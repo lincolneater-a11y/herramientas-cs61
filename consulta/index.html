@@ -122,6 +122,7 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
     </div>
     <textarea id="tx" aria-label="Transcripción de la consulta" placeholder="Al grabar, aquí aparece lo que se dice. También puede escribir o pegar texto."></textarea>
     <div id="interim" aria-hidden="true"></div>
+    <div class="row"><label class="sub" for="redact" style="margin:0">Ocultar antes de enviar a la IA</label><input type="text" id="redact" placeholder="Nombre, apellido, lugar (se detectan solos)" style="flex:1;min-width:200px"></div>
     <div class="row">
       <button class="pri" id="go">Generar nota</button>
       <button id="stop" class="warn" hidden>Cancelar</button>
@@ -408,9 +409,19 @@ function buildPrompt(txt){
    +'\nVOCABULARIO (términos correctos de la especialidad; si algo transcripto suena parecido, usá este término):\n'+(vocab().join(', ')||'(vacío)')
    +'\nBLOQUES YA EDITADOS POR EL PROFESIONAL (no los reescribas; no los incluyas en la respuesta):\n'+JSON.stringify(locked)
    +'\nBORRADOR ACTUAL (podés mejorarlo con la transcripción completa):\n'+JSON.stringify(cur)
-   +'\nTRANSCRIPCIÓN:\n"""\n'+txt+'\n"""\n';
+   +'\nTRANSCRIPCIÓN (los datos identificatorios se reemplazaron por [reservado] o [DNI]; no los incluyas en la nota, referite a "la persona" o "el paciente"):\n"""\n'+redact(txt)+'\n"""\n';
   p+=libre?'Respondé SOLO JSON: {"bloques":[{"label":"","fmt":"p","texto":""}],"dudas":["..."]}':'Respondé SOLO JSON: {"campos":{"<nombre exacto del bloque>":"texto"},"dudas":["..."]}';
   return p;
+}
+function redactTerms(){return $('redact').value.split(/[,;\n]+/).map(function(x){return x.trim()}).filter(function(x){return x.length>1})}
+function detectNames(txt){
+  var out=[],m,re=/(?:[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,}(?:\s+(?:de|del|la|las|los|y)\s+)?\s*){2,5}/g;
+  while((m=re.exec(txt))){var v=m[0].trim().replace(/\s+(de|del|la|las|los|y)$/,'');if(v.split(/\s+/).length>=2)out.push(v)}
+  return out;
+}
+function redact(txt){
+  redactTerms().sort(function(a,b){return b.length-a.length}).forEach(function(t){txt=txt.replace(new RegExp('(^|[^\\p{L}])'+rx(t)+'(?![\\p{L}])','giu'),function(m,p){return p+'[reservado]'})});
+  return txt.replace(/\b\d{1,2}[.\s]?\d{3}[.\s]?\d{3}\b/g,'[DNI]');
 }
 function parseJ(t){var m=/\{[\s\S]*\}/.exec(t||'');if(!m)throw new Error('json');return JSON.parse(m[0])}
 function norm(f,x){
@@ -458,8 +469,11 @@ async function callIA(prompt,ctl,msg){
   var cfg=api();
   if(!cfg){$('cfg').open=true;throw {msg:'Falta conectar el script (sección «Conexión»).'}}
   $('stat').textContent=msg||'Generando la nota…';
-  var resp=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:cfg.key,nota:{prompt:prompt}}),signal:ctl?ctl.signal:undefined});
-  var j=await resp.json();
+  var resp;
+  try{resp=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:cfg.key,nota:{prompt:prompt}}),signal:ctl?ctl.signal:undefined})}
+  catch(e){if(ctl&&ctl.signal.aborted)throw e;throw {msg:'No se pudo conectar con el script. Revise la conexión a internet y la dirección en «Conexión».'}}
+  var raw=await resp.text(),j;
+  try{j=JSON.parse(raw)}catch(e){throw {msg:'El script no devolvió una respuesta válida (código '+resp.status+'). Suele ocurrir si falta publicar la nueva versión del script (Implementar → Administrar implementaciones → Nueva versión). Detalle: '+raw.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,140)}}
   if(!j.ok){
     if(j.error==='clave')throw {msg:'El script rechazó la clave.'};
     if(j.error==='sin_api')throw {msg:'El script todavía no tiene una clave de IA (propiedad GEMINI_KEY o ANTHROPIC_KEY).',sin:1};
@@ -482,10 +496,17 @@ function manual(why){
 async function run(){
   var txt=$('tx').value.trim();
   if(txt.length<20){$('stat').textContent='Todavía hay muy poco texto para generar la nota.';return}
+  var ya=redactTerms().map(function(x){return x.toLowerCase()}),nuevos=[];
+  detectNames(txt).forEach(function(n){if(ya.indexOf(n.toLowerCase())<0&&nuevos.indexOf(n)<0)nuevos.push(n)});
+  if(nuevos.length){$('redact').value=(redactTerms().concat(nuevos)).join(', ');lsSet('cs61_cons2_redact',$('redact').value)}
   var ctl=new AbortController();busy=ctl;$('go').disabled=true;$('stop').hidden=false;
   try{
-    var t=await callIA(buildPrompt(txt),ctl);
-    applyRes(parseJ(t));$('man').hidden=true;$('stat').textContent='Nota generada. Revise cada bloque antes de pasarla a la historia clínica.';
+    var t=await callIA(buildPrompt(txt),ctl),res;
+    try{res=parseJ(t)}catch(pe){
+      t=await callIA(buildPrompt(txt),ctl,'Reintentando…');
+      try{res=parseJ(t)}catch(pe2){throw {msg:'La IA respondió, pero no en el formato esperado. Pulse «Generar nota» otra vez. Respuesta recibida: '+String(t).replace(/\s+/g,' ').slice(0,120)}}
+    }
+    applyRes(res);$('man').hidden=true;$('stat').textContent='Nota generada. Revise cada bloque antes de pasarla a la historia clínica.'+(nuevos.length?' Se ocultaron antes de enviar: '+nuevos.join(', ')+'.':'');
   }catch(e){
     if(ctl.signal.aborted)$('stat').textContent='Cancelado.';
     else if(e&&e.sin){manual(e.msg+' Mientras tanto, siga estos pasos.');$('stat').textContent=''}
@@ -497,10 +518,11 @@ async function run(){
 $('go').onclick=function(){if(!busy)run()};
 $('stop').onclick=function(){if(busy)busy.abort()};
 $('tx').addEventListener('input',saveDraft);
+$('redact').addEventListener('change',function(){lsSet('cs61_cons2_redact',$('redact').value)});
 $('clr').onclick=function(){
   if(!$('clr').dataset.sure){$('clr').dataset.sure='1';$('clr').textContent='Confirmar: borrar todo';setTimeout(function(){delete $('clr').dataset.sure;$('clr').textContent='Nueva consulta'},4000);return}
   delete $('clr').dataset.sure;$('clr').textContent='Nueva consulta';
-  $('tx').value='';audioBlob=null;$('audio-dl').hidden=true;$('man').hidden=true;S.vals={};S.dudas=[];S.auto=[];renderFields();saveDraft();$('stat').textContent='Lista para una nueva consulta.';$('stat2').textContent='';
+  $('tx').value='';audioBlob=null;$('audio-dl').hidden=true;$('man').hidden=true;S.vals={};S.dudas=[];S.auto=[];$('redact').value='';lsSet('cs61_cons2_redact','');renderFields();saveDraft();$('stat').textContent='Lista para una nueva consulta.';$('stat2').textContent='';
 };
 
 /* ---------- grabación y transcripción ---------- */
@@ -608,6 +630,7 @@ $('prof').addEventListener('change',function(){S.prof=$('prof').value;lsSet('cs6
   var dj=lsGet('cs61_cons2_draft');
   if(!dj){try{var od=JSON.parse(lsGet('cs61_cons_draft')||'null');if(od&&od.tx)dj=JSON.stringify({tx:od.tx})}catch(e){}}
   if(dj){try{var d=JSON.parse(dj);$('tx').value=d.tx||'';S.vals=d.vals||{};S.dudas=d.dudas||[];S.auto=d.auto||[]}catch(e){}}
+  $('redact').value=lsGet('cs61_cons2_redact')||'';
   planOptions();renderCfg();renderFields();
 })();
 })();
