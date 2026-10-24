@@ -1,0 +1,408 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Consulta asistida CS 61</title>
+<link rel="icon" type="image/png" href="../icon-192.png"><meta name="theme-color" content="#14304f">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600;700&display=swap">
+<style>
+/* Layout: cabecera navy; dos columnas (dictado | anamnesis) que apilan en móvil; verde azulado = IA, bordó = alerta, dorado = foco */
+:root{--bg:#f1f5f8;--surf:#fff;--ink:#14243a;--ink2:#4a5d73;--line:#d2dce5;--navy:#14304f;--teal:#0d7a85;--teal-soft:#dff1f2;--bord:#8a1f3d;--bord-soft:#f7e3e8;--gold:#a87615;--gold-soft:#f8efd9;--hf:'Source Serif 4',Georgia,serif;--bf:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1722;--surf:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--navy:#0a2038;--teal:#4fc1c9;--teal-soft:#123c42;--bord:#f0869f;--bord-soft:#40202b;--gold:#e0b25a;--gold-soft:#3a3018;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0c1722;--surf:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--navy:#0a2038;--teal:#4fc1c9;--teal-soft:#123c42;--bord:#f0869f;--bord-soft:#40202b;--gold:#e0b25a;--gold-soft:#3a3018;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--bf);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top{background:var(--navy);color:#fff;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:14px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px))}
+header.top .wrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+header.top h1{font:700 1.25rem/1.2 var(--hf);margin:0}
+header.top small{color:#b8cadb;display:block}
+.prof{display:flex;gap:8px;align-items:center}
+.prof label{font-size:.8rem;color:#b8cadb}
+input,textarea,button,select{font:inherit;color:var(--ink)}
+input[type=text]{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:0}
+.aviso{margin:16px 0;background:var(--gold-soft);border:1px solid var(--gold);border-radius:10px;padding:10px 14px;font-size:.9rem}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:20px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{font:700 1.05rem var(--hf);margin:0 0 4px;color:var(--navy)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card h2{color:var(--teal)}}
+:root[data-theme="dark"] .card h2{color:var(--teal)}
+.sub{color:var(--ink2);font-size:.88rem;margin:0 0 10px}
+textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical;line-height:1.45}
+textarea:focus,input:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+#tx{min-height:300px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+button{cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surf);padding:8px 14px;font-weight:600}
+button.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.pri{color:#06232a}}
+:root[data-theme="dark"] button.pri{color:#06232a}
+button.warn{color:var(--bord);border-color:var(--bord)}
+button:disabled{opacity:.55;cursor:default}
+.chk{display:flex;gap:6px;align-items:center;font-size:.88rem;color:var(--ink2)}
+.stat{font-size:.85rem;color:var(--ink2);min-height:1.3em}
+.fld{margin-bottom:14px}
+.fld .hd{display:flex;gap:8px;align-items:baseline;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap}
+.fld label{font-weight:700;font-size:.92rem}
+.tag{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:99px}
+.tag.ia{background:var(--teal-soft);color:var(--teal)}
+.tag.man{background:var(--gold-soft);color:var(--gold)}
+.fld textarea{min-height:64px}
+.dudas{background:var(--bord-soft);border:1px solid var(--bord);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.dudas h3{margin:0 0 4px;font-size:.92rem;color:var(--bord)}
+.dudas ul{margin:0;padding-left:20px}
+details.cfg{margin-top:20px}
+details.cfg summary{cursor:pointer;font-weight:700;padding:6px 0}
+.cfg .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.er{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) auto;gap:6px;margin-bottom:6px;align-items:center}
+.er.g{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}
+.er button{padding:6px 10px}
+.priv{font-size:.82rem;color:var(--ink2);margin-top:16px}
+@media(prefers-reduced-motion:no-preference){.fld textarea{transition:border-color .3s,background .3s}.fld.flash textarea{border-color:var(--teal);background:var(--teal-soft)}}
+
+.rec{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button.red{background:var(--bord);border-color:var(--bord);color:#fff}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--line);display:inline-block}
+.dot.on{background:var(--bord);animation:pul 1.2s infinite}
+@keyframes pul{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.dot.on{animation:none}}
+.timer{font:700 1.1rem var(--bf);font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg label{padding:7px 12px;cursor:pointer;font-weight:600;font-size:.9rem;background:var(--surf)}
+.seg input{position:absolute;opacity:0}
+.seg input:checked+span{color:#fff}
+.seg label:has(input:checked){background:var(--teal);color:#fff}
+.seg label:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:-2px}
+#interim{color:var(--ink2);font-style:italic;min-height:1.4em;font-size:.9rem;margin-top:6px}
+#tx{min-height:260px}
+.sw-tool{margin-left:auto;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap}
+.sw-tool:hover,.sw-tool:focus-visible{background:rgba(255,255,255,.14);outline:2px solid #e0b25a;outline-offset:2px}
+.manual{margin-top:12px;background:var(--gold-soft);border:1px solid var(--gold);border-radius:10px;padding:12px}
+.manual textarea{min-height:90px;margin:6px 0}
+.cfgrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0}
+.cfgrow label{display:block;font-size:.82rem;color:var(--ink2);margin-bottom:2px}
+.cfgrow input{width:100%}
+</style></head><body>
+<header class="top"><div class="wrap">
+  <div><h1>Consulta asistida</h1><small>Centro de Salud N.º 61 Solidaridad · notas de consulta con IA</small></div>
+  <a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a>
+  <div class="prof"><label for="prof">Profesional</label><input id="prof" type="text" placeholder="Nombre y apellido" autocomplete="off"></div>
+</div></header>
+
+<div class="wrap">
+<div class="aviso"><strong>Antes de empezar.</strong> Pida el consentimiento de la persona para grabar. Funciona en <strong>Chrome o Edge</strong>, con internet y permiso de micrófono. Coloque el equipo cerca de ambos y active «Habla» según quién hable. La nota la revisa y firma el profesional: la IA propone, usted decide.</div>
+
+<div class="grid">
+  <section class="card" aria-labelledby="h-tx">
+    <h2 id="h-tx">Grabación de la consulta</h2>
+    <p class="sub">La conversación se transcribe mientras habla. Puede corregir el texto antes de generar la nota.</p>
+    <div class="rec">
+      <button class="pri red" id="rec-go">● Grabar</button>
+      <button id="rec-pause" hidden>⏸ Pausar</button>
+      <button id="rec-stop" hidden>■ Terminar</button>
+      <span class="dot" id="dot"></span><span class="timer" id="timer">00:00</span>
+    </div>
+    <div class="row"><span class="sub" style="margin:0" id="spk-l">Habla:</span>
+      <div class="seg" role="radiogroup" aria-labelledby="spk-l">
+        <label><input type="radio" name="spk" value="Profesional" checked><span>Profesional</span></label>
+        <label><input type="radio" name="spk" value="Paciente"><span>Paciente</span></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="audio"> Guardar también el audio en esta computadora</label>
+    </div>
+    <textarea id="tx" aria-label="Transcripción de la consulta" placeholder="Al grabar, aquí aparece lo que se dice. También puede escribir o pegar texto."></textarea>
+    <div id="interim" aria-hidden="true"></div>
+    <div class="row">
+      <button class="pri" id="go">Generar nota</button>
+      <button id="stop" class="warn" hidden>Cancelar</button>
+      <button id="gl-apply">Corregir con el glosario</button>
+      <button id="audio-dl" hidden>Descargar audio</button>
+      <button id="clr" class="warn">Nueva consulta</button>
+    </div>
+    <div class="stat" id="stat" role="status" aria-live="polite"></div>
+    <div class="manual" id="man" hidden>
+      <strong>Modo manual</strong>
+      <p class="sub" id="man-why" style="margin:4px 0"></p>
+      <button id="man-copy">1. Copiar indicaciones y texto</button>
+      <p class="sub" style="margin:8px 0 0">2. Pégalas en una conversación de Claude y copie su respuesta aquí:</p>
+      <textarea id="man-in" aria-label="Respuesta de Claude" placeholder="Pegue la respuesta de Claude"></textarea>
+      <button class="pri" id="man-apply">3. Aplicar a la anamnesis</button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="h-an">
+    <h2 id="h-an">Anamnesis</h2>
+    <p class="sub">Los campos que usted edita a mano quedan bloqueados: la IA no los vuelve a pisar.</p>
+    <div id="dudas"></div>
+    <div id="fields"></div>
+    <div class="row">
+      <button class="pri" id="copy">Copiar nota</button>
+      <button id="save">Guardar como archivo .txt</button>
+    </div>
+    <div class="stat" id="stat2" role="status" aria-live="polite"></div>
+  </section>
+</div>
+
+<details class="cfg" id="cfg"><summary>Conexión, mi modelo de anamnesis y mi glosario</summary>
+  <div class="card"><p class="sub">Se guardan en este navegador, por profesional (según el nombre escrito arriba). Cambie los campos como prefiera: la IA siempre completa los que figuran aquí.</p>
+  <div class="cfgrow"><div><label for="api-url">Dirección del script (URL /exec)</label><input type="text" id="api-url" placeholder="https://script.google.com/macros/s/…/exec"></div><div><label for="api-key">Clave</label><input type="text" id="api-key" autocomplete="off"></div></div>
+  <p class="sub">Si ya configuró la planilla en las otras herramientas, estos datos se completan solos. Sin la API de Claude conectada al script, queda el modo manual.</p>
+  <div class="cols">
+    <div><h2>Campos de la anamnesis</h2><div id="tpl-ed"></div><div class="row"><button id="tpl-add">+ Campo</button><button id="tpl-reset" class="warn">Volver al modelo base</button></div></div>
+    <div><h2>Glosario</h2><p class="sub">Término mal escuchado o abreviado → forma correcta.</p><div id="gl-ed"></div><div class="row"><button id="gl-add">+ Término</button></div></div>
+  </div></div>
+</details>
+<p class="priv">Datos de pacientes: la transcripción la realiza el servicio de voz del navegador (Google, en Chrome/Edge) y la nota la genera Claude a través de su script. Nada se guarda en un servidor propio. Sólo el borrador y su configuración quedan en este navegador. Pegue la nota final en la historia clínica del centro. Marco: Leyes 25.326 y 26.529.</p>
+</div>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var BASE=[
+ {id:'motivo',label:'Motivo de consulta',hint:'Por qué viene y qué espera'},
+ {id:'enfact',label:'Enfermedad actual / evolución',hint:'Peso, síntomas y tiempo de evolución'},
+ {id:'antper',label:'Antecedentes personales',hint:'Enfermedades, cirugías, embarazos'},
+ {id:'antfam',label:'Antecedentes familiares',hint:'Diabetes, HTA, obesidad, cardiopatías'},
+ {id:'medic',label:'Medicación y suplementos',hint:'Nombre y dosis si se mencionan'},
+ {id:'habitos',label:'Hábitos',hint:'Actividad física, sueño, tabaco, alcohol'},
+ {id:'alim',label:'Hábitos alimentarios',hint:'Comidas del día, horarios, quién cocina, agua'},
+ {id:'dig',label:'Síntomas digestivos',hint:'Reflujo, constipación, distensión'},
+ {id:'antro',label:'Antropometría y datos objetivos',hint:'Peso, talla, circunferencia, TA, laboratorio'},
+ {id:'dx',label:'Diagnóstico nutricional',hint:'Sólo si el profesional lo dijo'},
+ {id:'plan',label:'Plan e indicaciones',hint:'Objetivos, pautas y próximo control'}
+];
+var GL0=[
+ {a:'ache te a',b:'HTA'},{a:'de be te dos',b:'DBT2'},{a:'i eme ce',b:'IMC'},
+ {a:'hemoglobina glicosilada',b:'HbA1c'},{a:'celíaco',b:'celiaquía'},{a:'colesterol malo',b:'LDL'}
+];
+var S={prof:'',tpl:BASE.slice(),gl:GL0.slice(),vals:{},dudas:[]};
+var busy=null;
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function pk(){return 'cs61_cons_'+(S.prof||'').trim().toLowerCase().replace(/\s+/g,'_')}
+function loadCfg(){
+  var j=lsGet(pk()); S.tpl=BASE.map(function(x){return x}); S.gl=GL0.slice();
+  if(j){try{var o=JSON.parse(j); if(o.tpl&&o.tpl.length)S.tpl=o.tpl; if(o.gl)S.gl=o.gl}catch(e){}}
+}
+function saveCfg(){lsSet(pk(),JSON.stringify({tpl:S.tpl,gl:S.gl}))}
+function saveDraft(){lsSet('cs61_cons_draft',JSON.stringify({tx:$('tx').value,vals:S.vals,dudas:S.dudas,prof:S.prof}))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+function renderFields(flash){
+  var h='';
+  S.tpl.forEach(function(f){
+    var v=S.vals[f.id]||{t:'',src:''};
+    var tag=v.src==='man'?'<span class="tag man">Editado</span>':(v.src==='ia'&&v.t?'<span class="tag ia">IA</span>':'');
+    h+='<div class="fld'+(flash&&flash[f.id]?' flash':'')+'"><div class="hd"><label for="f_'+f.id+'">'+esc(f.label)+'</label>'+tag+'</div><textarea id="f_'+f.id+'" rows="2" placeholder="'+esc(f.hint||'')+'" data-id="'+f.id+'">'+esc(v.t)+'</textarea></div>';
+  });
+  $('fields').innerHTML=h;
+  Array.prototype.forEach.call($('fields').querySelectorAll('textarea'),function(t){
+    t.style.height='auto';t.style.height=Math.max(64,t.scrollHeight+2)+'px';
+    t.addEventListener('input',function(){
+      var id=t.getAttribute('data-id');S.vals[id]={t:t.value,src:t.value?'man':''};
+      var hd=t.parentNode.querySelector('.hd');var old=hd.querySelector('.tag');if(old)old.remove();
+      if(t.value){var s=document.createElement('span');s.className='tag man';s.textContent='Editado';hd.appendChild(s)}
+      t.style.height='auto';t.style.height=Math.max(64,t.scrollHeight+2)+'px';saveDraft();
+    });
+  });
+  var d=S.dudas||[];
+  $('dudas').innerHTML=d.length?'<div class="dudas"><h3>Para confirmar con la persona</h3><ul>'+d.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div>':'';
+  if(flash)setTimeout(function(){Array.prototype.forEach.call(document.querySelectorAll('.fld.flash'),function(e){e.classList.remove('flash')})},1400);
+}
+function renderCfg(){
+  var h='';
+  S.tpl.forEach(function(f,i){
+    h+='<div class="er"><input type="text" data-k="label" data-i="'+i+'" value="'+esc(f.label)+'" aria-label="Nombre del campo"><input type="text" data-k="hint" data-i="'+i+'" value="'+esc(f.hint||'')+'" aria-label="Qué debe contener"><span><button data-up="'+i+'" aria-label="Subir">↑</button> <button data-del="'+i+'" class="warn" aria-label="Quitar">×</button></span></div>';
+  });
+  $('tpl-ed').innerHTML=h;
+  var g='';
+  S.gl.forEach(function(x,i){g+='<div class="er g"><input type="text" data-ga="'+i+'" value="'+esc(x.a)+'" aria-label="Término escuchado"><input type="text" data-gb="'+i+'" value="'+esc(x.b)+'" aria-label="Forma correcta"><button data-gdel="'+i+'" class="warn" aria-label="Quitar">×</button></div>'});
+  $('gl-ed').innerHTML=g;
+}
+$('tpl-ed').addEventListener('input',function(e){var t=e.target,i=t.getAttribute('data-i');if(i==null)return;S.tpl[i][t.getAttribute('data-k')]=t.value;saveCfg()});
+$('tpl-ed').addEventListener('change',function(){renderFields()});
+$('tpl-ed').addEventListener('click',function(e){
+  var t=e.target.closest('button');if(!t)return;
+  var u=t.getAttribute('data-up'),d=t.getAttribute('data-del');
+  if(u!=null&&+u>0){var i=+u,x=S.tpl[i];S.tpl[i]=S.tpl[i-1];S.tpl[i-1]=x}
+  if(d!=null){S.tpl.splice(+d,1)}
+  saveCfg();renderCfg();renderFields();
+});
+$('tpl-add').onclick=function(){S.tpl.push({id:'c'+Date.now().toString(36),label:'Nuevo campo',hint:''});saveCfg();renderCfg();renderFields()};
+$('tpl-reset').onclick=function(){S.tpl=BASE.slice();saveCfg();renderCfg();renderFields()};
+$('gl-ed').addEventListener('input',function(e){var t=e.target,a=t.getAttribute('data-ga'),b=t.getAttribute('data-gb');if(a!=null)S.gl[a].a=t.value;if(b!=null)S.gl[b].b=t.value;saveCfg()});
+$('gl-ed').addEventListener('click',function(e){var t=e.target.closest('button');if(t&&t.getAttribute('data-gdel')!=null){S.gl.splice(+t.getAttribute('data-gdel'),1);saveCfg();renderCfg()}});
+$('gl-add').onclick=function(){S.gl.push({a:'',b:''});saveCfg();renderCfg()};
+
+function rx(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+function applyGl(txt){
+  S.gl.forEach(function(x){if(x.a&&x.b){txt=txt.replace(new RegExp('(^|[^\\p{L}])'+rx(x.a)+'(?![\\p{L}])','giu'),function(m,p){return p+x.b})}});
+  return txt;
+}
+$('gl-apply').onclick=function(){var n=applyGl($('tx').value);var c=n!==$('tx').value;$('tx').value=n;saveDraft();$('stat').textContent=c?'Glosario aplicado al texto.':'No había términos del glosario para corregir.'};
+
+function buildPrompt(txt){
+  var locked={},cur={};
+  S.tpl.forEach(function(f){var v=S.vals[f.id];if(v&&v.src==='man'&&v.t)locked[f.id]=v.t;else if(v&&v.t)cur[f.id]=v.t});
+  return 'Sos asistente de un nutricionista de un centro de salud de Salta, Argentina. Completás la anamnesis a partir de la transcripción automática de una consulta (líneas con "Profesional:" y "Paciente:"; la transcripción puede tener errores de reconocimiento de voz).\n'
+   +'REGLAS: usá SOLO lo dicho en el texto; no inventes, no diagnostiques, no completes valores no mencionados. Escribí en español rioplatense profesional, frases breves tipo nota clínica, sin nombres de personas ni DNI. Si algo no se dijo, devolvé "" en ese campo. Corregí términos mal transcriptos según el glosario. Los datos ambiguos, contradictorios o que parecen errores de transcripción (cifras, dosis, fármacos, fechas) van en "dudas" como pregunta corta para confirmar.\n'
+   +'CAMPOS (id: nombre — qué incluye):\n'+S.tpl.map(function(f){return f.id+': '+f.label+' — '+(f.hint||'')}).join('\n')
+   +'\nGLOSARIO (escuchado → correcto):\n'+(S.gl.filter(function(x){return x.a&&x.b}).map(function(x){return x.a+' → '+x.b}).join('\n')||'(vacío)')
+   +'\nCAMPOS YA EDITADOS POR EL PROFESIONAL (no los reescribas; devolvelos ""):\n'+JSON.stringify(locked)
+   +'\nBORRADOR ACTUAL (podés mejorarlo con el texto completo):\n'+JSON.stringify(cur)
+   +'\nTRANSCRIPCIÓN:\n"""\n'+txt+'\n"""\n'
+   +'Respondé SOLO JSON: {"campos":{"<id>":"texto",...},"dudas":["..."]} con todos los ids de CAMPOS.';
+}
+function parseJ(t){var m=/\{[\s\S]*\}/.exec(t||'');if(!m)throw new Error('json');return JSON.parse(m[0])}
+function applyRes(r){
+  var c=(r&&r.campos)||{},fl={};
+  S.tpl.forEach(function(f){
+    var v=S.vals[f.id];if(v&&v.src==='man'&&v.t)return;
+    var n=typeof c[f.id]==='string'?c[f.id].trim():'';
+    if(n&&(!v||v.t!==n)){S.vals[f.id]={t:n,src:'ia'};fl[f.id]=1}
+    else if(!n&&!(v&&v.t)){S.vals[f.id]={t:'',src:''}}
+  });
+  S.dudas=Array.isArray(r&&r.dudas)?r.dudas.filter(function(x){return typeof x==='string'&&x}):[];
+  renderFields(fl);saveDraft();
+}
+function api(){
+  var u=$('api-url').value.trim(),k=$('api-key').value.trim();
+  if(u&&k)return {url:u,key:k};
+  return null;
+}
+function loadApi(){
+  var c=null;try{c=JSON.parse(lsGet('cs61_cons_api')||'null')}catch(e){}
+  if(!c){['cs61_pl','cs61_plcv'].forEach(function(n){if(c)return;try{var x=JSON.parse(lsGet(n)||'null');if(x&&x.url&&x.key)c=x}catch(e){}})}
+  if(c){$('api-url').value=c.url||'';$('api-key').value=c.key||''}
+}
+['api-url','api-key'].forEach(function(i){$(i).addEventListener('change',function(){lsSet('cs61_cons_api',JSON.stringify({url:$('api-url').value.trim(),key:$('api-key').value.trim()}))})});
+function manual(why){
+  $('man').hidden=false;$('man-why').textContent=why;$('cfg').open=true;
+  $('man-copy').onclick=async function(){
+    var t=buildPrompt($('tx').value.trim());
+    try{await navigator.clipboard.writeText(t);$('stat').textContent='Indicaciones copiadas. Pegue en Claude.'}
+    catch(e){$('man-in').value=t;$('man-in').select();$('stat').textContent='Copie el texto de la caja con Ctrl+C.'}
+  };
+  $('man-apply').onclick=function(){
+    try{applyRes(parseJ($('man-in').value));$('man-in').value='';$('man').hidden=true;$('stat').textContent='Anamnesis actualizada. Revise cada campo antes de pasarla a la historia clínica.'}
+    catch(e){$('stat').textContent='No se pudo leer la respuesta. Pegue la respuesta completa de Claude, con el JSON.'}
+  };
+}
+async function run(){
+  var txt=$('tx').value.trim();
+  if(txt.length<20){$('stat').textContent='Todavía hay muy poco texto para generar la nota.';return}
+  var cfg=api();
+  if(!cfg){manual('Falta conectar el script (sección «Conexión»). Mientras tanto, siga estos pasos.');return}
+  var ctl=new AbortController();busy=ctl;$('go').disabled=true;$('stop').hidden=false;$('stat').textContent='Generando la nota…';
+  try{
+    var resp=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:cfg.key,nota:{prompt:buildPrompt(txt)}}),signal:ctl.signal});
+    var j=await resp.json();
+    if(!j.ok){
+      if(j.error==='clave')$('stat').textContent='El script rechazó la clave.';
+      else if(j.error==='sin_api'){manual('El script todavía no tiene una clave de IA (propiedad GEMINI_KEY o ANTHROPIC_KEY).');$('stat').textContent='';}
+      else $('stat').textContent='La API devolvió un error: '+(j.detalle||j.error);
+    }else{applyRes(parseJ(j.text));$('man').hidden=true;$('stat').textContent='Nota generada. Revise cada campo antes de pasarla a la historia clínica.'}
+  }catch(e){
+    $('stat').textContent=ctl.signal.aborted?'Cancelado.':'No se pudo completar. El texto sigue guardado; intente de nuevo.';
+  }
+  busy=null;$('go').disabled=false;$('stop').hidden=true;
+}
+$('go').onclick=function(){if(!busy)run()};
+$('stop').onclick=function(){if(busy)busy.abort()};
+$('tx').addEventListener('input',saveDraft);
+$('clr').onclick=function(){
+  if(!$('clr').dataset.sure){$('clr').dataset.sure='1';$('clr').textContent='Confirmar: borrar todo';setTimeout(function(){delete $('clr').dataset.sure;$('clr').textContent='Nueva consulta'},4000);return}
+  delete $('clr').dataset.sure;$('clr').textContent='Nueva consulta';
+  $('tx').value='';audioBlob=null;$('audio-dl').hidden=true;$('man').hidden=true;S.vals={};S.dudas=[];renderFields();saveDraft();$('stat').textContent='Lista para una nueva consulta.';$('stat2').textContent='';
+};
+
+
+/* ---------- grabación y transcripción ---------- */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var st='idle',rc=null,mr=null,chunks=[],audioBlob=null,t0=0,acc=0,tick=null,lastSpk='',wl=null,strm=null;
+function fmt(ms){var s=Math.floor(ms/1000),m=Math.floor(s/60);s=s%60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s}
+function curSpk(){return document.querySelector('input[name=spk]:checked').value}
+function append(t){
+  t=applyGl(t.trim());if(!t)return;
+  var tx=$('tx'),sp=curSpk();
+  if(sp!==lastSpk||!tx.value){tx.value+=(tx.value&&!/\n$/.test(tx.value)?'\n':'')+sp+': ';lastSpk=sp}
+  else tx.value+=' ';
+  tx.value+=t;tx.scrollTop=tx.scrollHeight;saveDraft();
+}
+function ui(){
+  $('rec-go').hidden=st!=='idle';$('rec-pause').hidden=st==='idle';$('rec-stop').hidden=st==='idle';
+  $('rec-pause').textContent=st==='pause'?'▶ Reanudar':'⏸ Pausar';
+  $('dot').className='dot'+(st==='rec'?' on':'');
+}
+function tickf(){$('timer').textContent=fmt(acc+(st==='rec'?Date.now()-t0:0))}
+function startSR(){
+  rc=new SR();rc.lang='es-AR';rc.continuous=true;rc.interimResults=true;
+  rc.onresult=function(e){
+    var it='';
+    for(var i=e.resultIndex;i<e.results.length;i++){var r=e.results[i];if(r.isFinal)append(r[0].transcript);else it+=r[0].transcript}
+    $('interim').textContent=it;
+  };
+  rc.onerror=function(e){
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){$('stat').textContent='El navegador no tiene permiso para usar el micrófono. Habilítelo en el candado de la barra de direcciones.';stopAll(true)}
+    else if(e.error==='network'){$('stat').textContent='El servicio de voz necesita conexión a internet.'}
+    else if(e.error==='audio-capture'){$('stat').textContent='No se detecta ningún micrófono.';stopAll(true)}
+  };
+  rc.onend=function(){if(st==='rec'){try{rc.start()}catch(x){setTimeout(function(){if(st==='rec'){try{rc.start()}catch(y){}}},400)}}};
+  try{rc.start()}catch(x){}
+}
+async function begin(){
+  if(!SR){$('stat').textContent='Este navegador no transcribe voz. Use Chrome o Edge en la computadora. Igual puede escribir o pegar el texto.';return}
+  if($('audio').checked){
+    try{strm=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];mr=new MediaRecorder(strm);mr.ondataavailable=function(e){if(e.data.size)chunks.push(e.data)};mr.onstop=function(){audioBlob=new Blob(chunks,{type:mr.mimeType||'audio/webm'});$('audio-dl').hidden=false};mr.start(5000)}
+    catch(e){$('stat').textContent='No se pudo acceder al micrófono para guardar el audio.';return}
+  }
+  st='rec';t0=Date.now();acc=0;lastSpk='';audioBlob=null;$('audio-dl').hidden=true;
+  startSR();ui();tick=setInterval(tickf,500);$('stat').textContent='Grabando. Mantenga esta pestaña abierta.';
+  try{if(navigator.wakeLock)wl=await navigator.wakeLock.request('screen')}catch(e){}
+}
+function stopAll(silent){
+  if(st==='rec')acc+=Date.now()-t0;
+  var was=st;st='idle';clearInterval(tick);tickf();
+  try{rc&&rc.stop()}catch(e){}
+  try{mr&&mr.state!=='inactive'&&mr.stop()}catch(e){}
+  if(strm){strm.getTracks().forEach(function(t){t.stop()});strm=null}
+  try{wl&&wl.release()}catch(e){}
+  $('interim').textContent='';ui();
+  if(!silent&&was!=='idle')$('stat').textContent='Grabación terminada. Revise el texto y pulse «Generar nota».';
+}
+$('rec-go').onclick=begin;
+$('rec-stop').onclick=function(){stopAll()};
+$('rec-pause').onclick=function(){
+  if(st==='rec'){acc+=Date.now()-t0;st='pause';try{rc.stop()}catch(e){}try{mr&&mr.pause()}catch(e){}$('stat').textContent='En pausa.'}
+  else if(st==='pause'){st='rec';t0=Date.now();startSR();try{mr&&mr.resume()}catch(e){}$('stat').textContent='Grabando.'}
+  ui();tickf();
+};
+$('audio-dl').onclick=function(){
+  if(!audioBlob)return;var a=document.createElement('a');a.href=URL.createObjectURL(audioBlob);
+  a.download='consulta_'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.webm';document.body.appendChild(a);a.click();a.remove();
+};
+window.addEventListener('beforeunload',function(e){if(st!=='idle'){e.preventDefault();e.returnValue=''}});
+
+function noteText(){
+  var d=new Date(),f=d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var o='CS N.º 61 Solidaridad · Consulta nutricional\nFecha: '+f+(S.prof?'\nProfesional: '+S.prof:'')+'\n';
+  S.tpl.forEach(function(x){var v=S.vals[x.id];if(v&&v.t)o+='\n'+x.label.toUpperCase()+'\n'+v.t+'\n'});
+  if(S.dudas&&S.dudas.length)o+='\nPENDIENTE DE CONFIRMAR\n- '+S.dudas.join('\n- ')+'\n';
+  return o;
+}
+$('copy').onclick=async function(){
+  var t=noteText();
+  try{await navigator.clipboard.writeText(t);$('stat2').textContent='Nota copiada.'}
+  catch(e){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();$('stat2').textContent=ok?'Nota copiada.':'No se pudo copiar. Seleccione el texto de los campos y copie a mano.'}
+};
+$('save').onclick=function(){
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([noteText()],{type:'text/plain;charset=utf-8'}));
+  a.download='consulta_'+new Date().toISOString().slice(0,10)+'.txt';document.body.appendChild(a);a.click();a.remove();$('stat2').textContent='Archivo guardado.';
+};
+$('prof').addEventListener('change',function(){S.prof=$('prof').value;lsSet('cs61_cons_last',S.prof);loadCfg();renderCfg();renderFields();saveDraft()});
+
+(function init(){
+  loadApi();
+  var last=lsGet('cs61_cons_last');if(last){S.prof=last;$('prof').value=last}
+  loadCfg();
+  var dj=lsGet('cs61_cons_draft');
+  if(dj){try{var d=JSON.parse(dj);$('tx').value=d.tx||'';S.vals=d.vals||{};S.dudas=d.dudas||[];}catch(e){}}
+  renderCfg();renderFields();
+})();
+})();
+</script></body></html>
