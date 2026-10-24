@@ -98,6 +98,7 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
 .chips label{display:flex;gap:8px;align-items:flex-start;margin-bottom:4px;font-size:.9rem}
 .cfg textarea{min-height:90px}
 .cfg .sub b{color:var(--ink)}
+.acu{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--bg)}.acu h3{margin:0 0 2px;font:700 1rem var(--hf)}.acu .blk{margin-top:10px}.acu .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;font-weight:700;font-size:.9rem}.acu textarea{min-height:90px}
 </style></head>
 <body>
 <header class="top"><div class="wrap">
@@ -149,8 +150,10 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
     <div class="row">
       <button class="pri" id="copy">Copiar nota</button>
       <button id="save">Guardar como archivo .txt</button>
+      <button id="acu-go">Preparar para Acuario</button>
     </div>
     <div class="stat" id="stat2" role="status" aria-live="polite"></div>
+    <div id="acu"></div>
   </section>
 </div>
 
@@ -161,7 +164,7 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
   <p class="sub">Si ya configuró la planilla en las otras herramientas, estos datos se completan solos.</p>
 
   <h3>Mis planillas de anamnesis</h3>
-  <p class="sub">La planilla define los bloques de la nota. <b>Libre</b>: la IA decide los bloques según la conversación, como NOA Notes. <b>Mis planillas</b>: use la estructura de su propia ficha de entrevista; puede crear varias (primera consulta, control, embarazo…).</p>
+  <p class="sub">La planilla define los bloques de la nota. <b>Libre</b>: la IA decide los bloques según la conversación. <b>Mis planillas</b>: use la estructura de su propia ficha de entrevista; puede crear varias (primera consulta, control, embarazo…).</p>
   <div id="plan-ed"></div>
   <div class="row"><input type="text" id="plan-name" placeholder="Nombre de la planilla" aria-label="Nombre de la planilla"><button id="plan-save">Guardar bloques actuales como planilla</button><button id="plan-del" class="warn">Eliminar esta planilla</button></div>
   <h3>Crear una planilla desde mi ficha</h3>
@@ -620,6 +623,26 @@ $('copy').onclick=async function(){
 $('save').onclick=function(){
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([noteText()],{type:'text/plain;charset=utf-8'}));
   a.download='consulta_'+new Date().toISOString().slice(0,10)+'.txt';document.body.appendChild(a);a.click();a.remove();$('stat2').textContent='Archivo guardado.';
+};
+/* ---------- resumen con el formato de Acuario ---------- */
+var ACU_CODES='Z713 Consulta para instrucción y vigilancia de la dieta; E660 Obesidad debida a exceso de calorías; E441 Desnutrición proteicocalórica leve; E782 Hiperlipidemia mixta; I10 Hipertensión esencial (primaria); E119 Diabetes mellitus no insulinodependiente sin mención de complicación; K590 Constipación; Z719 Consulta, no especificada; Z349 Supervisión de embarazo normal no especificado; Z391 Atención y examen de madre en período de lactancia; Z003 Examen del estado de desarrollo del adolescente; Z762 Consulta para atención y supervisión de la salud de otros niños o lactantes sanos';
+function noteBody(){var o='';tpl().forEach(function(x){var v=S.vals[x.id];if(v&&v.t)o+=x.label.toUpperCase()+'\n'+v.t+'\n\n'});return o.trim()}
+function renderAcu(d){
+  var B=[['dat','Datos Comunidad Médica',d.datos],['dx','Diagnóstico sugerido',d.diagnostico],['tto','Tratamiento',d.tratamiento]];
+  $('acu').innerHTML='<div class="acu"><h3>Para pegar en Acuario</h3><p class="sub">Revise y edite antes de copiar. El diagnóstico es una sugerencia orientativa: lo valida el profesional.</p>'
+   +B.map(function(b){return '<div class="blk"><div class="hd"><label for="acu-'+b[0]+'">'+b[1]+'</label><button type="button" data-acu="acu-'+b[0]+'">Copiar</button></div><textarea id="acu-'+b[0]+'" rows="4">'+esc(b[2]||'')+'</textarea></div>'}).join('')
+   +'<div class="row"><button class="pri" type="button" id="acu-all">Copiar los tres bloques</button></div></div>';
+  async function cp(txt,btn){var o=btn.textContent;try{await navigator.clipboard.writeText(txt);btn.textContent='Copiado'}catch(e){btn.textContent='Seleccione y copie'}setTimeout(function(){btn.textContent=o},1500)}
+  Array.prototype.forEach.call($('acu').querySelectorAll('[data-acu]'),function(b){b.onclick=function(){cp($(b.getAttribute('data-acu')).value,b)}});
+  $('acu-all').onclick=function(){cp('DATOS COMUNIDAD MÉDICA\n'+$('acu-dat').value+'\n\nDIAGNÓSTICO SUGERIDO\n'+$('acu-dx').value+'\n\nTRATAMIENTO\n'+$('acu-tto').value,$('acu-all'))};
+}
+$('acu-go').onclick=async function(){
+  var nb=noteBody();if(nb.length<20){$('stat2').textContent='Primero genere la nota de la consulta.';return}
+  var prompt='Sos asistente de un nutricionista de un centro de salud de Salta, Argentina. A partir de la nota de consulta ya redactada, preparás los tres textos que el profesional carga en el sistema Acuario: "datos" (Datos Comunidad Médica: resumen clínico breve y ordenado de lo relevante para otros profesionales: motivo, antecedentes, datos objetivos y situación nutricional), "diagnostico" (Diagnóstico sugerido: diagnósticos o problemas nutricionales que surgen de lo registrado; si el profesional dejó un diagnóstico, usalo; si no surge nada claro, escribí "A definir por el profesional") y "tratamiento" (Tratamiento: indicaciones y plan nutricional registrados en la nota; si no hay, escribí "A definir por el profesional"). REGLAS: usá SOLO lo que figura en la nota; no inventes datos ni indicaciones; sin nombres de personas ni DNI; español profesional, conciso, frases completas (sin abreviaturas ambiguas como "21/26": escribí "21 puntos de 26 posibles"). En "diagnostico" podés agregar al final una línea "Códigos de la lista de Acuario a considerar:" con 1 a 3 códigos de esta lista, sólo si corresponden claramente: '+ACU_CODES+'.\nNOTA:\n"""\n'+redact(nb)+'\n"""\nRespondé SOLO JSON: {"datos":"","diagnostico":"","tratamiento":""}';
+  $('acu-go').disabled=true;
+  try{var r=parseJ(await callIA(prompt,null,'Preparando el resumen para Acuario…'));renderAcu({datos:String(r.datos||''),diagnostico:String(r.diagnostico||''),tratamiento:String(r.tratamiento||'')});$('stat').textContent='';$('stat2').textContent='Resumen listo. Revise antes de copiar.'}
+  catch(e){$('stat2').textContent=(e&&e.msg)||'No se pudo preparar el resumen. Intente de nuevo.'}
+  $('acu-go').disabled=false;
 };
 $('prof').addEventListener('change',function(){S.prof=$('prof').value;lsSet('cs61_cons_last',S.prof);loadCfg();planOptions();renderCfg();renderFields();saveDraft()});
 

@@ -110,6 +110,13 @@ main { max-width: 1120px; margin: 0 auto; padding-top: 22px; }
 @keyframes cnpulse { 50% { opacity: .35; } }
 .cn-big.rec::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: #fff; display: inline-block; margin-right: 8px; animation: cnpulse 1.2s infinite; }
 textarea { width: 100%; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font: inherit; resize: vertical; }
+.acu { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--surface-2); }
+.acu h4 { margin: 0 0 2px; font-size: .95rem; }
+.acu .sub { margin: 0 0 8px; font-size: .8rem; color: var(--ink-2); }
+.acu .blk { margin-top: 10px; }
+.acu .blk .hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; font-weight: 700; font-size: .85rem; }
+.acu textarea { min-height: 84px; font-size: .86rem; line-height: 1.4; }
+@media print { .acu { display: none !important; } }
 textarea:focus-visible { outline: 3px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
 input[type="number"], input[type="text"], input[type="date"], select {
   width: 100%; min-width: 0; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); }
@@ -329,6 +336,7 @@ details.card[open] > summary { margin-bottom: 12px; }
           </div>
           <div class="actions" style="margin-top:16px"><button class="btn primary" id="ec-save" type="button">Agregar a la planilla</button><button class="btn" id="ec-cancel" type="button" hidden>Cancelar edición</button><button class="btn" id="ec-send" type="button">Enviar a la planilla compartida</button><button class="btn" id="ec-new" type="button">Limpiar formulario</button></div>
           <div class="alert info" id="ec-msg" role="status" hidden style="margin-top:12px"></div>
+          <div id="ec-acu-wrap"></div>
         </div>
       </div>
       <aside class="col sticky"><div class="card" id="ec-side"></div></aside>
@@ -487,6 +495,21 @@ function copyText(text, btn) {
   try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(function () { done(true); }, fallback); } else { fallback(); } } catch (e) { fallback(); }
 }
 
+/* ---------- Resumen con el formato de Acuario ---------- */
+function acuHTML(pref, d) {
+  var B = [['dat', 'Datos Comunidad Médica', d.dat], ['dx', 'Diagnóstico sugerido', d.dx], ['tto', 'Tratamiento', d.tto]];
+  return '<div class="acu" id="' + pref + '-acu"><h4>Para pegar en Acuario</h4><p class="sub">Revise y edite antes de copiar. El diagnóstico es una sugerencia orientativa: lo valida el profesional.</p>' +
+    B.map(function (b) { return '<div class="blk"><div class="hd"><label for="' + pref + '-' + b[0] + '">' + b[1] + '</label><button class="btn small" type="button" data-acu="' + pref + '-' + b[0] + '">Copiar</button></div><textarea id="' + pref + '-' + b[0] + '" rows="4">' + esc(b[2]) + '</textarea></div>'; }).join('') +
+    '<div class="actions" style="margin-top:10px"><button class="btn small primary" type="button" data-acu-all="' + pref + '">Copiar los tres bloques</button></div></div>';
+}
+function acuBind(pref) {
+  var root = $(pref + '-acu'); if (!root) return;
+  root.querySelectorAll('[data-acu]').forEach(function (b) { b.addEventListener('click', function () { copyText($(b.getAttribute('data-acu')).value, b); }); });
+  root.querySelectorAll('[data-acu-all]').forEach(function (b) { b.addEventListener('click', function () {
+    copyText('DATOS COMUNIDAD MÉDICA\n' + $(pref + '-dat').value + '\n\nDIAGNÓSTICO SUGERIDO\n' + $(pref + '-dx').value + '\n\nTRATAMIENTO\n' + $(pref + '-tto').value, b);
+  }); });
+}
+
 /* ---------- Navegación ---------- */
 var VIEWS = ['ecv', 'findrisc', 'excel'];
 function show(v) {
@@ -509,7 +532,22 @@ var FR_CATS = [
 function radio(name) { var e = document.querySelector('input[name="' + name + '"]:checked'); return e ? e.value : null; }
 function setRadio(name, v) { document.querySelectorAll('input[name="' + name + '"]').forEach(function (r) { r.checked = (v !== null && r.value === String(v)); }); }
 
+function frAcu(total, cat, items, bmi) {
+  var ptsTxt = function (n) { return n + (n === 1 ? ' punto' : ' puntos'); };
+  var dat = 'Test FINDRISC (tamizaje de riesgo de diabetes tipo 2): ' + total + ' puntos de un máximo de 26 posibles.\n' +
+    'Categoría: ' + cat.name + ' (riesgo estimado de desarrollar diabetes tipo 2 en 10 años: ' + cat.prob + ', 1 de cada ' + cat.one.replace('1 de cada ', '') + ' personas con este puntaje).\n' +
+    items.map(function (i) { return '- ' + i.label + ': ' + i.ans + ' (' + ptsTxt(i.pts) + ')'; }).join('\n');
+  var dx = 'Riesgo ' + cat.name.toLowerCase().replace(/^riesgo /, '') + ' de desarrollar diabetes tipo 2 a 10 años (FINDRISC ' + total + ' puntos).';
+  if (bmi >= 30) dx += '\nObesidad (IMC ' + fmt(bmi, 1) + ' kg/m²).'; else if (bmi >= 25) dx += '\nSobrepeso (IMC ' + fmt(bmi, 1) + ' kg/m²).';
+  dx += '\nCódigos de la lista de Acuario a considerar: Z713 (consulta para instrucción y vigilancia de la dieta)' + (bmi >= 30 ? '; E660 (obesidad debida a exceso de calorías)' : '') + '.';
+  var tto = cat.act + '\nSeguimiento según el nivel de riesgo y la guía vigente.';
+  return { dat: dat, dx: dx, tto: tto };
+}
+var FR_SIG = null;
+function frSig() { return ['fr-age', 'fr-w', 'fr-h', 'fr-waist'].map(function (i) { return $(i).value; }).concat(['fr-sex', 'fr-act', 'fr-veg', 'fr-med', 'fr-glu', 'fr-fam'].map(radio)).join('|'); }
+function frMaybe(e) { if (e && e.target && e.target.closest && e.target.closest('#fr-acu')) return; if (frSig() === FR_SIG) return; frCalc(); }
 function frCalc() {
+  FR_SIG = frSig();
   var sex = radio('fr-sex'), age = val('fr-age'), w = val('fr-w'), h = val('fr-h'), waist = val('fr-waist');
   var bmi = (w && h) ? w / Math.pow(h / 100, 2) : null;
   $('fr-bmi-chip').innerHTML = bmi ? '<span class="chip">IMC <b>' + fmt(bmi, 1) + ' kg/m²</b></span>' : '';
@@ -545,15 +583,16 @@ function frCalc() {
     '<p style="margin:10px 0 4px"><b>Riesgo a 10 años:</b> ' + cat.prob + ' (' + cat.one + ' personas con este puntaje).</p>' +
     '<div class="note" style="margin:10px 0"><b>Conducta orientativa.</b> ' + esc(cat.act) + ' Ajustar a la guía del Ministerio de Salud y al protocolo del centro.</div>' +
     '<div class="tw"><table><thead><tr><th>Pregunta</th><th>Respuesta</th><th class="num">Puntos</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<div class="actions" style="margin-top:12px"><button class="btn small" id="fr-copy" type="button">Copiar resumen</button></div>' +
+    '<div class="actions" style="margin-top:12px"><button class="btn small" id="fr-copy" type="button">Copiar resumen</button></div>' + acuHTML('fr', frAcu(total, cat, items, bmi)) +
     '<p style="margin-top:10px;font-size:.76rem;color:var(--ink-2)">Lindström J, Tuomilehto J. Diabetes Care 2003;26(3):725-731. Es una herramienta de tamizaje, no diagnostica.</p>';
-  FR_LAST = 'FINDRISC: ' + total + '/26 puntos · ' + cat.name + ' · riesgo a 10 años ' + cat.prob + ' (' + cat.one + ').\n' +
-    items.map(function (i) { return '- ' + i.label + ': ' + i.ans + ' (' + i.pts + ')'; }).join('\n');
+  FR_LAST = 'FINDRISC: ' + total + ' puntos de 26 posibles · ' + cat.name + ' · riesgo a 10 años ' + cat.prob + ' (' + cat.one + ').\n' +
+    items.map(function (i) { return '- ' + i.label + ': ' + i.ans + ' (' + i.pts + (i.pts === 1 ? ' punto' : ' puntos') + ')'; }).join('\n');
   $('fr-copy').addEventListener('click', function () { copyText(FR_LAST, this); });
+  acuBind('fr');
 }
 var FR_LAST = null;
-$('v-findrisc').addEventListener('input', frCalc);
-$('v-findrisc').addEventListener('change', frCalc);
+$('v-findrisc').addEventListener('input', frMaybe);
+$('v-findrisc').addEventListener('change', frMaybe);
 $('fr-clear').addEventListener('click', function () {
   ['fr-age', 'fr-w', 'fr-h', 'fr-waist'].forEach(function (i) { $(i).value = ''; });
   ['fr-sex', 'fr-act', 'fr-veg', 'fr-med', 'fr-glu', 'fr-fam'].forEach(function (n) { setRadio(n, null); }); frCalc();
@@ -688,8 +727,22 @@ function ecReset() {
   EC_EDIT = null; ecFill({ nombre: '', doc: '', fpa: '', tas: null, tad: null, fcm: '', med: '', os: '', frec: todayISO() });
   $('ec-ftitle').textContent = 'Nueva persona'; $('ec-save').textContent = 'Agregar a la planilla'; $('ec-cancel').hidden = true; $('ec-docmsg').textContent = '';
 }
+function ecAcu(r, nc) {
+  var d = function (iso) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; };
+  var dat = 'Supervisión de enfermedades cardiovasculares.\n' +
+    (r.tas !== null && r.tad !== null ? '- Presión arterial: ' + r.tas + '/' + r.tad + ' mmHg' + (r.fpa ? ' (control del ' + d(r.fpa) + ')' : '') + '\n' : '') +
+    (r.fcm ? '- Último control médico: ' + d(r.fcm) + '\n' : '') +
+    (r.med ? '- Medicación: ' + r.med + '\n' : '') +
+    (r.dos ? '- Dos o más drogas antihipertensivas\n' : '') + (r.est ? '- Recibe estatinas\n' : '') + (r.dbt ? '- Diabetes (DBT)\n' : '') + (r.acv ? '- Antecedente de evento cerebrovascular (ACV)\n' : '') + (r.ecv ? '- Antecedente de evento cardiovascular\n' : '');
+  var dx = nc === null ? '' : (nc ? 'Presión arterial no controlada (≥ 140/90 mmHg).' : 'Presión arterial controlada (< 140/90 mmHg).');
+  if (r.dbt && nc) dx += '\nDiabetes con presión arterial no controlada.';
+  if (r.acv || r.ecv) dx += '\nAntecedente de ' + (r.acv && r.ecv ? 'evento cerebrovascular y cardiovascular' : r.acv ? 'evento cerebrovascular' : 'evento cardiovascular') + ' (riesgo cardiovascular alto).';
+  var tto = (r.med ? 'Tratamiento actual: ' + r.med + '.' : 'Sin medicación registrada.') + (nc ? '\nPresión arterial no controlada: reevaluar el esquema y la adherencia, según criterio del médico.' : '');
+  return { dat: dat.replace(/\n$/, ''), dx: dx, tto: tto };
+}
 function ecChip() {
   var r = ecRead(), nc = ecPAnc(r);
+  var box = $('ec-acu-wrap'); if (box) { var gen = (nc === null && !r.med) ? '' : JSON.stringify(ecAcu(r, nc)); if (box.getAttribute('data-gen') !== gen) { box.setAttribute('data-gen', gen); box.innerHTML = gen ? acuHTML('ec', ecAcu(r, nc)) : ''; if (gen) acuBind('ec'); } }
   $('ec-pa-chip').innerHTML = nc === null ? '' : '<span class="chip">Presión arterial: <b>' + r.tas + '/' + r.tad + ' mmHg</b></span><span class="badge ' + (nc ? 'bad' : 'ok') + '">' + (nc ? 'No controlada (≥ 140/90)' : 'Controlada (< 140/90)') + '</span>';
 }
 function ecSide() {
@@ -1006,8 +1059,8 @@ document.addEventListener('click', function (e) {
 $('ec-save').addEventListener('click', ecSave);
 $('ec-cancel').addEventListener('click', function () { ecReset(); msg('ec-msg', '', ''); });
 $('ec-new').addEventListener('click', function () { ecReset(); msg('ec-msg', '', ''); });
-$('v-ecv').addEventListener('input', function (e) { if (e.target.id && e.target.id.indexOf('ec-') === 0) ecChip(); });
-$('v-ecv').addEventListener('change', ecChip);
+$('v-ecv').addEventListener('input', function (e) { if (e.target.closest && e.target.closest('#ec-acu-wrap')) return; if (e.target.id && e.target.id.indexOf('ec-') === 0) ecChip(); });
+$('v-ecv').addEventListener('change', function (e) { if (e.target.closest && e.target.closest('#ec-acu-wrap')) return; ecChip(); });
 $('ec-doc').addEventListener('change', function () {
   var d = this.value.replace(/\D/g, ''); if (!d || EC_EDIT) return;
   var r = ECR.filter(function (x) { return x.doc === d; })[0];
