@@ -321,6 +321,8 @@ details.card[open] > summary { margin-bottom: 12px; }
     <p class="sub">Los datos de identificación son opcionales y sólo se usan en el resumen para copiar.</p>
     <div class="grid">
       <label class="field"><span>Código de paciente (opcional)</span><input type="text" id="lc-id" placeholder="Sin nombre ni DNI" maxlength="40" autocomplete="off"></label>
+      <label class="field"><span>DNI (para guardar en la planilla)</span><input type="text" id="lc-dni" maxlength="12" inputmode="numeric" autocomplete="off"><small>Opcional. Sólo se envía a la planilla compartida, no aparece en el resumen.</small></label>
+      <label class="field"><span>Nombre y apellido (para guardar en la planilla)</span><input type="text" id="lc-nom" maxlength="80" autocomplete="off"></label>
       <label class="field"><span>Sexo</span><select id="lc-sex"><option value="">Seleccionar</option><option value="M">Varón</option><option value="F">Mujer</option></select></label>
       <label class="field"><span>Fecha de nacimiento</span><input type="date" id="lc-dob"></label>
       <label class="field"><span>Fecha de control</span><input type="date" id="lc-ctl"></label>
@@ -519,6 +521,8 @@ details.card[open] > summary { margin-bottom: 12px; }
     <p class="sub">Los datos de identificación son opcionales y sólo se usan en el resumen para copiar.</p>
     <div class="grid">
       <label class="field"><span>Código de paciente (opcional)</span><input type="text" id="es-id" placeholder="Sin nombre ni DNI" maxlength="40" autocomplete="off"></label>
+      <label class="field"><span>DNI (para guardar en la planilla)</span><input type="text" id="es-dni" maxlength="12" inputmode="numeric" autocomplete="off"><small>Opcional. Sólo se envía a la planilla compartida, no aparece en el resumen.</small></label>
+      <label class="field"><span>Nombre y apellido (para guardar en la planilla)</span><input type="text" id="es-nom" maxlength="80" autocomplete="off"></label>
       <label class="field"><span>Sexo</span><select id="es-sex"><option value="">Seleccionar</option><option value="M">Varón</option><option value="F">Mujer</option></select></label>
       <label class="field"><span>Fecha de nacimiento</span><input type="date" id="es-dob"></label>
       <label class="field"><span>Fecha de control</span><input type="date" id="es-ctl"></label>
@@ -584,6 +588,8 @@ details.card[open] > summary { margin-bottom: 12px; }
         <p class="sub">Ingrese la FUM o directamente las semanas de gestación. Los datos de identificación son opcionales y sólo se usan en el resumen.</p>
         <div class="grid">
           <label class="field"><span>Código de paciente</span><input type="text" id="em-id" placeholder="Sin nombre ni DNI" maxlength="40" autocomplete="off"></label>
+      <label class="field"><span>DNI (para guardar en la planilla)</span><input type="text" id="em-dni" maxlength="12" inputmode="numeric" autocomplete="off"><small>Opcional. Sólo se envía a la planilla compartida, no aparece en el resumen.</small></label>
+      <label class="field"><span>Nombre y apellido (para guardar en la planilla)</span><input type="text" id="em-nom" maxlength="80" autocomplete="off"></label>
           <label class="field"><span>Edad (años)</span><input type="number" id="em-age" min="10" max="55" inputmode="numeric"></label>
           <label class="field"><span>Fecha de control</span><input type="date" id="em-ctl"></label>
           <label class="field"><span>FUM</span><input type="date" id="em-fum"></label>
@@ -2298,10 +2304,11 @@ var esMatCopy = [];
 var PL_COLS = ['id', 'registrado', 'fecha_control', 'modulo', 'codigo', 'profesional', 'sexo', 'edad_anios', 'edad_meses', 'peso_kg', 'talla_cm', 'pc_cm', 'imc', 'cintura_cm', 'z_peso_edad', 'z_talla_edad', 'z_pc_edad', 'z_peso_talla', 'z_imc_edad', 'clasificacion', 'semanas_gest', 'peso_pregest_kg', 'imc_pregest', 'vel_talla_cm_anio', 'vel_centilo', 'talla_blanco_cm', 'detalle'];
 function plGet(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
 function plSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
-function plCfg() { var c = plGet('cs61_pl'); return (c && c.url && c.key) ? c : null; }
+function plCfg() { var c = plGet('cs61_pl'); if (!(c && c.url && c.key)) c = plGet('cs61_plcv'); return (c && c.url && c.key) ? c : null; }
+function plSetCfg(o) { var a = plSet('cs61_pl', o); plSet('cs61_plcv', o); return a; }
 function plNum(t) { if (t === null || t === undefined) return null; var x = parseFloat(String(t).replace('−', '-').replace(/\.(?=\d{3}\b)/g, '').replace(',', '.')); return isFinite(x) ? x : null; }
 function plId() { return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
-function plBase(mod, code, ctl, sex) { var r = { id: plId(), registrado: new Date().toISOString(), fecha_control: ctl || todayISO(), modulo: mod, codigo: code || '', profesional: (plGet('cs61_pl') || {}).prof || '', sexo: sex === 'M' ? 'Varón' : (sex === 'F' ? 'Mujer' : '') }; PL_COLS.forEach(function (c) { if (!(c in r)) r[c] = ''; }); return r; }
+function plBase(mod, code, ctl, sex) { var r = { id: plId(), registrado: new Date().toISOString(), fecha_control: ctl || todayISO(), modulo: mod, codigo: code || '', profesional: (plCfg() || plGet('cs61_pl') || {}).prof || '', sexo: sex === 'M' ? 'Varón' : (sex === 'F' ? 'Mujer' : '') }; PL_COLS.forEach(function (c) { if (!(c in r)) r[c] = ''; }); return r; }
 function plIndicators(r, lines) {
   var cls = [];
   lines.forEach(function (l) {
@@ -2317,14 +2324,14 @@ function plIndicators(r, lines) {
   r.clasificacion = cls.join(' | ');
 }
 function plRecLc() {
-  var P = readPatient(), r = plBase('Recién nacido y niño', $('lc-id').value.trim(), $('lc-ctl') ? $('lc-ctl').value : '', P.sex);
+  var P = readPatient(), r = plBase('Recién nacido y niño', $('lc-id').value.trim(), $('lc-ctl') ? $('lc-ctl').value : '', P.sex); r.dni = $('lc-dni').value.replace(/\D/g, ''); r.nombre = $('lc-nom').value.trim();
   r.edad_meses = Math.round(P.chron / MD * 10) / 10; r.edad_anios = Math.round(P.chron / MD / 12 * 100) / 100; r.peso_kg = P.w ? P.w / 1000 : '';
   plIndicators(r, GR_COPY);
   var ex = []; try { if (LAST) ex.push(lcSummary(LAST)); } catch (e) { }
   r.detalle = AGES_COPY.concat([''], GR_COPY, [''], ex).join('\n'); return r;
 }
 function plRecEs() {
-  var P = esRead(), r = plBase('Escolar y adolescente', $('es-id').value.trim(), P.ctl, P.sex);
+  var P = esRead(), r = plBase('Escolar y adolescente', $('es-id').value.trim(), P.ctl, P.sex); r.dni = $('es-dni').value.replace(/\D/g, ''); r.nombre = $('es-nom').value.trim();
   if (P.m !== null) { r.edad_meses = Math.round(P.m * 10) / 10; r.edad_anios = P.dec !== null ? Math.round(P.dec * 100) / 100 : Math.round(P.m / 12 * 100) / 100; }
   r.peso_kg = P.w || ''; r.talla_cm = P.h || ''; r.cintura_cm = P.wc || '';
   plIndicators(r, ES_COPY);
@@ -2336,7 +2343,7 @@ function plRecEs() {
   r.detalle = ES_COPY.concat(esVelCopy, esMatCopy).join('\n'); return r;
 }
 function plRecEm() {
-  var E = EM_REC || {}, r = plBase('Embarazada', $('em-id').value.trim(), $('em-ctl') ? $('em-ctl').value : '', '');
+  var E = EM_REC || {}, r = plBase('Embarazada', $('em-id').value.trim(), $('em-ctl') ? $('em-ctl').value : '', ''); r.dni = $('em-dni').value.replace(/\D/g, ''); r.nombre = $('em-nom').value.trim();
   r.sexo = 'Mujer'; r.edad_anios = val('em-age') === null ? '' : val('em-age'); r.talla_cm = E.h || ''; r.peso_kg = E.w || ''; r.peso_pregest_kg = E.wpre || ''; r.imc_pregest = E.imc0 ? Math.round(E.imc0 * 10) / 10 : ''; r.semanas_gest = E.eg === null || E.eg === undefined ? '' : Math.round(E.eg * 10) / 10; r.clasificacion = E.cat ? 'IMC pregestacional: ' + E.cat : '';
   r.detalle = (EM_LAST || []).join('\n'); return r;
 }
@@ -2360,18 +2367,26 @@ function plSave(rec, btn) {
   var say = function (t) { btn.textContent = t; setTimeout(function () { btn.textContent = o; btn.disabled = false; }, 2600); };
   var cfg = plCfg(); if (!cfg) { say('Falta configurar la planilla'); show('inicio'); setTimeout(function () { var c = $('pl-card'); if (c) c.scrollIntoView(); }, 50); return; }
   if (/\b\d{7,8}\b/.test(rec.codigo)) { if (!window.confirm('El código parece un DNI. Para proteger la identidad del paciente use un código interno. ¿Guardar igual?')) return; }
+  if (rec.dni || rec.nombre) {
+    if (!rec.dni || !rec.nombre) { say('Falta el DNI o el nombre'); window.alert('Para vincular el control con la persona ingrese DNI y nombre y apellido, o deje ambos vacíos.'); return; }
+    if (!window.confirm('¿La persona dio su consentimiento para registrar sus datos en la planilla compartida del centro?\n\nEl DNI y el nombre se guardan sólo en la hoja «Pacientes»; en el control queda un código.')) return;
+    rec.consent = true; rec.fecha_consent = todayISO();
+  } else if (!rec.codigo) {
+    if (!window.confirm('No indicó código ni DNI. El control se guardará sin vincular con la persona (no se podrá buscar ni unir con ECV o FINDRISC). ¿Guardar igual?')) return;
+  }
   btn.disabled = true; btn.textContent = 'Guardando…';
-  plPost(cfg, { rec: rec }).then(function (j) { if (j && j.ok) say(j.dup ? 'Ya estaba guardado' : 'Guardado ✓'); else { var q = plQueue(); q.push(rec); plSet('cs61_pl_q', q); plStatusRefresh(); say('No se pudo guardar: quedó pendiente'); } })
+  plPost(cfg, { rec: rec }).then(function (j) { if (j && j.ok) say(j.dup ? 'Ya estaba guardado' : 'Guardado ✓' + (j.codigo ? ' · ' + j.codigo : ''));
+      else if (j && (j.error === 'sin_consentimiento' || j.error === 'sin_dni' || j.error === 'faltan_hojas')) { say(j.error === 'faltan_hojas' ? 'La planilla no tiene la hoja Pacientes' : 'Falta DNI o consentimiento'); } else { var q = plQueue(); q.push(rec); plSet('cs61_pl_q', q); plStatusRefresh(); say('No se pudo guardar: quedó pendiente'); } })
     .catch(function () { var q = plQueue(); q.push(rec); plSet('cs61_pl_q', q); plStatusRefresh(); say('Sin conexión: quedó pendiente'); });
 }
 (function () {
   var st = function (t, k) { var e = $('pl-status'); if (e) e.innerHTML = t ? '<div class="alert ' + (k || 'info') + '">' + (k === 'warn' ? ICON_WARN : ICON_INFO) + '<span>' + t + '</span></div>' : ''; };
-  try { var m = /[#&]cfg=([^&]+)/.exec(location.hash || ''); if (m) { var c = JSON.parse(decodeURIComponent(escape(atob(m[1])))); if (c && c.url && c.key) { var o = plGet('cs61_pl') || {}; plSet('cs61_pl', { url: c.url, key: c.key, prof: o.prof || '' }); } history.replaceState(null, '', '#inicio'); } } catch (e) { }
-  var c0 = plGet('cs61_pl'); if (c0) { $('pl-url').value = c0.url || ''; $('pl-key').value = c0.key || ''; $('pl-prof').value = c0.prof || ''; st('Planilla configurada en este dispositivo.'); }
+  try { var m = /[#&]cfg=([^&]+)/.exec(location.hash || ''); if (m) { var c = JSON.parse(decodeURIComponent(escape(atob(m[1])))); if (c && c.url && c.key) { var o = plGet('cs61_pl') || {}; plSetCfg({ url: c.url, key: c.key, prof: o.prof || '' }); } history.replaceState(null, '', '#inicio'); } } catch (e) { }
+  var c0 = plGet('cs61_pl') || plGet('cs61_plcv'); if (c0) { $('pl-url').value = c0.url || ''; $('pl-key').value = c0.key || ''; $('pl-prof').value = c0.prof || ''; st('Planilla configurada en este dispositivo.'); }
   plStatusRefresh();
   $('pl-save').addEventListener('click', function () {
     var u = $('pl-url').value.trim(), k = $('pl-key').value.trim(); if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(u)) { st('La dirección debe ser la URL de la aplicación web de Apps Script (termina en /exec).', 'warn'); return; } if (!k) { st('Ingrese la clave.', 'warn'); return; }
-    st(plSet('cs61_pl', { url: u, key: k, prof: $('pl-prof').value.trim() }) ? 'Configuración guardada en este dispositivo. Pruebe la conexión.' : 'Este navegador no permite guardar la configuración.', 'info');
+    st(plSetCfg({ url: u, key: k, prof: $('pl-prof').value.trim() }) ? 'Configuración guardada en este dispositivo. Pruebe la conexión.' : 'Este navegador no permite guardar la configuración.', 'info');
   });
   $('pl-test').addEventListener('click', function () {
     var cfg = plCfg(); if (!cfg) { st('Guarde primero la configuración.', 'warn'); return; } st('Probando…');

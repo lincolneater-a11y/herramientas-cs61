@@ -378,6 +378,10 @@ details.card[open] > summary { margin-bottom: 12px; }
   <div id="fr-p-cargar" style="margin-top:14px">
   <div class="split">
     <div class="col"><div class="card" id="fr-form">
+      <div class="grid wide" style="margin-bottom:10px">
+        <label class="field"><span>Nombre y apellido</span><input type="text" id="fr-nombre" maxlength="80" autocomplete="off"></label>
+        <label class="field"><span>Documento (DNI)</span><input type="text" id="fr-dni" maxlength="12" inputmode="numeric" autocomplete="off"><small>Necesario para el rastreo de auditoría y la carga al sistema.</small></label>
+      </div>
       <div class="grid" style="margin-bottom:6px">
         <div class="field"><span class="lbl">Sexo</span>
           <div class="seg" role="radiogroup" aria-label="Sexo"><label><input type="radio" name="fr-sex" value="f"><span>Mujer</span></label><label><input type="radio" name="fr-sex" value="m"><span>Varón</span></label></div></div>
@@ -403,16 +407,10 @@ details.card[open] > summary { margin-bottom: 12px; }
       <div class="card" id="fr-savebox" style="margin-top:14px">
         <h3>Guardar en el registro</h3>
         <div class="grid wide" style="margin-top:10px">
-          <label class="field"><span>Identificación (opcional)</span><input type="text" id="fr-ident" maxlength="40" autocomplete="off" placeholder="Iniciales, DNI o N.º de historia"></label>
+          <label class="field"><span>N.º de historia u observación (opcional)</span><input type="text" id="fr-ident" maxlength="40" autocomplete="off" placeholder="Opcional"></label>
           <label class="field"><span>Fecha</span><input type="date" id="fr-fecha"></label>
         </div>
-        <details class="cn-txt" style="margin-top:12px"><summary>Planilla compartida (opcional)</summary>
-          <p class="sub" style="margin:8px 0 10px">Para enviar el test a la planilla del centro: el DNI y el nombre se guardan sólo en la hoja «Pacientes»; en el test queda un código (por ejemplo CS61-0001). Si la persona ya tiene código, escríbalo en «Identificación» y no hace falta el DNI.</p>
-          <div class="grid wide">
-            <label class="field"><span>DNI</span><input type="text" id="fr-dni" maxlength="12" inputmode="numeric" autocomplete="off"></label>
-            <label class="field"><span>Nombre y apellido</span><input type="text" id="fr-nombre" maxlength="80" autocomplete="off"></label>
-          </div>
-        </details>
+        <p class="sub" style="margin:12px 0 0">Al enviar a la planilla compartida, el DNI y el nombre se guardan en la hoja «Pacientes» y el test queda asociado a un código (por ejemplo CS61-0001), que permite el rastreo de auditoría.</p>
         <div class="actions" style="margin-top:12px"><button class="btn primary" id="fr-save" type="button" disabled>Guardar test</button><button class="btn" id="fr-send" type="button" disabled>Enviar a la planilla compartida</button></div>
         <div class="alert info" id="fr-msg" role="status" hidden style="margin-top:12px"></div>
       </div>
@@ -603,11 +601,11 @@ var FR_LAST = null;
 $('v-findrisc').addEventListener('input', frMaybe);
 $('v-findrisc').addEventListener('change', frMaybe);
 $('fr-clear').addEventListener('click', function () {
-  ['fr-age', 'fr-w', 'fr-h', 'fr-waist'].forEach(function (i) { $(i).value = ''; });
+  ['fr-age', 'fr-w', 'fr-h', 'fr-waist', 'fr-nombre', 'fr-dni'].forEach(function (i) { $(i).value = ''; });
   ['fr-sex', 'fr-act', 'fr-veg', 'fr-med', 'fr-glu', 'fr-fam'].forEach(function (n) { setRadio(n, null); }); frCalc();
 });
 $('fr-example').addEventListener('click', function () {
-  setRadio('fr-sex', 'f'); $('fr-age').value = 52; $('fr-w').value = 78; $('fr-h').value = 160; $('fr-waist').value = 92;
+  $('fr-nombre').value = 'Persona de Ejemplo'; $('fr-dni').value = '12345678'; setRadio('fr-sex', 'f'); $('fr-age').value = 52; $('fr-w').value = 78; $('fr-h').value = 160; $('fr-waist').value = 92;
   setRadio('fr-act', 2); setRadio('fr-veg', 0); setRadio('fr-med', 0); setRadio('fr-glu', 0); setRadio('fr-fam', 3); frCalc();
 });
 
@@ -622,7 +620,8 @@ var FRR = lsGet(K_FR, []), ECR = lsGet(K_EC, []), CFG = lsGet(K_CFG, { centro: '
   var K = 'cs61_plcv', Q = 'cs61_plcv_q', OKC = {};
   var get = function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   var set = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
-  var cfg = function () { var c = get(K); return (c && c.url && c.key) ? c : null; };
+  var cfg = function () { var c = get(K); if (!(c && c.url && c.key)) c = get('cs61_pl'); return (c && c.url && c.key) ? c : null; };
+  var setCfg = function (o) { var a = set(K, o); set('cs61_pl', o); return a; };
   var st = function (t, c) { msg('cv-status', t, c); };
   var post = function (c, body) { return fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ k: c.key }, body)) }).then(function (r) { return r.json(); }); };
   var queue = function () { return get(Q) || []; };
@@ -655,10 +654,11 @@ var FRR = lsGet(K_FR, []), ECR = lsGet(K_EC, []), CFG = lsGet(K_CFG, { centro: '
   });
   $('fr-send').addEventListener('click', function () {
     if (!FR_CUR) return; var v = FR_CUR.v, ident = $('fr-ident').value.trim();
+    if (!$('fr-nombre').value.trim() || !$('fr-dni').value.replace(/\D/g, '')) { msg('fr-msg', 'Para enviar a la planilla ingrese el nombre y apellido y el DNI.', 'warn'); return; }
     send({ id: uid(), tipo: 'fr', dni: $('fr-dni').value.replace(/\D/g, ''), nombre: $('fr-nombre').value.trim(), codigo: /^CS61-\d+$/i.test(ident) ? ident : '', fecha: $('fr-fecha').value || todayISO(), sexo: v.sex === 'm' ? 'Varón' : 'Mujer', edad: v.age, peso: v.w, talla: v.h, cintura: v.waist, act: FR_TXT.act[v.act], veg: FR_TXT.veg[v.veg], med: FR_TXT.med[v.med], glu: FR_TXT.glu[v.glu], fam: FR_TXT.fam[v.fam] }, 'fr-msg', this);
   });
-  try { var m = /[#&]cfgcv=([^&]+)/.exec(location.hash || ''); if (m) { var c0 = JSON.parse(decodeURIComponent(escape(atob(m[1])))); if (c0 && c0.url && c0.key) { var o = get(K) || {}; set(K, { url: c0.url, key: c0.key, prof: o.prof || '' }); } history.replaceState(null, '', '#excel'); } } catch (e) { }
-  var c1 = get(K); if (c1) { $('cv-url').value = c1.url || ''; $('cv-key').value = c1.key || ''; $('cv-prof').value = c1.prof || ''; st('Planilla compartida configurada en este dispositivo.'); }
+  try { var m = /[#&]cfgcv=([^&]+)/.exec(location.hash || ''); if (m) { var c0 = JSON.parse(decodeURIComponent(escape(atob(m[1])))); if (c0 && c0.url && c0.key) { var o = get(K) || {}; setCfg({ url: c0.url, key: c0.key, prof: o.prof || '' }); } history.replaceState(null, '', '#excel'); } } catch (e) { }
+  var c1 = get(K) || get('cs61_pl'); if (c1) { $('cv-url').value = c1.url || ''; $('cv-key').value = c1.key || ''; $('cv-prof').value = c1.prof || ''; st('Planilla compartida configurada en este dispositivo.'); }
   if (cfg()) { var dt = document.querySelector('#fr-savebox details'); if (dt) dt.open = true; }
   refresh();
   $('cv-save').addEventListener('click', function () {
@@ -666,7 +666,7 @@ var FRR = lsGet(K_FR, []), ECR = lsGet(K_EC, []), CFG = lsGet(K_CFG, { centro: '
     if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(u)) { st('La dirección debe ser la URL de la aplicación web de Apps Script (termina en /exec).', 'warn'); return; }
     if (!k) { st('Ingrese la clave.', 'warn'); return; }
     var dt2 = document.querySelector('#fr-savebox details'); if (dt2) dt2.open = true;
-    st(set(K, { url: u, key: k, prof: $('cv-prof').value.trim() }) ? 'Configuración guardada en este dispositivo. Pruebe la conexión.' : 'Este navegador no permite guardar la configuración.', 'info');
+    st(setCfg({ url: u, key: k, prof: $('cv-prof').value.trim() }) ? 'Configuración guardada en este dispositivo. Pruebe la conexión.' : 'Este navegador no permite guardar la configuración.', 'info');
   });
   $('cv-test').addEventListener('click', function () {
     var c = cfg(); if (!c) { st('Guarde primero la configuración.', 'warn'); return; } st('Probando…');
@@ -873,18 +873,20 @@ var FR_CUR = null;
 function frStoreCur(total, cat, vals) { FR_CUR = vals ? { puntaje: total, cat: cat.name, lvl: cat.lvl, v: vals } : null; $('fr-save').disabled = !FR_CUR; $('fr-send').disabled = !FR_CUR; }
 function frSave() {
   if (!FR_CUR) return;
-  var r = { id: uid(), fecha: $('fr-fecha').value || todayISO(), ident: $('fr-ident').value.trim(), sexo: FR_CUR.v.sex, edad: FR_CUR.v.age, peso: FR_CUR.v.w, talla: FR_CUR.v.h, cintura: FR_CUR.v.waist, imc: FR_CUR.v.bmi, act: FR_CUR.v.act, veg: FR_CUR.v.veg, med: FR_CUR.v.med, glu: FR_CUR.v.glu, fam: FR_CUR.v.fam, puntaje: FR_CUR.puntaje, cat: FR_CUR.cat, lvl: FR_CUR.lvl };
+  var nom = $('fr-nombre').value.trim(), dn = $('fr-dni').value.replace(/\D/g, '');
+  if (!nom || !dn) { msg('fr-msg', 'Ingrese el nombre y apellido y el DNI de la persona: son necesarios para el rastreo de auditoría.', 'warn'); return; }
+  var r = { id: uid(), fecha: $('fr-fecha').value || todayISO(), nombre: nom, doc: dn, ident: $('fr-ident').value.trim(), sexo: FR_CUR.v.sex, edad: FR_CUR.v.age, peso: FR_CUR.v.w, talla: FR_CUR.v.h, cintura: FR_CUR.v.waist, imc: FR_CUR.v.bmi, act: FR_CUR.v.act, veg: FR_CUR.v.veg, med: FR_CUR.v.med, glu: FR_CUR.v.glu, fam: FR_CUR.v.fam, puntaje: FR_CUR.puntaje, cat: FR_CUR.cat, lvl: FR_CUR.lvl };
   FRR.push(r); var ok = lsSet(K_FR, FRR); $('fr-n').textContent = '(' + FRR.length + ')';
   msg('fr-msg', 'Test guardado en el registro (' + FRR.length + ' en total).' + (ok ? '' : ' No se pudo guardar en este navegador: descargue el Excel.'), ok ? 'info' : 'warn');
-  $('fr-ident').value = '';
+  $('fr-ident').value = ''; $('fr-nombre').value = ''; $('fr-dni').value = '';
 }
-var FR_COLS = ['Fecha', 'Identificación', 'Sexo', 'Edad', 'Peso (kg)', 'Talla (cm)', 'Cintura (cm)', 'IMC', 'Actividad física ≥30 min/día', 'Verduras y frutas todos los días', 'Medicación antihipertensiva', 'Glucemia alta previa', 'Antecedentes familiares de diabetes', 'Puntaje', 'Categoría de riesgo'];
+var FR_COLS = ['Nombre y Apellido', 'Documento', 'Fecha', 'N.º de historia / observación', 'Sexo', 'Edad', 'Peso (kg)', 'Talla (cm)', 'Cintura (cm)', 'IMC', 'Actividad física ≥30 min/día', 'Verduras y frutas todos los días', 'Medicación antihipertensiva', 'Glucemia alta previa', 'Antecedentes familiares de diabetes', 'Puntaje', 'Categoría de riesgo'];
 var FR_TXT = { act: { '0': 'Sí', '2': 'No' }, veg: { '0': 'Sí', '1': 'No' }, med: { '0': 'No', '2': 'Sí' }, glu: { '0': 'No', '5': 'Sí' }, fam: { '0': 'No', '3': 'Abuelos, tíos o primos', '5': 'Padres, hermanos o hijos' } };
-function frAOA() { return [FR_COLS].concat(FRR.map(function (r) { return [isoToEs(r.fecha), r.ident, r.sexo === 'm' ? 'Varón' : 'Mujer', r.edad, r.peso, r.talla, r.cintura, r.imc === null ? '' : Math.round(r.imc * 10) / 10, FR_TXT.act[r.act], FR_TXT.veg[r.veg], FR_TXT.med[r.med], FR_TXT.glu[r.glu], FR_TXT.fam[r.fam], r.puntaje, r.cat]; })); }
+function frAOA() { return [FR_COLS].concat(FRR.map(function (r) { return [r.nombre || '', r.doc || '', isoToEs(r.fecha), r.ident, r.sexo === 'm' ? 'Varón' : 'Mujer', r.edad, r.peso, r.talla, r.cintura, r.imc === null ? '' : Math.round(r.imc * 10) / 10, FR_TXT.act[r.act], FR_TXT.veg[r.veg], FR_TXT.med[r.med], FR_TXT.glu[r.glu], FR_TXT.fam[r.fam], r.puntaje, r.cat]; })); }
 function frTable() {
-  var h = '<thead><tr><th>#</th><th>Fecha</th><th>Ident.</th><th>Sexo</th><th>Edad</th><th>IMC</th><th>Cintura</th><th>Puntaje</th><th>Riesgo</th><th></th></tr></thead><tbody>';
-  if (!FRR.length) h += '<tr><td colspan="10" class="sd">Todavía no hay tests guardados.</td></tr>';
-  FRR.forEach(function (r, i) { h += '<tr><td>' + (i + 1) + '</td><td>' + isoToEs(r.fecha) + '</td><td>' + esc(r.ident) + '</td><td>' + (r.sexo === 'm' ? 'Varón' : 'Mujer') + '</td><td>' + r.edad + '</td><td>' + fmt(r.imc, 1) + '</td><td>' + r.cintura + '</td><td><b>' + r.puntaje + '</b></td><td><span class="badge ' + (r.lvl >= 4 ? 'bad' : (r.lvl === 3 ? 'mid' : 'ok')) + '">' + esc(r.cat) + '</span></td><td><button class="btn small danger" data-frdel="' + r.id + '" type="button">Quitar</button></td></tr>'; });
+  var h = '<thead><tr><th>#</th><th>Nombre</th><th>DNI</th><th>Fecha</th><th>Sexo</th><th>Edad</th><th>IMC</th><th>Cintura</th><th>Puntaje</th><th>Riesgo</th><th></th></tr></thead><tbody>';
+  if (!FRR.length) h += '<tr><td colspan="11" class="sd">Todavía no hay tests guardados.</td></tr>';
+  FRR.forEach(function (r, i) { h += '<tr><td>' + (i + 1) + '</td><td>' + esc(r.nombre || '') + '</td><td>' + esc(r.doc || r.ident || '') + '</td><td>' + isoToEs(r.fecha) + '</td><td>' + (r.sexo === 'm' ? 'Varón' : 'Mujer') + '</td><td>' + r.edad + '</td><td>' + fmt(r.imc, 1) + '</td><td>' + r.cintura + '</td><td><b>' + r.puntaje + '</b></td><td><span class="badge ' + (r.lvl >= 4 ? 'bad' : (r.lvl === 3 ? 'mid' : 'ok')) + '">' + esc(r.cat) + '</span></td><td><button class="btn small danger" data-frdel="' + r.id + '" type="button">Quitar</button></td></tr>'; });
   $('fr-tbl').innerHTML = h + '</tbody>';
 }
 function frStats() {
@@ -939,7 +941,7 @@ function sheetsFor(kind) {
   }
   if (kind === 'fr' || kind === 'all') {
     var r2 = frStats();
-    L.push({ name: 'FINDRISC', aoa: frAOA(), w: [12, 18, 8, 7, 9, 9, 11, 7, 14, 14, 14, 12, 22, 8, 20], title: 'Test FINDRISC: registro' });
+    L.push({ name: 'FINDRISC', aoa: frAOA(), w: [28, 14, 12, 18, 8, 7, 9, 9, 11, 7, 14, 14, 14, 12, 22, 8, 20], title: 'Test FINDRISC: registro' });
     L.push({ name: 'Estadísticas FINDRISC', aoa: statAOA(r2, 'Test FINDRISC: estadísticas'), w: [40, 58, 8, 12, 8, 14], title: 'Estadísticas FINDRISC' });
   }
   return L;
@@ -1021,15 +1023,15 @@ function importWB(wb) {
         ECR.push(o); addE++;
       });
     } else if (n.indexOf('findrisc') >= 0) {
-      var jx = { fecha: colIdx(hdr, 'fecha'), ident: colIdx(hdr, 'identificacion'), sexo: colIdx(hdr, 'sexo'), edad: colIdx(hdr, 'edad'), peso: colIdx(hdr, 'peso'), talla: colIdx(hdr, 'talla'), cintura: colIdx(hdr, 'cintura'), act: colIdx(hdr, 'actividad'), veg: colIdx(hdr, 'verduras'), med: colIdx(hdr, 'medicacion'), glu: colIdx(hdr, 'glucemia'), fam: colIdx(hdr, 'antecedentes'), puntaje: colIdx(hdr, 'puntaje') };
+      var jx = { nombre: colIdx(hdr, 'nombre'), doc: colIdx(hdr, 'documento'), fecha: colIdx(hdr, 'fecha'), ident: Math.max(colIdx(hdr, 'historia'), colIdx(hdr, 'identificacion')), sexo: colIdx(hdr, 'sexo'), edad: colIdx(hdr, 'edad'), peso: colIdx(hdr, 'peso'), talla: colIdx(hdr, 'talla'), cintura: colIdx(hdr, 'cintura'), act: colIdx(hdr, 'actividad'), veg: colIdx(hdr, 'verduras'), med: colIdx(hdr, 'medicacion'), glu: colIdx(hdr, 'glucemia'), fam: colIdx(hdr, 'antecedentes'), puntaje: colIdx(hdr, 'puntaje') };
       var rev = function (map, t) { var s = norm(t); for (var k in map) { if (norm(map[k]) === s) return k; } return null; };
       rows.slice(1).forEach(function (r) {
         var g = function (k) { return jx[k] >= 0 ? r[jx[k]] : ''; };
-        var o = { id: uid(), fecha: parseDate(g('fecha')) || todayISO(), ident: String(g('ident')).trim(), sexo: /^v|^m$/i.test(String(g('sexo')).trim()) ? 'm' : 'f', edad: numOrNull(g('edad')), peso: numOrNull(g('peso')), talla: numOrNull(g('talla')), cintura: numOrNull(g('cintura')), act: rev(FR_TXT.act, g('act')), veg: rev(FR_TXT.veg, g('veg')), med: rev(FR_TXT.med, g('med')), glu: rev(FR_TXT.glu, g('glu')), fam: rev(FR_TXT.fam, g('fam')), puntaje: numOrNull(g('puntaje')) };
+        var o = { id: uid(), nombre: String(g('nombre')).trim(), doc: String(g('doc')).replace(/\D/g, ''), fecha: parseDate(g('fecha')) || todayISO(), ident: String(g('ident')).trim(), sexo: /^v|^m$/i.test(String(g('sexo')).trim()) ? 'm' : 'f', edad: numOrNull(g('edad')), peso: numOrNull(g('peso')), talla: numOrNull(g('talla')), cintura: numOrNull(g('cintura')), act: rev(FR_TXT.act, g('act')), veg: rev(FR_TXT.veg, g('veg')), med: rev(FR_TXT.med, g('med')), glu: rev(FR_TXT.glu, g('glu')), fam: rev(FR_TXT.fam, g('fam')), puntaje: numOrNull(g('puntaje')) };
         if (o.edad === null || o.puntaje === null || o.act === null) return;
         o.imc = (o.peso && o.talla) ? o.peso / Math.pow(o.talla / 100, 2) : null;
         var c = FR_CATS.filter(function (x) { return o.puntaje <= x.max; })[0]; o.cat = c.name; o.lvl = c.lvl;
-        var key = function (x) { return [x.fecha, x.ident, x.edad, x.peso, x.puntaje].join('|'); };
+        var key = function (x) { return [x.fecha, x.doc || '', x.ident, x.edad, x.peso, x.puntaje].join('|'); };
         if (FRR.some(function (x) { return key(x) === key(o); })) { dup++; return; }
         FRR.push(o); addF++;
       });
