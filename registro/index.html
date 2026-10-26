@@ -532,7 +532,12 @@ var FR_CATS = [
 function radio(name) { var e = document.querySelector('input[name="' + name + '"]:checked'); return e ? e.value : null; }
 function setRadio(name, v) { document.querySelectorAll('input[name="' + name + '"]').forEach(function (r) { r.checked = (v !== null && r.value === String(v)); }); }
 
-function frAcu(total, cat, items, bmi) {
+function ictInfo(waist, h) {
+  if (!waist || !h) return null;
+  var r = waist / h, lv = r < 0.5 ? 0 : r < 0.6 ? 1 : 2;
+  return { r: r, lv: lv, goal: h / 2, txt: lv === 0 ? 'por debajo de 0,5 (sin riesgo aumentado por este indicador)' : lv === 1 ? 'riesgo cardiometabólico aumentado (0,5 a 0,59)' : 'riesgo cardiometabólico alto (0,6 o más)', cls: lv === 0 ? 'ok' : lv === 1 ? 'warn' : 'bad' };
+}
+function frAcu(total, cat, items, bmi, ict) {
   var ptsTxt = function (n) { return n + (n === 1 ? ' punto' : ' puntos'); };
   var dat = 'Test FINDRISC (tamizaje de riesgo de diabetes tipo 2): ' + total + ' puntos de un máximo de 26 posibles.\n' +
     'Categoría: ' + cat.name + ' (riesgo estimado de desarrollar diabetes tipo 2 en 10 años: ' + cat.prob + ', 1 de cada ' + cat.one.replace('1 de cada ', '') + ' personas con este puntaje).\n' +
@@ -540,6 +545,7 @@ function frAcu(total, cat, items, bmi) {
   var dx = 'Riesgo ' + cat.name.toLowerCase().replace(/^riesgo /, '') + ' de desarrollar diabetes tipo 2 a 10 años (FINDRISC ' + total + ' puntos).';
   if (bmi >= 30) dx += '\nObesidad (IMC ' + fmt(bmi, 1) + ' kg/m²).'; else if (bmi >= 25) dx += '\nSobrepeso (IMC ' + fmt(bmi, 1) + ' kg/m²).';
   dx += '\nCódigos de la lista de Acuario a considerar: Z713 (consulta para instrucción y vigilancia de la dieta)' + (bmi >= 30 ? '; E660 (obesidad debida a exceso de calorías)' : '') + '.';
+  if (ict) { dat += '\nÍndice cintura/talla: ' + fmt(ict.r, 2) + ' (' + ict.txt + '; referencia: menor a 0,5, es decir, cintura menor a la mitad de la talla).'; if (ict.lv) dx += '\nRiesgo cardiometabólico ' + (ict.lv === 2 ? 'alto' : 'aumentado') + ' por índice cintura/talla ' + fmt(ict.r, 2) + '.'; }
   var tto = cat.act + '\nSeguimiento según el nivel de riesgo y la guía vigente.';
   return { dat: dat, dx: dx, tto: tto };
 }
@@ -550,7 +556,8 @@ function frCalc() {
   FR_SIG = frSig();
   var sex = radio('fr-sex'), age = val('fr-age'), w = val('fr-w'), h = val('fr-h'), waist = val('fr-waist');
   var bmi = (w && h) ? w / Math.pow(h / 100, 2) : null;
-  $('fr-bmi-chip').innerHTML = bmi ? '<span class="chip">IMC <b>' + fmt(bmi, 1) + ' kg/m²</b></span>' : '';
+  var ict = ictInfo(waist, h);
+  $('fr-bmi-chip').innerHTML = (bmi ? '<span class="chip">IMC <b>' + fmt(bmi, 1) + ' kg/m²</b></span>' : '') + (ict ? '<span class="chip">Cintura/talla <b>' + fmt(ict.r, 2) + '</b></span>' : '');
   var items = [], missing = [];
   function add(label, ans, pts) { items.push({ label: label, ans: ans, pts: pts }); }
   if (age === null) missing.push('edad'); else add('Edad', age + ' años', age < 45 ? 0 : age < 55 ? 2 : age < 65 ? 3 : 4);
@@ -582,11 +589,13 @@ function frCalc() {
     '<div class="risk">' + bars + '</div>' + legendHTML(cat.lvl) +
     '<p style="margin:10px 0 4px"><b>Riesgo a 10 años:</b> ' + cat.prob + ' (' + cat.one + ' personas con este puntaje).</p>' +
     '<div class="note" style="margin:10px 0"><b>Conducta orientativa.</b> ' + esc(cat.act) + ' Ajustar a la guía del Ministerio de Salud y al protocolo del centro.</div>' +
+    (ict ? '<div class="note" style="margin:10px 0"><b>Indicador adicional: índice cintura/talla ' + fmt(ict.r, 2) + '.</b> No suma puntos del FINDRISC ni se guarda en la planilla. Interpretación: ' + ict.txt + '. ' + (ict.lv ? 'Una cintura menor a ' + fmt(ict.goal, 0) + ' cm (la mitad de su talla) sería la referencia.' : 'Se mantiene la referencia de cintura menor a la mitad de la talla.') + ' Es un indicador de riesgo cardiometabólico, no un diagnóstico.</div>' : '') +
     '<div class="tw"><table><thead><tr><th>Pregunta</th><th>Respuesta</th><th class="num">Puntos</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<div class="actions" style="margin-top:12px"><button class="btn small" id="fr-copy" type="button">Copiar resumen</button></div>' + acuHTML('fr', frAcu(total, cat, items, bmi)) +
+    '<div class="actions" style="margin-top:12px"><button class="btn small" id="fr-copy" type="button">Copiar resumen</button></div>' + acuHTML('fr', frAcu(total, cat, items, bmi, ictInfo(waist, h))) +
     '<p style="margin-top:10px;font-size:.76rem;color:var(--ink-2)">Lindström J, Tuomilehto J. Diabetes Care 2003;26(3):725-731. Es una herramienta de tamizaje, no diagnostica.</p>';
   FR_LAST = 'FINDRISC: ' + total + ' puntos de 26 posibles · ' + cat.name + ' · riesgo a 10 años ' + cat.prob + ' (' + cat.one + ').\n' +
-    items.map(function (i) { return '- ' + i.label + ': ' + i.ans + ' (' + i.pts + (i.pts === 1 ? ' punto' : ' puntos') + ')'; }).join('\n');
+    items.map(function (i) { return '- ' + i.label + ': ' + i.ans + ' (' + i.pts + (i.pts === 1 ? ' punto' : ' puntos') + ')'; }).join('\n') +
+    (ict ? '\nÍndice cintura/talla: ' + fmt(ict.r, 2) + ' (' + ict.txt + '). No suma al puntaje.' : '');
   $('fr-copy').addEventListener('click', function () { copyText(FR_LAST, this); });
   acuBind('fr');
 }
@@ -1090,4 +1099,4 @@ $('ec-example').addEventListener('click', function () {
 
 </script>
 
-<script>/*EMBED*/try{if(window.top!==window){var a=document.querySelector(".sw-tool");if(a)a.style.display="none"}}catch(e){}</script></body></html>
+<script>/*EMBED*/try{if(window.top!==window){var a=document.querySelector(".sw-tool");if(a)a.style.display="none"}}catch(e){}</script><script>/*CFGSYNC*/(function(){try{fetch("../config.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(c){if(!c||!c.url||!/^https:\/\/script\.google\.com\//.test(c.url))return;["cs61_pl","cs61_plcv","cs61_cons_api"].forEach(function(k){try{var o=JSON.parse(localStorage.getItem(k)||"null");if(o&&o.key&&o.url!==c.url){o.url=c.url;localStorage.setItem(k,JSON.stringify(o))}}catch(e){}})}).catch(function(){})}catch(e){}})();</script></body></html>
