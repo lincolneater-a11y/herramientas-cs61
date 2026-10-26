@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruleta Saludable CS 61</title>
+<meta name="description" content="Ruleta de preguntas sobre alimentación saludable del Centro de Salud N.º 61, B.º Solidaridad, Salta.">
+<link rel="icon" href="assets/logo-cs61.jpg">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="bk" id="bk" href="../">⇄ Volver a Recursos</a>
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <div class="logo-wrap" id="logoWrap" title="Logo del Centro de Salud N.º 61">
+        <img id="logoImg" alt="Logo del Centro de Salud N.º 61" hidden>
+        <div class="logo-ph" id="logoPh">CS<br>61<small>SALTA</small></div>
+      </div>
+      <div style="min-width:0">
+        <h1>Ruleta saludable</h1>
+        <p>Centro de Salud N.º 61 · Barrio Solidaridad · Día Mundial de la Alimentación</p>
+      </div>
+    </div>
+    <div class="tools">
+      <span class="chip">Participante <b id="cPart">1</b></span>
+      <span class="chip">Preguntas sin usar <b id="cLeft">66</b></span>
+      <button class="tbtn" id="btnSound" aria-pressed="true" type="button">Efectos: sí</button>
+      <button class="tbtn" id="btnMusic" aria-pressed="true" type="button">Música: sí</button>
+      <label class="vol" for="vol">Volumen <input type="range" id="vol" min="0" max="100" value="35"></label>
+      <button class="tbtn" id="btnRes" type="button">Resultados</button>
+      <button class="tbtn" id="btnFull" type="button">Pantalla completa</button>
+      <button class="tbtn" id="btnLogo" type="button">Cambiar logo</button>
+      <button class="linkbtn" id="btnLogoDel" type="button" hidden>Logo original</button>
+      <input type="file" id="logoFile" accept="image/*" hidden>
+    </div>
+  </header>
+
+  <main>
+    <section class="wheel-col" aria-label="Ruleta">
+      <div class="wheel-box"><canvas id="wheel" aria-label="Ruleta con seis categorías"></canvas></div>
+      <button class="spin-btn" id="btnSpin" type="button">¡Girar!</button>
+    </section>
+
+    <section class="panel" aria-live="polite">
+      <!-- Inicio -->
+      <div id="vIdle" style="display:flex;flex-direction:column;gap:16px">
+        <img class="hero-logo" id="heroLogo" alt="Logo del Centro de Salud N.º 61">
+        <h2 style="font-size:clamp(1.9rem,3.8vw,3.2rem)">Girás, respondés y ganás</h2>
+        <p class="lead">Todos los que participan se llevan una preparación saludable.</p>
+        <details class="ses"><summary>Datos de la jornada (opcional, para el registro)</summary>
+          <div class="ses-grid">
+            <label>Evento o lugar<input type="text" id="sesEv" maxlength="80" placeholder="Ej.: Día de la Alimentación · plaza del barrio" autocomplete="off"></label>
+            <label>Nivel de las preguntas<select id="sesNv"><option value="">Todos los niveles</option><option value="1">Básico</option><option value="2">Intermedio</option><option value="3">Avanzado</option></select></label>
+            <label>Grupo de quien juega<select id="sesGr"><option value="">Sin especificar</option><option value="Niñas y niños">Niñas y niños</option><option value="Adolescentes">Adolescentes</option><option value="Adultos">Adultos</option><option value="Adultos mayores">Adultos mayores</option></select></label>
+          </div>
+          <p class="ses-note" id="sesSync"></p>
+          <p class="ses-note">Los datos son anónimos: no se registran nombres ni DNI. El grupo se mantiene hasta que lo cambies.</p>
+        </details>
+        <ol class="steps">
+          <li><span class="ic">1</span> Tocá «Girar» o la barra espaciadora.</li>
+          <li><span class="ic">2</span> Escuchá la pregunta y elegí una respuesta.</li>
+          <li><span class="ic">3</span> Si te equivocás, tenés una segunda oportunidad.</li>
+          <li><span class="ic">4</span> Pedí ayuda al público si la necesitás.</li>
+          <li><span class="ic">🧑‍🍳</span> Si sale el Chef Comodín, ¡hay un desafío de 30 segundos!</li>
+        </ol>
+      </div>
+
+      <!-- Pregunta -->
+      <div id="vQ" hidden style="display:flex;flex-direction:column;gap:16px">
+        <div class="cat-tag" id="qCat"></div>
+        <h2 class="q-text" id="qText"></h2>
+        <ul class="opts" id="qOpts"></ul>
+        <p class="hint" id="qHint"></p>
+        <div class="audience" id="audBox" hidden><span class="t" id="audT">15</span><span>El público puede opinar. ¡Levanten la mano!</span></div>
+        <div class="actions"><button class="ghost" id="btnRead" type="button">🔊 Leer en voz alta</button><button class="ghost" id="btnAud" type="button">Ayuda del público</button></div>
+      </div>
+
+      <!-- Desafío del Chef -->
+      <div id="vC" hidden style="display:flex;flex-direction:column;gap:14px">
+        <div class="chef"><span class="chef-em" id="chefEm">🥕🧑‍🍳🍎</span><div class="bubble" id="chefSay"></div></div>
+        <h2 class="joker-title" id="cTitle"></h2>
+        <p class="lead" id="cInstr"></p>
+        <div class="timer" id="cTimerWrap" hidden><span class="n" id="cTime">30</span><div class="tbar"><i id="cBar"></i></div></div>
+        <div id="cStage" hidden></div>
+        <div class="actions">
+          <button class="next-btn" id="btnCStart" type="button">¡Empezar! (30 segundos)</button>
+          <button class="ghost" id="btnCEnd" type="button" hidden>Terminar ya</button>
+        </div>
+      </div>
+
+      <!-- Resultado -->
+      <div id="vR" hidden style="display:flex;flex-direction:column;gap:16px">
+        <h2 class="result-head" id="rHead"></h2>
+        <p class="explain" id="rExp"></p>
+        <div class="prize"><span class="big">🥣</span><span>¡Felicitaciones! Te llevás una preparación saludable por participar.</span></div>
+        <div class="actions"><button class="next-btn" id="btnNext" type="button">Siguiente participante</button><button class="ghost" id="btnRead2" type="button">🔊 Leer en voz alta</button></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Preguntas basadas en las Guías Alimentarias para la Población Argentina del Ministerio de Salud.</span>
+    <span>Atajos: Espacio gira · A, B, C, D responden · Enter continúa · F y V suman en el desafío · Resultados: botón del encabezado</span>
+  </footer>
+</div>
+<div class="modal" id="resModal" hidden role="dialog" aria-modal="true" aria-labelledby="resTitle">
+  <div class="modal-card">
+    <h2 id="resTitle">Resultados de la jornada</h2>
+    <div class="stats" id="resStats"></div>
+    <div class="tablewrap"><table><thead><tr><th>N.º</th><th>Hora</th><th>Categoría</th><th>Resultado</th></tr></thead><tbody id="resRows"></tbody></table></div>
+    <p class="modal-note" id="resNote">Los datos se guardan en este navegador y no incluyen nombres. Descargá el archivo antes de borrar el historial del navegador.</p>
+    <div class="actions">
+      <button class="next-btn" id="btnDl" type="button">Descargar para Excel</button>
+      <button class="ghost" id="btnCopy" type="button">Copiar datos</button>
+      <button class="ghost" id="btnResClose" type="button">Cerrar</button>
+      <button class="ghost danger" id="btnWipe" type="button">Borrar registro</button>
+    </div>
+  </div>
+</div>
+<div class="cheer" id="cheer" aria-hidden="true">
+  <div class="cheer-card">
+    <div class="cheer-em"><span>👍</span><span>😀</span><span>🎉</span></div>
+    <div class="cheer-t">¡Felicitaciones!</div>
+    <div class="cheer-s" id="cheerS">¡Respuesta correcta!</div>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+
+<script src="../rec-sync.js"></script>
+<script>try{if(window.top!==window)document.getElementById("bk").style.display="none"}catch(e){}</script>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

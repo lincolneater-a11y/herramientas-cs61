@@ -1,0 +1,50 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recursos para la comunidad · CS 61</title>
+<link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><meta name="theme-color" content="#14304f">
+<style>
+:root{--bg:#f1f5f8;--s:#fff;--ink:#14243a;--ink2:#4a5d73;--line:#d2dce5;--hdr:#14304f;--teal:#0d7a85;--gold:#a87615;--bord:#8c2f3f;--ok:#1f7a4d}
+@media (prefers-color-scheme:dark){:root{--bg:#0c1722;--s:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--hdr:#0a2038;--teal:#4fc1c9;--gold:#e0b25a;--bord:#e58a99;--ok:#6fd8a4}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:var(--hdr);color:#fff;padding:14px 16px}.in{max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header img{width:48px;height:48px;border-radius:50%;background:#fff}header h1{margin:0;font-size:1.1rem}header small{color:#b8cadb}
+.sw-tool{margin-left:auto;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap}
+main{max-width:900px;margin:0 auto;padding:24px 16px 48px}h2{margin:0 0 4px}p{margin:0;color:var(--ink2)}
+.g{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:20px}
+a.c{display:block;background:var(--s);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:inherit;border-top:4px solid var(--teal)}
+a.c:nth-child(2){border-top-color:var(--gold)}a.c h3{margin:0 0 6px}a.c .em{font-size:2rem;display:block;margin-bottom:6px}
+a.c:hover,a.c:focus-visible{outline:2px solid var(--gold)}
+.box{background:var(--s);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:22px}
+.box h3{margin:0 0 6px}.box input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;background:var(--bg);color:var(--ink);margin:8px 0}
+.box button{font:inherit;font-weight:700;padding:9px 16px;border-radius:8px;border:1px solid var(--hdr);background:var(--hdr);color:#fff;cursor:pointer;margin-right:8px}
+.box button.s{background:transparent;color:var(--hdr)}@media (prefers-color-scheme:dark){.box button{border-color:var(--teal);background:var(--teal);color:#08202a}.box button.s{background:transparent;color:var(--teal)}}
+.st{margin-top:8px;font-size:.92rem;color:var(--ink2)}.st.ok{color:var(--ok)}.st.err{color:var(--bord)}
+.n{margin-top:18px;font-size:.88rem}
+</style></head><body>
+<header><div class="in"><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Recursos para la comunidad</h1><small>Centro de Salud N.º 61 · Juegos educativos</small></div><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a></div></header>
+<main>
+<h2>Juegos para usar en la comunidad</h2>
+<p>Pensados para proyectar en una pantalla o usar desde un celular o tablet en ferias, talleres y salas de espera. Funcionan sin conexión una vez abiertos.</p>
+<div class="g">
+<a class="c" href="ruleta/"><span class="em">🎡</span><h3>Ruleta saludable</h3><p>Preguntas y respuestas de alimentación y hábitos, con 66 preguntas de tres niveles y desafíos del Chef. Ideal para proyectar.</p></a>
+<a class="c" href="plato/"><span class="em">🍽️</span><h3>Armá tu plato saludable</h3><p>Cada participante arma su plato con fotos o dibujos de alimentos y recibe una devolución sobre las proporciones del plato.</p></a>
+</div>
+<section class="box" aria-labelledby="cn"><h3 id="cn">Planilla de resultados (opcional)</h3>
+<p>Para que las respuestas de la comunidad se acumulen en una planilla de Google (estadísticas e investigación), pegá la dirección del script de la planilla de Recursos (termina en <b>/exec</b>). Se guarda en este navegador y sirve para los dos juegos. Los datos son anónimos: no se registran nombres ni DNI.</p>
+<input type="url" id="u" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" aria-label="Dirección del script de la planilla de Recursos">
+<button id="sv" type="button">Guardar</button><button id="ts" class="s" type="button">Probar conexión</button><button id="rs" class="s" type="button">Enviar pendientes</button>
+<div class="st" id="st" role="status"></div></section>
+<p class="n">Esta planilla es distinta de la del registro cardiovascular y de nutrición: no lleva datos de pacientes. Si no se conecta, los resultados quedan en el navegador y se pueden descargar desde cada juego.</p>
+</main>
+<script src="rec-sync.js"></script>
+<script>
+(function(){var $=function(i){return document.getElementById(i)};
+function paint(){var s=RecSync.status();$("u").value=s.url||$("u").value;
+ $("st").className="st";$("st").textContent=s.url?("Conectada. "+(s.pending?s.pending+" registro(s) pendiente(s) de envío. ":"")+s.sent+" registro(s) enviado(s) desde este navegador."):"No conectada: los datos quedan en este navegador."}
+$("sv").onclick=function(){var v=$("u").value.trim();if(!RecSync.setUrl(v)){$("st").className="st err";$("st").textContent="La dirección debe empezar con https://script.google.com y terminar en /exec.";return}paint()};
+$("ts").onclick=function(){var u=RecSync.url()||$("u").value.trim();if(!u){$("st").className="st err";$("st").textContent="Pegá primero la dirección y tocá Guardar.";return}
+ $("st").className="st";$("st").textContent="Probando…";
+ fetch(u,{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){$("st").className=j&&j.ok?"st ok":"st err";$("st").textContent=j&&j.ok?"Conexión correcta: "+(j.servicio||"script activo")+".":"El script respondió, pero con un error."}).catch(function(){$("st").className="st err";$("st").textContent="No se pudo comprobar desde este navegador (sin conexión o permiso). Los envíos igual se intentan en segundo plano."})};
+$("rs").onclick=function(){RecSync.flush().then(paint)};
+RecSync.onChange(paint);paint();
+if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){}
+})();
+</script></body></html>
