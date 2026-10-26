@@ -1,0 +1,402 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><style>.sw-tool{order:99;margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;font-family:inherit}.sw-tool:hover,.sw-tool:focus-visible{background:rgba(255,255,255,.14);outline:2px solid #e0b25a;outline-offset:2px}@media print{.sw-tool{display:none!important}}@media(max-width:520px){.sw-tool{padding:5px 9px;font-size:.74rem}}</style></head><body>
+<title>Calculadora antropométrica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500;600&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: una columna; datos arriba, resultados con semáforo debajo, registro al final. */
+:root{
+ --bg:#f2f5f7;--card:#ffffff;--ink:#14283c;--mute:#566a7c;--line:#d3dde5;
+ --navy:#12315a;--teal:#0f8b8d;--gold:#b8892b;--bord:#8c2f3f;
+ --ok:#1f7a4d;--okbg:#e2f3ea;--warn:#8a5a00;--warnbg:#fbf0d6;--crit:#8c2f3f;--critbg:#f8e3e6;--btn:#12315a;--btnink:#ffffff;
+ --serif:"Newsreader",Georgia,"Times New Roman",serif;--sans:"Public Sans","Segoe UI",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#0d1824;--card:#14263a;--ink:#e6eef5;--mute:#9db0c2;--line:#26405a;
+ --navy:#8fbbee;--teal:#3cc3c5;--gold:#e0b04f;--bord:#e58a99;
+ --ok:#6fd8a4;--okbg:#14382a;--warn:#f0c46a;--warnbg:#3a2e12;--crit:#f0929f;--critbg:#3d1c25;--btn:#8fbbee;--btnink:#0d1824;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#0d1824;--card:#14263a;--ink:#e6eef5;--mute:#9db0c2;--line:#26405a;
+ --navy:#8fbbee;--teal:#3cc3c5;--gold:#e0b04f;--bord:#e58a99;
+ --ok:#6fd8a4;--okbg:#14382a;--warn:#f0c46a;--warnbg:#3a2e12;--crit:#f0929f;--critbg:#3d1c25;--btn:#8fbbee;--btnink:#0d1824;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:20px 40px}
+main{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--serif);font-size:1.7rem;line-height:1.15;margin:0;color:var(--navy);text-wrap:balance}
+h2{font-family:var(--serif);font-size:1.15rem;margin:0 0 12px;color:var(--navy)}
+.sub{margin:4px 0 0;color:var(--mute)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.tabs{display:flex;gap:0;border:1px solid var(--navy);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.tabs button{flex:1;border:0;border-radius:0;background:transparent;color:var(--navy);padding:10px 8px;font-weight:600}
+.tabs button[aria-pressed="true"]{background:var(--btn);color:var(--btnink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid>div{min-width:0}
+.full{grid-column:1/-1}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:4px}
+input,select{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.agepair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font:inherit;padding:10px 16px;border-radius:8px;border:1px solid var(--btn);background:var(--btn);color:var(--btnink);cursor:pointer;font-weight:500}
+button.s{background:transparent;color:var(--navy);border-color:var(--navy)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.err{color:var(--bord);min-height:1.3em;margin-top:8px;font-size:.9rem}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.kpi b{display:block;font-family:var(--serif);font-size:1.6rem;line-height:1.2;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.82rem;color:var(--mute)}
+.ind{display:flex;flex-direction:column;gap:8px}
+.it{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+.it .n{font-weight:600}
+.it .d{grid-column:1/-1;font-size:.84rem;color:var(--mute)}
+.pill{font-size:.82rem;font-weight:600;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.crit{background:var(--critbg);color:var(--crit)}
+.pill.na{background:var(--bg);color:var(--mute);border:1px solid var(--line)}
+.note{font-size:.82rem;color:var(--mute);margin:12px 0 0}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.85rem;min-width:820px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--mute);font-weight:600}
+
+.gb{width:100%;height:auto;display:block}
+.gt{fill:var(--ink);font:11px var(--sans)}.gm{fill:var(--mute);font:10px var(--sans)}.gh{fill:var(--ink);font:600 12px var(--sans)}
+.k-ok{fill:var(--ok);fill-opacity:.38}.k-warn{fill:var(--warn);fill-opacity:.42}.k-crit{fill:var(--crit);fill-opacity:.4}
+.gl{stroke:var(--mute);stroke-width:1;fill:none}.gmk{fill:var(--navy);stroke:var(--card);stroke-width:1.5}.gmed{stroke:var(--teal);stroke-width:1.2;stroke-dasharray:4 3;fill:none}.gcur{stroke:var(--ink);stroke-width:1;fill:none;opacity:.55}
+
+.k-lo{fill:#a9714b;fill-opacity:.5}
+.sf{fill:var(--mute);fill-opacity:.28}.sf.on-ok{fill:var(--ok);fill-opacity:.9}.sf.on-warn{fill:var(--warn);fill-opacity:.9}.sf.on-crit{fill:var(--crit);fill-opacity:.9}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:18px}
+.tile{border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.tile h3{margin:0 0 4px;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.tile .big{font-family:var(--serif);font-size:1.5rem;font-weight:600;line-height:1.2}
+.tile .sm{font-size:.84rem;color:var(--mute);margin-top:2px}
+.tile.ok{border-color:var(--ok);background:var(--okbg)}.tile.warn{border-color:var(--warn);background:var(--warnbg)}.tile.crit{border-color:var(--crit);background:var(--critbg)}
+.tile .pill{display:inline-block;margin-top:6px}
+.gfig{margin-bottom:18px}
+.brand h1{margin:0}
+.sw-tool{color:var(--navy)!important;border:1px solid var(--navy)!important;display:inline-block;margin:0 0 10px!important;padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none}
+@media print{body.pcalc>*:not(main){display:none!important}body.pcalc main>section:not(#rc):not(#gc){display:none!important}body.pcalc .row,body.pcalc .tabs{display:none!important}body{background:#fff}}
+</style>
+
+<main>
+<header>
+<div class="brand"><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a><h1>Calculadora antropométrica</h1>
+<p class="sub">IMC, cintura e índices de riesgo para adultos y para niños de 5 a 19 años, con gráficos. Útil para consulta rápida o en terreno.</p></div>
+</header>
+
+<section class="card" aria-label="Datos">
+<div class="tabs" role="group" aria-label="Grupo etario">
+<button id="tA" aria-pressed="true">Adulto</button>
+<button id="tP" aria-pressed="false">Pediátrico (5 a 19 años)</button>
+</div>
+<div class="grid">
+<div><label for="nom">Nombre o código (opcional)</label><input id="nom" autocomplete="off"></div>
+<div><label for="sexo">Sexo</label><select id="sexo"><option value="m">Masculino</option><option value="f">Femenino</option></select></div>
+<div id="eA"><label for="edad">Edad (años)</label><input id="edad" type="number" inputmode="numeric" min="18" max="110" placeholder="Ej.: 45"></div>
+<div id="eP" hidden><label>Edad</label><div class="agepair"><input id="ea" type="number" inputmode="numeric" min="5" max="19" placeholder="Años" aria-label="Años"><input id="em" type="number" inputmode="numeric" min="0" max="11" placeholder="Meses" aria-label="Meses"></div></div>
+<div><label for="peso">Peso (kg)</label><input id="peso" type="number" inputmode="decimal" step="0.1" min="10" max="400" placeholder="Ej.: 68,5"></div>
+<div id="metW"><label for="met">Cómo obtuviste la talla</label><select id="met"></select></div>
+<div id="talW"><label for="talla">Talla (cm)</label><input id="talla" type="number" inputmode="decimal" step="0.1" min="90" max="230" placeholder="Ej.: 165,0"></div>
+<div id="semW" hidden><label for="semi">Semienvergadura (cm): hueco esternal a punta del dedo medio</label><input id="semi" type="number" inputmode="decimal" step="0.1" min="50" max="120" placeholder="Ej.: 80,0"></div>
+<div id="tibW" hidden><label for="tib">Longitud de la tibia (cm): del borde interno de la meseta tibial al borde inferior del maléolo interno</label><input id="tib" type="number" inputmode="decimal" step="0.1" min="15" max="55" placeholder="Ej.: 31,0"></div>
+<div id="braW" hidden><label for="bra">Longitud del brazo (cm): del acromion al epicóndilo lateral del húmero</label><input id="bra" type="number" inputmode="decimal" step="0.1" min="10" max="50" placeholder="Ej.: 24,0"></div>
+<div><label for="cint">Circunferencia de cintura (cm)</label><input id="cint" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="Opcional"></div>
+<div id="cadW"><label for="cad">Circunferencia de cadera (cm)</label><input id="cad" type="number" inputmode="decimal" step="0.1" min="50" max="250" placeholder="Opcional"></div>
+</div>
+<div class="row"><button id="calc">Calcular</button><button id="limpiar" class="s">Limpiar</button></div>
+<div class="err" id="err" role="alert"></div>
+</section>
+
+<section class="card" id="rc" hidden aria-label="Resultado">
+<h2>Resultado</h2>
+<div class="kpis" id="kp"></div>
+<div class="ind" id="ind"></div>
+<div class="row"><button id="guardar">Guardar en registro</button></div>
+<p class="note" id="nt"></p>
+</section>
+
+<section class="card" id="gc" hidden aria-label="Gráficos">
+<h2>Gráficos</h2>
+<div id="gr"></div>
+<div class="row"><button id="gprint" class="s">Imprimir resultado y gráficos</button></div>
+<p class="note">Referencias: OMS (IMC adultos y niños 5–19 años, 2007), OPS para ≥65 años, cintura OMS, ICT 0,5 / 0,6. Son puntos de corte orientativos de riesgo, no diagnóstico.</p>
+</section>
+
+<section class="card" aria-label="Registro">
+<h2>Registro</h2>
+<div class="tw"><table><thead><tr><th>Paciente</th><th>Grupo</th><th>Sexo</th><th>Edad</th><th>Peso</th><th>Talla</th><th>IMC</th><th>Z IMC/edad</th><th>Clasificación</th><th>Cintura</th><th>ICT</th><th>ICC</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+<p class="note" id="vacio">Todavía no hay mediciones guardadas.</p>
+<div class="row"><button id="csv" class="s">Copiar como CSV</button><button id="borrar" class="s">Borrar registro</button></div>
+<p class="note">El registro se guarda solo en este navegador y no se comparte. No reemplaza la historia clínica.</p>
+</section>
+</main>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+/* OMS 2007, IMC/edad. Fila: [mes, -3DE, -2DE, -1DE, mediana, +1DE, +2DE, +3DE] */
+var B=[[61,12.1,13.0,14.1,15.3,16.6,18.3,20.2],[66,12.1,13.0,14.1,15.3,16.7,18.4,20.4],[72,12.1,13.0,14.1,15.3,16.8,18.5,20.7],[78,12.2,13.1,14.1,15.4,16.9,18.7,21.1],[84,12.3,13.1,14.2,15.5,17.0,19.0,21.6],[90,12.3,13.2,14.3,15.6,17.2,19.3,22.1],[96,12.4,13.3,14.4,15.7,17.4,19.7,22.8],[102,12.5,13.4,14.5,15.9,17.7,20.1,23.5],[108,12.6,13.5,14.6,16.0,17.9,20.5,24.3],[114,12.7,13.6,14.8,16.2,18.2,20.9,25.1],[120,12.8,13.7,14.9,16.4,18.5,21.4,26.1],[126,12.9,13.9,15.1,16.7,18.8,21.9,27.0],[132,13.1,14.1,15.3,16.9,19.2,22.5,28.0],[138,13.2,14.2,15.5,17.2,19.5,23.0,29.0],[144,13.4,14.5,15.8,17.5,19.9,23.6,30.0],[150,13.6,14.7,16.1,17.9,20.4,24.2,30.9],[156,13.8,14.9,16.4,18.2,20.8,24.8,31.7],[162,14.0,15.2,16.7,18.6,21.3,25.3,32.4],[168,14.3,15.5,17.0,19.0,21.8,25.9,33.1],[174,14.5,15.7,17.3,19.4,22.2,26.5,33.6],[180,14.7,16.0,17.6,19.8,22.7,27.0,34.1],[186,14.9,16.3,18.0,20.1,23.1,27.4,34.5],[192,15.1,16.5,18.2,20.5,23.5,27.9,34.8],[198,15.3,16.7,18.5,20.8,23.9,28.3,35.0],[204,15.4,16.9,18.8,21.1,24.3,28.6,35.2],[210,15.6,17.1,19.0,21.4,24.6,29.0,35.3],[216,15.7,17.3,19.2,21.7,24.9,29.2,35.4],[222,15.8,17.4,19.4,22.0,25.2,29.5,35.5],[228,15.9,17.6,19.6,22.2,25.4,29.7,35.5]];
+var G=[[61,11.8,12.7,13.9,15.2,16.9,18.9,21.3],[66,11.7,12.7,13.9,15.2,16.9,19.0,21.7],[72,11.7,12.7,13.9,15.3,17.0,19.2,22.1],[78,11.7,12.7,13.9,15.3,17.1,19.5,22.7],[84,11.8,12.7,13.9,15.4,17.3,19.8,23.3],[90,11.8,12.8,14.0,15.5,17.5,20.1,24.0],[96,11.9,12.9,14.1,15.7,17.7,20.6,24.8],[102,12.0,13.0,14.3,15.9,18.0,21.0,25.6],[108,12.1,13.1,14.4,16.1,18.3,21.5,26.5],[114,12.2,13.3,14.6,16.3,18.7,22.0,27.5],[120,12.4,13.5,14.8,16.6,19.0,22.6,28.4],[126,12.5,13.7,15.1,16.9,19.4,23.1,29.3],[132,12.7,13.9,15.3,17.2,19.9,23.7,30.2],[138,12.9,14.1,15.6,17.6,20.3,24.3,31.1],[144,13.2,14.4,16.0,18.0,20.8,25.0,31.9],[150,13.4,14.7,16.3,18.4,21.3,25.6,32.7],[156,13.6,14.9,16.6,18.8,21.8,26.2,33.4],[162,13.8,15.2,16.9,19.2,22.3,26.8,34.1],[168,14.0,15.4,17.2,19.6,22.7,27.3,34.7],[174,14.2,15.7,17.5,19.9,23.1,27.8,35.1],[180,14.4,15.9,17.8,20.2,23.5,28.2,35.5],[186,14.5,16.0,18.0,20.5,23.8,28.6,35.8],[192,14.6,16.2,18.2,20.7,24.1,28.9,36.1],[198,14.7,16.3,18.3,20.9,24.3,29.1,36.2],[204,14.7,16.4,18.4,21.0,24.5,29.3,36.3],[210,14.7,16.4,18.5,21.2,24.6,29.4,36.3],[216,14.7,16.4,18.6,21.3,24.8,29.5,36.3],[222,14.7,16.5,18.6,21.3,24.9,29.6,36.2],[228,14.7,16.5,18.7,21.4,25.0,29.7,36.2]];
+var KEY="antropo_registro_v2",reg=[],cur=null,modo="A";
+try{var s=localStorage.getItem(KEY);if(s)reg=JSON.parse(s)||[]}catch(e){reg=[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(reg))}catch(e){}}
+function f(n,d){return n.toFixed(d).replace(".",",")}
+function num(id){var v=parseFloat($(id).value);return isNaN(v)?null:v}
+
+function zImc(imc,meses,sx){
+ var T=sx==="m"?B:G,m=Math.min(Math.max(meses,61),228),i=0;
+ while(i<T.length-2&&T[i+1][0]<=m)i++;
+ var a=T[i],b=T[i+1],t=(m-a[0])/(b[0]-a[0]),c=[];
+ for(var k=1;k<=7;k++)c.push(a[k]+(b[k]-a[k])*t);
+ var j=0;while(j<5&&imc>=c[j+1])j++;
+ return (j-3)+(imc-c[j])/(c[j+1]-c[j]);
+}
+function clasifAdulto(imc,ed){
+ if(ed>=65){if(imc<23)return["Bajo peso","warn","OPS adulto mayor: <23"];if(imc<28)return["Normopeso","ok","OPS: 23–27,9"];if(imc<32)return["Sobrepeso","warn","OPS: 28–31,9"];return["Obesidad","crit","OPS: ≥32"]}
+ if(imc<16)return["Delgadez severa","crit","OMS: <16"];if(imc<17)return["Delgadez moderada","crit","OMS: 16–16,9"];if(imc<18.5)return["Delgadez leve","warn","OMS: 17–18,4"];
+ if(imc<25)return["Normopeso","ok","OMS: 18,5–24,9"];if(imc<30)return["Sobrepeso","warn","OMS: 25–29,9"];if(imc<35)return["Obesidad grado I","crit","OMS: 30–34,9"];if(imc<40)return["Obesidad grado II","crit","OMS: 35–39,9"];return["Obesidad grado III","crit","OMS: ≥40"];
+}
+function clasifPed(z){
+ if(z<-3)return["Delgadez severa","crit"];if(z<-2)return["Delgadez","crit"];if(z<=1)return["Normal","ok"];if(z<=2)return["Sobrepeso","warn"];return["Obesidad","crit"];
+}
+function setModo(m){
+ modo=m;var p=m==="P";
+ $("tA").setAttribute("aria-pressed",!p);$("tP").setAttribute("aria-pressed",p);
+ $("eA").hidden=p;$("eP").hidden=!p;$("cadW").hidden=p;
+ var o=p?[["t","Medida con tallímetro"],["tib","Estimada por longitud de tibia (sin tallímetro)"],["bra","Estimada por longitud del brazo (sin tallímetro)"]]:[["t","Medida con tallímetro"],["s","Estimada por semienvergadura"]];
+ $("met").innerHTML="";o.forEach(function(x){var op=document.createElement("option");op.value=x[0];op.textContent=x[1];$("met").appendChild(op)});
+ if(p)$("met").value="tib";
+ vistaTalla();$("rc").hidden=true;$("gc").hidden=true;$("err").textContent="";cur=null;
+}
+function vistaTalla(){var v=$("met").value;$("semW").hidden=v!=="s";$("tibW").hidden=v!=="tib";$("braW").hidden=v!=="bra";$("talW").hidden=v!=="t"}
+
+function calc(){
+ var e=$("err");e.textContent="";
+ var sx=$("sexo").value,p=num("peso"),cc=num("cint"),cad=num("cad"),ed,meses=null,h,metodo="Tallímetro";
+ if(modo==="A"){
+  ed=num("edad");if(!(ed>=18&&ed<=110)){e.textContent="Ingresá una edad de 18 años o más.";return}
+ }else{
+  var ea=num("ea"),em=num("em")||0;
+  if(!(ea>=5&&ea<=19)||em<0||em>11){e.textContent="Ingresá la edad en años (5 a 19) y meses (0 a 11).";return}
+  meses=ea*12+em;if(meses<60||meses>228){e.textContent="Este modo cubre de 5 años a 19 años. Para menores de 5 usá las tablas OMS 2006.";return}
+  ed=ea+em/12;
+ }
+ if(!(p>=10&&p<=400)){e.textContent="Ingresá el peso en kilos.";return}
+ var mv=$("met").value;
+ if(modo==="A"&&mv==="s"){
+  var sm=num("semi");if(!(sm>=50&&sm<=120)){e.textContent="Ingresá la semienvergadura en cm (50 a 120).";return}
+  h=sx==="m"?1.40*sm+57.8:1.35*sm+60.1;metodo="Semienvergadura";
+ }else if(modo==="P"&&mv==="tib"){
+  var tb=num("tib");if(!(tb>=15&&tb<=55)){e.textContent="Ingresá la longitud de la tibia en cm (15 a 55).";return}
+  h=3.26*tb+30.8;metodo="Tibia (Stevenson)";
+ }else if(modo==="P"&&mv==="bra"){
+  var br=num("bra");if(!(br>=10&&br<=50)){e.textContent="Ingresá la longitud del brazo en cm (10 a 50).";return}
+  h=4.35*br+21.8;metodo="Brazo (Stevenson)";
+ }else{
+  h=num("talla");if(!(h>=90&&h<=230)){e.textContent="Ingresá la talla en cm (90 a 230).";return}
+ }
+ if(cc!==null&&!(cc>=30&&cc<=250)){e.textContent="Revisá la cintura: debe estar entre 30 y 250 cm.";return}
+ if(cad!==null&&!(cad>=50&&cad<=250)){e.textContent="Revisá la cadera: debe estar entre 50 y 250 cm.";return}
+ var imc=p/Math.pow(h/100,2),ict=cc?cc/h:null,icc=(cc&&cad&&modo==="A")?cc/cad:null;
+ var r={n:$("nom").value.trim()||"Sin nombre",g:modo,sx:sx==="m"?"M":"F",ed:modo==="A"?ed:Math.floor(meses/12)+"a "+(meses%12)+"m",p:p,h:Math.round(h*10)/10,imc:Math.round(imc*10)/10,z:null,c:"",cc:cc,ict:ict?Math.round(ict*100)/100:null,icc:icc?Math.round(icc*100)/100:null,met:metodo};
+ var kp=[["Peso",f(p,1)+" kg"],["Talla"+(metodo!=="Tallímetro"?" (estimada)":""),f(h,1)+" cm"],["IMC",f(imc,1)+" kg/m²"]],it=[];
+ if(modo==="A"){
+  var c=clasifAdulto(imc,ed);r.c=c[0];
+  it.push(["IMC",c[0],c[1],c[2]]);
+  if(cc){var lo=sx==="m"?94:80,hi=sx==="m"?102:88,t=cc>=hi?["Riesgo muy aumentado","crit"]:cc>=lo?["Riesgo aumentado","warn"]:["Sin riesgo aumentado","ok"];
+   it.push(["Circunferencia de cintura: "+f(cc,1)+" cm",t[0],t[1],"OMS: riesgo aumentado ≥"+lo+" cm, muy aumentado ≥"+hi+" cm"]);}
+  if(ict){var t2=ict>=0.6?["Riesgo muy alto","crit"]:ict>=0.5?["Riesgo aumentado","warn"]:["Sin riesgo aumentado","ok"];
+   it.push(["Índice cintura-talla: "+f(ict,2),t2[0],t2[1],"Punto de corte 0,5; ≥0,6 riesgo muy alto"]);}
+  if(icc){var u=sx==="m"?0.90:0.85,t3=icc>=u?["Riesgo aumentado","warn"]:["Sin riesgo aumentado","ok"];
+   it.push(["Índice cintura-cadera: "+f(icc,2),t3[0],t3[1],"OMS: riesgo con ≥"+f(u,2)+" en "+(sx==="m"?"varones":"mujeres")]);}
+  else if(cc&&!cad)it.push(["Índice cintura-cadera","Falta cadera","na","Cargá la cadera para calcularlo"]);
+  $("nt").textContent="Con semienvergadura la talla es una estimación (Bassey 1986) y el ICT hereda su error. En adultos mayores con cifosis puede subestimar la talla.";
+ }else{
+  var z=zImc(imc,meses,sx),cp=clasifPed(z);r.z=Math.round(z*100)/100;r.c=cp[0];
+  kp.push(["Z IMC/edad",(z>0?"+":"")+f(z,2)+" DE"]);
+  it.push(["IMC/edad: z = "+(z>0?"+":"")+f(z,2),cp[0],cp[1],"OMS 2007: delgadez <−2, sobrepeso >+1, obesidad >+2 DE"]);
+  if(cc){it.push(["Circunferencia de cintura: "+f(cc,1)+" cm","Sin referencia","na","Esta versión no incluye tablas de percentiles de cintura. Comparala con la referencia que uses."]);}
+  if(ict){var t4=ict>=0.5?["Riesgo aumentado","warn"]:["Sin riesgo aumentado","ok"];
+   it.push(["Índice cintura-talla: "+f(ict,2),t4[0],t4[1],"Punto de corte 0,5, también usado en niños y adolescentes"]);}
+  if(meses<61)$("err").textContent="";
+  var aviso="El z se calcula por interpolación entre las curvas de la OMS 2007, con puntos cada 6 meses.";
+  if(metodo!=="Tallímetro"){aviso+=" La talla es una estimación con la ecuación de Stevenson (1995), validada en niños de 0 a 14 años"+(meses>168?"; este paciente tiene más de 14, así que el resultado es menos confiable":"")+". El IMC, el z y el índice cintura-talla heredan ese error: usalos como orientación y confirmá con talla medida cuando puedas.";}
+  $("nt").textContent=aviso;
+ }
+ cur=r;
+ graf({modo:modo,sx:sx,ed:ed,imc:imc,cc:cc,h:h,ict:ict,icc:icc,meses:meses,z:r.z,p:p});
+ $("kp").innerHTML="";kp.forEach(function(k){var d=document.createElement("div");d.className="kpi";var b=document.createElement("b");b.textContent=k[1];var s=document.createElement("span");s.textContent=k[0];d.appendChild(b);d.appendChild(s);$("kp").appendChild(d)});
+ $("ind").innerHTML="";it.forEach(function(x){var d=document.createElement("div");d.className="it";var n=document.createElement("span");n.className="n";n.textContent=x[0];var pl=document.createElement("span");pl.className="pill "+x[2];pl.textContent=x[1];var de=document.createElement("span");de.className="d";de.textContent=x[3];d.appendChild(n);d.appendChild(pl);d.appendChild(de);$("ind").appendChild(d)});
+ $("rc").hidden=false;
+}
+
+var NS="http://www.w3.org/2000/svg";
+function E(t,a,x){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(x!==undefined)e.textContent=x;return e}
+function svgNew(w,h){var s=E("svg",{viewBox:"0 0 "+w+" "+h,"class":"gb",role:"img"});return s}
+/* barra de bandas con marcador. bands: [desde,hasta,clase,etiqueta] */
+function gauge(titulo,lo,hi,bands,v,txt,dec){
+ var W=640,H=92,x0=14,x1=W-14,sc=function(t){return x0+(Math.min(Math.max(t,lo),hi)-lo)/(hi-lo)*(x1-x0)};
+ var s=svgNew(W,H);s.setAttribute("aria-label",titulo+": "+txt);s.setAttribute("class","gb gfig");
+ s.appendChild(E("text",{x:x0,y:14,"class":"gh"},titulo));
+ bands.forEach(function(b){var a=sc(b[0]),c=sc(b[1]);s.appendChild(E("rect",{x:a,y:34,width:Math.max(c-a,1),height:26,"class":"k-"+b[2]}));
+  if(c-a>46)s.appendChild(E("text",{x:(a+c)/2,y:51,"text-anchor":"middle","class":"gt"},b[3]))});
+ bands.forEach(function(b,i){if(i>0)s.appendChild(E("text",{x:sc(b[0]),y:76,"text-anchor":"middle","class":"gm"},f(b[0],dec||0)))});
+ s.appendChild(E("rect",{x:x0,y:34,width:x1-x0,height:26,fill:"none","class":"gl"}));
+ var mx=sc(v);
+ s.appendChild(E("path",{d:"M"+(mx-7)+" 24 L"+(mx+7)+" 24 L"+mx+" 36 Z","class":"gmk"}));
+ var t=E("text",{x:Math.min(Math.max(mx+12,x0),W-x0),y:20,"text-anchor":mx>W-120?"end":"start","class":"gh"},txt);
+ if(mx>W-120)t.setAttribute("x",mx-12);
+ s.appendChild(t);return s;
+}
+/* dibujo: figura con cinta en la cintura y comparación con la mitad de la talla */
+function figura(h,cc,ict,cls){
+ var s=svgNew(640,190);s.setAttribute("class","gb gfig");s.setAttribute("aria-label","Cintura frente a la mitad de la talla");
+ s.appendChild(E("text",{x:14,y:14,"class":"gh"},"Cintura frente a la mitad de la talla"));
+ var cx=70;
+ s.appendChild(E("circle",{cx:cx,cy:44,r:14,"class":"gl"}));
+ s.appendChild(E("path",{d:"M"+(cx-26)+" 66 Q"+cx+" 58 "+(cx+26)+" 66 L"+(cx+22)+" 112 Q"+(cx+30)+" 126 "+(cx+16)+" 130 L"+(cx+14)+" 176 L"+(cx+3)+" 176 L"+cx+" 138 L"+(cx-3)+" 176 L"+(cx-14)+" 176 L"+(cx-16)+" 130 Q"+(cx-30)+" 126 "+(cx-22)+" 112 Z","class":"gl"}));
+ s.appendChild(E("ellipse",{cx:cx,cy:108,rx:24,ry:5,"class":"k-"+cls}));
+ s.appendChild(E("ellipse",{cx:cx,cy:108,rx:24,ry:5,"class":"gl"}));
+ var mx=Math.max(h/2,cc)*1.08,bx=150,bw=460,L=function(v){return v/mx*bw};
+ s.appendChild(E("text",{x:bx,y:60,"class":"gt"},"Mitad de la talla: "+f(h/2,1)+" cm"));
+ s.appendChild(E("rect",{x:bx,y:66,width:L(h/2),height:20,"class":"k-ok"}));
+ s.appendChild(E("text",{x:bx,y:118,"class":"gt"},"Cintura: "+f(cc,1)+" cm"));
+ s.appendChild(E("rect",{x:bx,y:124,width:L(cc),height:20,"class":"k-"+cls}));
+ s.appendChild(E("line",{x1:bx+L(h/2),x2:bx+L(h/2),y1:58,y2:152,"class":"gcur",style:"stroke-dasharray:4 3"}));
+ s.appendChild(E("text",{x:bx,y:172,"class":"gm"},"Índice cintura-talla "+f(ict,2)+(ict<0.5?" · la cintura es menor que la mitad de la talla":" · la cintura supera la mitad de la talla")));
+ return s;
+}
+/* curva IMC/edad OMS 2007 con el punto del paciente */
+function curva(sx,meses,imc,z){
+ var T=sx==="m"?B:G,W=640,H=330,L=42,R=14,Tp=24,Bt=40,mn=11,mx=38,m0=61,m1=228;
+ var X=function(m){return L+(m-m0)/(m1-m0)*(W-L-R)},Y=function(v){return Tp+(mx-v)/(mx-mn)*(H-Tp-Bt)};
+ var s=svgNew(W,H);s.setAttribute("class","gb gfig");s.setAttribute("aria-label","IMC para la edad, OMS 2007");
+ s.appendChild(E("text",{x:L,y:14,"class":"gh"},"IMC para la edad (OMS 2007) · "+(sx==="m"?"varones":"mujeres")));
+ var col=function(k){return T.map(function(r){return [X(r[0]),Y(r[k])]})};
+ var band=function(kLo,kHi,cl){var a=kLo?col(kLo):T.map(function(r){return [X(r[0]),Y(mn)]}),b=kHi?col(kHi):T.map(function(r){return [X(r[0]),Y(mx)]});
+  var d="M"+a.map(function(p){return p[0]+" "+p[1]}).join(" L")+" L"+b.slice().reverse().map(function(p){return p[0]+" "+p[1]}).join(" L")+" Z";s.appendChild(E("path",{d:d,"class":"k-"+cl,stroke:"none"}))};
+ band(0,2,"crit");band(2,5,"ok");band(5,6,"warn");band(6,0,"crit");
+ [1,2,3,4,5,6,7].forEach(function(k){var p=col(k);s.appendChild(E("path",{d:"M"+p.map(function(q){return q[0]+" "+q[1]}).join(" L"),"class":k===4?"gmed":"gcur"}));
+  s.appendChild(E("text",{x:W-R-2,y:p[p.length-1][1]-2,"text-anchor":"end","class":"gm"},k===4?"Mediana":(k-4>0?"+":"−")+Math.abs(k-4)+" DE"))});
+ for(var a=6;a<=19;a+=1){if(a%2===0||a===19||a===5){}}
+ [6,8,10,12,14,16,18].forEach(function(a){s.appendChild(E("text",{x:X(a*12),y:H-24,"text-anchor":"middle","class":"gm"},a+" a"))});
+ [12,16,20,24,28,32,36].forEach(function(v){s.appendChild(E("text",{x:L-6,y:Y(v)+3,"text-anchor":"end","class":"gm"},v));s.appendChild(E("line",{x1:L,x2:W-R,y1:Y(v),y2:Y(v),"class":"gcur",style:"opacity:.12"}))});
+ s.appendChild(E("text",{x:(L+W-R)/2,y:H-8,"text-anchor":"middle","class":"gm"},"Edad (años)"));
+ s.appendChild(E("text",{x:10,y:Tp+4,"class":"gm"},"IMC"));
+ var px=X(Math.min(Math.max(meses,m0),m1)),py=Y(Math.min(Math.max(imc,mn),mx));
+ s.appendChild(E("circle",{cx:px,cy:py,r:4,"class":"gmk"}));
+ s.appendChild(E("text",{x:px+(px>W-140?-8:8),y:py-8,"text-anchor":px>W-140?"end":"start","class":"gh"},"IMC "+f(imc,1)+" · z "+(z>0?"+":"")+f(z,2)));
+ return s;
+}
+
+/* siluetas por categoría de IMC con la del paciente resaltada */
+function siluetas(sx,imc){
+ var cats=[["<18,5","Bajo peso","warn",.72],["18,5–24,9","Peso normal","ok",.9],["25–29,9","Sobrepeso","warn",1.08],["30–34,9","Obesidad I","crit",1.3],["35–39,9","Obesidad II","crit",1.6],["≥ 40","Obesidad III","crit",1.95]];
+ var sel=imc<18.5?0:imc<25?1:imc<30?2:imc<35?3:imc<40?4:5,W=640,H=290,s=svgNew(W,H),cw=W/6,fem=sx==="f";
+ s.setAttribute("class","gb gfig");s.setAttribute("aria-label","Silueta según IMC");
+ s.appendChild(E("text",{x:14,y:14,"class":"gh"},"Categoría de IMC (OMS) · "+f(imc,1)+" kg/m²"));
+ cats.forEach(function(c,i){
+  var cx=cw*i+cw/2,k=c[3],hs=(fem?11:14)+k*3,hb=9+(k-.7)*22,hw=hb*(fem?1.02:.92),y0=28,cl="sf"+(i===sel?" on-"+c[2]:""),col=i===sel?"var(--"+c[2]+")":"var(--mute)",op=i===sel?.9:.3,lg=3+k*3;
+  s.appendChild(E("circle",{cx:cx,cy:y0+10,r:8+k*1.5,"class":cl}));
+  var d="M"+(cx-hs)+" "+(y0+28)+" Q"+cx+" "+(y0+22)+" "+(cx+hs)+" "+(y0+28)+" C"+(cx+hb)+" "+(y0+50)+" "+(cx+hb*1.08)+" "+(y0+72)+" "+(cx+hw)+" "+(y0+98)+" L"+(cx+hw*.85)+" "+(y0+152)+" L"+(cx+lg*.5+1)+" "+(y0+152)+" L"+(cx+lg*.5)+" "+(y0+112)+" L"+(cx-lg*.5)+" "+(y0+112)+" L"+(cx-lg*.5-1)+" "+(y0+152)+" L"+(cx-hw*.85)+" "+(y0+152)+" L"+(cx-hw)+" "+(y0+98)+" C"+(cx-hb*1.08)+" "+(y0+72)+" "+(cx-hb)+" "+(y0+50)+" "+(cx-hs)+" "+(y0+28)+" Z";
+  s.appendChild(E("path",{d:d,"class":cl}));
+  [-1,1].forEach(function(sg){s.appendChild(E("path",{d:"M"+(cx+sg*(hs+2))+" "+(y0+32)+" L"+(cx+sg*(hb+5+k*1.5))+" "+(y0+100),style:"fill:none;stroke:"+col+";stroke-opacity:"+op+";stroke-width:"+(4+k*1.2)+";stroke-linecap:round"}))});
+  s.appendChild(E("rect",{x:cx-cw/2+3,y:200,width:cw-6,height:48,rx:6,"class":"k-"+c[2],stroke:i===sel?"var(--ink)":"none","stroke-width":2.5}));
+  s.appendChild(E("text",{x:cx,y:220,"text-anchor":"middle","class":"gh"},c[0]));
+  s.appendChild(E("text",{x:cx,y:238,"text-anchor":"middle","class":"gt"},c[1]));
+  if(i===sel)s.appendChild(E("path",{d:"M"+(cx-7)+" 258 L"+(cx+7)+" 258 L"+cx+" 250 Z","class":"gmk"}));
+ });
+ s.appendChild(E("text",{x:W/2,y:282,"text-anchor":"middle","class":"gm"},"Siluetas esquemáticas: ilustran la categoría, no la forma real del cuerpo."));
+ return s;
+}
+/* gráfico cintura (eje x) × talla (eje y) con zonas por índice cintura-talla */
+function cinturaTalla(cc,h,ict){
+ var W=640,H=380,L=48,R=14,T=34,Bt=48,x0=40,x1=130,y0=100,y1=200;
+ var X=function(v){return L+(Math.min(Math.max(v,x0),x1)-x0)/(x1-x0)*(W-L-R)},Y=function(v){return T+(y1-Math.min(Math.max(v,y0),y1))/(y1-y0)*(H-T-Bt)};
+ var s=svgNew(W,H);s.setAttribute("class","gb gfig");s.setAttribute("aria-label","Cintura según la talla");
+ s.appendChild(E("text",{x:L,y:12,"class":"gh"},"Cintura según la talla · índice cintura-talla"));
+ var df=E("defs",{});var cp=E("clipPath",{id:"cpct"});cp.appendChild(E("rect",{x:L,y:T,width:W-L-R,height:H-T-Bt}));df.appendChild(cp);s.appendChild(df);
+ var g=E("g",{"clip-path":"url(#cpct)"});
+ [[0,.4,"lo"],[.4,.5,"ok"],[.5,.6,"warn"],[.6,3,"crit"]].forEach(function(b){
+  var pts=[[b[0]*100,100],[b[0]*200,200],[b[1]*200,200],[b[1]*100,100]].map(function(q){return X(q[0])+" "+Y(q[1])}).join(" L");
+  g.appendChild(E("path",{d:"M"+pts+" Z","class":"k-"+b[2],stroke:"none"}))});
+ s.appendChild(g);
+ for(var v=40;v<=130;v+=10){s.appendChild(E("text",{x:X(v),y:H-Bt+16,"text-anchor":"middle","class":"gm"},v));s.appendChild(E("line",{x1:X(v),x2:X(v),y1:T,y2:H-Bt,"class":"gcur",style:"opacity:.12"}))}
+ for(var u=100;u<=200;u+=10){s.appendChild(E("text",{x:L-6,y:Y(u)+3,"text-anchor":"end","class":"gm"},u));s.appendChild(E("line",{x1:L,x2:W-R,y1:Y(u),y2:Y(u),"class":"gcur",style:"opacity:.12"}))}
+ s.appendChild(E("text",{x:(L+W-R)/2,y:H-Bt+34,"text-anchor":"middle","class":"gt"},"Cintura (cm)"));
+ s.appendChild(E("text",{x:L,y:T-4,"class":"gm"},"Talla (cm) ↑"));
+ var lab=function(r,txt,yy){var xx=r*yy;s.appendChild(E("text",{x:X(xx),y:Y(yy),"class":"gm","text-anchor":"middle",transform:"rotate(-62 "+X(xx)+" "+Y(yy)+")"},txt))};
+ lab(.27,"< 0,4",190);lab(.45,"0,4–0,49",160);lab(.55,"0,5–0,59",150);lab(.72,"≥ 0,6",140);
+ var px=X(cc),py=Y(h);
+ s.appendChild(E("line",{x1:px,x2:px,y1:py,y2:H-Bt,"class":"gcur",style:"stroke-dasharray:3 3"}));
+ s.appendChild(E("line",{x1:L,x2:px,y1:py,y2:py,"class":"gcur",style:"stroke-dasharray:3 3"}));
+ s.appendChild(E("circle",{cx:px,cy:py,r:5,"class":"gmk"}));
+ var right=px>W-190;
+ s.appendChild(E("text",{x:px+(right?-10:10),y:py-10,"text-anchor":right?"end":"start","class":"gh"},"Cintura "+f(cc,0)+" · talla "+f(h,0)+" · ICT "+f(ict,2)));
+ return s;
+}
+function tile(t,big,sm,cls,pill){var d=document.createElement("div");d.className="tile "+cls;var a=document.createElement("h3");a.textContent=t;var b=document.createElement("div");b.className="big";b.textContent=big;var c=document.createElement("div");c.className="sm";c.textContent=sm;d.appendChild(a);d.appendChild(b);d.appendChild(c);if(pill){var p=document.createElement("span");p.className="pill "+cls;p.textContent=pill;d.appendChild(p)}return d}
+function tiles(d){
+ var w=document.createElement("div");w.className="tiles";
+ var lo=d.sx==="m"?94:80,hi=d.sx==="m"?102:88;
+ var ci=d.ict>=0.6?["crit","Riesgo muy alto"]:d.ict>=0.5?["warn","Riesgo aumentado"]:["ok","Sin riesgo aumentado"];
+ w.appendChild(tile("Índice cintura/talla",f(d.ict,2),"Riesgo aumentado desde 0,5; muy alto desde 0,6",ci[0],ci[1]));
+ var cw=d.cc>=hi?["crit","Riesgo muy aumentado"]:d.cc>=lo?["warn","Riesgo aumentado"]:["ok","Sin riesgo aumentado"];
+ w.appendChild(tile("Cintura abdominal ("+(d.sx==="m"?"varón":"mujer")+")",f(d.cc,0)+" cm","Aumentado desde "+lo+" cm; muy aumentado desde "+hi+" cm",cw[0],cw[1]));
+ var mit=d.h/2;
+ w.appendChild(tile("Regla simple",d.cc<mit?"Menos de la mitad":"Más de la mitad","La cintura ("+f(d.cc,0)+" cm) debería medir menos de la mitad de la talla ("+f(mit,0)+" cm)",d.cc<mit?"ok":"crit",d.cc<mit?"Cumple":"No cumple"));
+ return w;
+}
+function graf(d){
+ var g=$("gr");g.innerHTML="";var cl=function(v,a,b){return v>=b?"crit":v>=a?"warn":"ok"};
+ if(d.modo==="A"){
+  g.appendChild(siluetas(d.sx,d.imc));
+  if(d.ed>=65)g.appendChild(gauge("IMC (OPS, adultos mayores ≥ 65 años)",15,42,[[15,23,"warn","Bajo peso"],[23,28,"ok","Normal"],[28,32,"warn","Sobrepeso"],[32,42,"crit","Obesidad"]],d.imc,f(d.imc,1)+" kg/m²",0));
+  if(d.cc){var lo=d.sx==="m"?94:80,hi=d.sx==="m"?102:88,a=d.sx==="m"?70:60,b=d.sx==="m"?140:130;
+   g.appendChild(tiles(d));
+   g.appendChild(cinturaTalla(d.cc,d.h,d.ict));
+   g.appendChild(gauge("Circunferencia de cintura ("+(d.sx==="m"?"varón":"mujer")+")",a,b,[[a,lo,"ok","Sin riesgo aumentado"],[lo,hi,"warn","Aumentado"],[hi,b,"crit","Muy aumentado"]],d.cc,f(d.cc,1)+" cm",0));
+   if(d.icc){var u=d.sx==="m"?0.9:0.85,a2=d.sx==="m"?0.7:0.65,b2=d.sx==="m"?1.1:1.05;g.appendChild(gauge("Índice cintura-cadera",a2,b2,[[a2,u,"ok","Sin riesgo"],[u,b2,"warn","Riesgo aumentado"]],d.icc,f(d.icc,2),2))}
+  }else{var p=document.createElement("p");p.className="note";p.textContent="Cargá la circunferencia de cintura para ver también el gráfico cintura × talla, el índice cintura-talla y la regla de la mitad de la talla.";g.appendChild(p)}
+ }else{
+  g.appendChild(curva(d.sx,d.meses,d.imc,d.z));
+  if(d.cc)g.appendChild(gauge("Índice cintura-talla (niños y adolescentes)",0.3,0.7,[[0.3,0.5,"ok","< 0,5"],[0.5,0.7,"warn","≥ 0,5"]],d.ict,f(d.ict,2),2));
+ }
+ $("gc").hidden=false;
+}
+function pintar(){
+ var tb=$("tb");tb.innerHTML="";
+ reg.forEach(function(r,i){
+  var tr=document.createElement("tr");
+  [r.n,r.g==="A"?"Adulto":"Pediátrico",r.sx,r.ed,f(r.p,1)+" kg",(r.met!=="Tallímetro"?"~":"")+f(r.h,1)+" cm",f(r.imc,1),r.z===null?"–":f(r.z,2),r.c,r.cc?f(r.cc,1)+" cm":"–",r.ict?f(r.ict,2):"–",r.icc?f(r.icc,2):"–"].forEach(function(v){var td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+  var td=document.createElement("td"),b=document.createElement("button");b.className="s";b.textContent="Quitar";b.style.padding="4px 10px";
+  b.onclick=function(){reg.splice(i,1);save();pintar()};td.appendChild(b);tr.appendChild(td);tb.appendChild(tr);
+ });
+ $("vacio").hidden=reg.length>0;
+}
+$("tA").onclick=function(){setModo("A")};$("tP").onclick=function(){setModo("P")};
+$("met").onchange=vistaTalla;
+$("calc").onclick=calc;
+["nom","edad","ea","em","peso","talla","semi","cint","cad"].forEach(function(i){$(i).addEventListener("keydown",function(ev){if(ev.key==="Enter")calc()})});
+$("limpiar").onclick=function(){["nom","edad","ea","em","peso","talla","semi","cint","cad"].forEach(function(i){$(i).value=""});$("rc").hidden=true;$("gc").hidden=true;$("err").textContent="";cur=null};
+$("guardar").onclick=function(){if(!cur)return;reg.push(cur);save();pintar();var b=$("guardar");b.textContent="Guardado";setTimeout(function(){b.textContent="Guardar en registro"},1200)};
+$("gprint").onclick=function(){document.body.classList.add("pcalc");var d=function(){document.body.classList.remove("pcalc");window.removeEventListener("afterprint",d)};window.addEventListener("afterprint",d);window.print();setTimeout(d,1500)};
+var armado=false;
+$("borrar").onclick=function(){var b=$("borrar");
+ if(!reg.length)return;
+ if(!armado){armado=true;b.textContent="Confirmar borrado";setTimeout(function(){armado=false;b.textContent="Borrar registro"},3000);return}
+ reg=[];save();pintar();armado=false;b.textContent="Borrar registro";
+};
+$("csv").onclick=function(){
+ var l=["Paciente;Grupo;Sexo;Edad;Peso_kg;Talla_cm;Metodo_talla;IMC;Z_IMC_edad;Clasificacion;Cintura_cm;ICT;ICC"];
+ reg.forEach(function(r){l.push([r.n,r.g==="A"?"Adulto":"Pediatrico",r.sx,r.ed,r.p,r.h,r.met,r.imc,r.z===null?"":r.z,r.c,r.cc||"",r.ict||"",r.icc||""].join(";"))});
+ var t=l.join("\n"),b=$("csv");
+ function ok(){b.textContent="Copiado";setTimeout(function(){b.textContent="Copiar como CSV"},1200)}
+ function fb(){var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){b.textContent="No se pudo copiar"}document.body.removeChild(ta)}
+ try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}
+};
+pintar();setModo("A");
+})();
+</script>
+
+<script>/*EMBED*/try{if(window.top!==window){var a=document.querySelector(".sw-tool");if(a)a.style.display="none"}}catch(e){}</script><script>/*CFGSYNC*/(function(){try{fetch("../config.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(c){if(!c||!c.url||!/^https:\/\/script\.google\.com\//.test(c.url))return;["cs61_pl","cs61_plcv","cs61_cons_api"].forEach(function(k){try{var o=JSON.parse(localStorage.getItem(k)||"null");if(o&&o.key&&o.url!==c.url){o.url=c.url;localStorage.setItem(k,JSON.stringify(o))}}catch(e){}})}).catch(function(){})}catch(e){}})();</script></body></html>
