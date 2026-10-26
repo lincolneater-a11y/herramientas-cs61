@@ -30,7 +30,7 @@ a.c:hover,a.c:focus-visible{outline:2px solid var(--gold)}
 <section class="box" aria-labelledby="cn"><h3 id="cn">Planilla de resultados (opcional)</h3>
 <p>Para que las respuestas de la comunidad se acumulen en una planilla de Google (estadísticas e investigación), pegá la dirección del script de la planilla de Recursos (termina en <b>/exec</b>). Se guarda en este navegador y sirve para los dos juegos. Los datos son anónimos: no se registran nombres ni DNI.</p>
 <input type="url" id="u" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" aria-label="Dirección del script de la planilla de Recursos">
-<button id="sv" type="button">Guardar</button><button id="ts" class="s" type="button">Probar conexión</button><button id="rs" class="s" type="button">Enviar pendientes</button>
+<button id="sv" type="button">Guardar</button><button id="ts" class="s" type="button">Probar conexión</button><button id="rs" class="s" type="button">Enviar pendientes</button><button id="tt" class="s" type="button">Enviar fila de prueba</button>
 <div class="st" id="st" role="status"></div></section>
 <p class="n">Esta planilla es distinta de la del registro cardiovascular y de nutrición: no lleva datos de pacientes. Si no se conecta, los resultados quedan en el navegador y se pueden descargar desde cada juego.</p>
 </main>
@@ -43,7 +43,11 @@ function paint(){var s=RecSync.status();$("u").value=s.url||$("u").value;
 $("sv").onclick=function(){var v=$("u").value.trim();if(!RecSync.setUrl(v)){$("st").className="st err";$("st").textContent="La dirección debe empezar con https://script.google.com y terminar en /exec.";return}paint()};
 $("ts").onclick=function(){var u=RecSync.url()||$("u").value.trim();if(!u){$("st").className="st err";$("st").textContent="Pegá primero la dirección y tocá Guardar.";return}
  $("st").className="st";$("st").textContent="Probando…";
- fetch(u,{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){$("st").className=j&&j.ok?"st ok":"st err";$("st").textContent=j&&j.ok?"Conexión correcta: "+(j.servicio||"script activo")+".":"El script respondió, pero con un error."}).catch(function(){$("st").className="st err";$("st").textContent="No se pudo comprobar desde este navegador (sin conexión o permiso). Los envíos igual se intentan en segundo plano."})};
+ fetch(u,{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){$("st").className=j&&j.ok?"st ok":"st err";$("st").textContent=j&&j.ok?"Conexión correcta: "+(j.servicio||"script activo")+".":"El script respondió, pero con un error."}).catch(function(){
+  fetch(u,{mode:"no-cors",cache:"no-store"}).then(function(){$("st").className="st";$("st").textContent="El script es alcanzable, pero este navegador no puede leer su respuesta. Tocá «Enviar fila de prueba» y mirá si aparece una fila en la hoja «Ruleta». Si no aparece, revisá que la implementación tenga acceso «Cualquier persona» y que sea la versión nueva del código."}).catch(function(){$("st").className="st err";$("st").textContent="No se pudo llegar al script: revisá la dirección y la conexión a internet."})})};
+$("tt").onclick=function(){var u=RecSync.url();if(!u){$("st").className="st err";$("st").textContent="Guardá primero la dirección.";return}
+ var d=new Date(),p=function(n){return(n<10?"0":"")+n};
+ RecSync.send("ruleta",{n:0,f:d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()),h:p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()),ev:"PRUEBA DE CONEXIÓN (borrar esta fila)",g:"",nv:"",c:"Prueba",qid:"PRUEBA",lq:"",q:"Fila de prueba",p1:"",p2:"",r:"Prueba",t:"",a:"",s:""}).then(function(){$("st").className="st ok";$("st").textContent="Fila de prueba enviada. Revisá la hoja «Ruleta» de tu planilla y borrala después."})};
 $("rs").onclick=function(){RecSync.flush().then(paint)};
 RecSync.onChange(paint);paint();
 if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){}
