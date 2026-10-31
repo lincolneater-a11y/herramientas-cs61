@@ -627,9 +627,10 @@ details.card[open] > summary { margin-bottom: 12px; }
           <label class="field"><span>Talla (cm)</span><input type="number" id="em-h" min="120" max="210" step="0.1" inputmode="decimal"></label>
           <label class="field"><span>Peso pregestacional (kg)</span><input type="number" id="em-wpre" min="30" max="250" step="0.1" inputmode="decimal"></label>
           <label class="field"><span>Peso actual (kg)</span><input type="number" id="em-w" min="30" max="250" step="0.1" inputmode="decimal"></label>
-          <label class="field"><span>Peso del control anterior (kg)</span><input type="number" id="em-wprev" min="30" max="250" step="0.1" inputmode="decimal"></label>
-          <label class="field"><span>Fecha del control anterior</span><input type="date" id="em-dprev"></label>
         </div>
+        <div class="src-h" style="margin:12px 0 6px"><span class="lbl">Controles anteriores</span><button class="btn small" id="em-add-ctl" type="button">Agregar control</button></div>
+        <div id="em-hist"></div>
+        <small style="color:var(--ink-2)">Cargue a mano los controles previos (fecha y peso): las semanas se calculan con la FUM. Se grafican en las curvas y, al guardar, quedan registrados en la planilla.</small>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px"><button class="btn small" data-plh="em" type="button">Traer controles anteriores de la planilla</button></div><div class="note" id="em-hst" style="margin:6px 0 0"></div>
         <div style="margin-top:12px"><label class="check"><input type="checkbox" id="em-first"> El peso inicial es del primer control (no es pregestacional)</label></div>
       </div>
@@ -1254,17 +1255,40 @@ function emAgeGrp() { var a = val('em-age'); if (a === null) return null; return
 function emAddAuto() { var eg = emEG(); if (eg === null) return 0; return eg < 14 ? 0 : (eg < 28 ? 340 : 452); }
 var EM_LAST = null, EM_REC = null;
 function pill(cls, t) { return '<span class="badge ' + cls + '">' + t + '</span>'; }
+var EMH = [];
+function emWeeksAt(d, ctl) {
+  var fum = $('em-fum') ? $('em-fum').value : '', dd;
+  if (fum) { dd = emDays(fum, d); return dd === null ? null : Math.round(dd / 7 * 10) / 10; }
+  var eg = emEG(), k = emDays(d, ctl); if (eg === null || k === null) return null; return Math.round((eg - k / 7) * 10) / 10;
+}
+/* controles previos: manuales + planilla (sin repetir fecha), solo anteriores al control actual */
+function emCtls(ctl) {
+  var out = [], seen = {};
+  EMH.forEach(function (r) { if (!r.d || r.w === null || r.d === ctl || (ctl && r.d > ctl) || seen[r.d]) return; seen[r.d] = 1; out.push({ d: r.d, w: r.w, g: emWeeksAt(r.d, ctl), man: true }); });
+  ((typeof PLH !== "undefined" && PLH && PLH.em) || []).forEach(function (r) { if (!r.fecha || !r.peso_kg || r.fecha === ctl || seen[r.fecha]) return; seen[r.fecha] = 1; out.push({ d: r.fecha, w: +r.peso_kg, g: r.semanas_gest ? +r.semanas_gest : emWeeksAt(r.fecha, ctl), hh: r.talla_cm ? r.talla_cm / 100 : null, pw: r.peso_pregest_kg ? +r.peso_pregest_kg : null }); });
+  out.sort(function (a, b) { return a.d < b.d ? -1 : 1; }); return out;
+}
 function emPrev(kind, ctl, wpre, hm) {
   var out = [];
-  PLH.em.forEach(function (r) {
-    if (r.fecha === ctl || !r.semanas_gest || !r.peso_kg) return;
-    if (kind === 'gain') { var pw = r.peso_pregest_kg ? +r.peso_pregest_kg : wpre; if (pw) out.push([+r.semanas_gest, +r.peso_kg - pw]); }
-    else { var hh = r.talla_cm ? r.talla_cm / 100 : hm; if (hh) out.push([+r.semanas_gest, +r.peso_kg / (hh * hh)]); }
+  emCtls(ctl).forEach(function (r) {
+    if (!r.g || r.g < 1) return;
+    if (kind === 'gain') { var pw = r.pw || wpre; if (pw) out.push([r.g, r.w - pw]); }
+    else { var hh = r.hh || hm; if (hh) out.push([r.g, r.w / (hh * hh)]); }
   });
   out.sort(function (a, b) { return a[0] - b[0]; }); return out;
 }
+function emHistHTML() {
+  if (!EMH.length) return '<p class="note">Agregue los controles previos para ver la trayectoria en las curvas.</p>';
+  return '<div class="tw"><table class="tbl"><thead><tr><th>Fecha</th><th>Peso (kg)</th><th>Semanas</th><th></th></tr></thead><tbody>' + EMH.map(function (r, i) {
+    var g = r.d ? emWeeksAt(r.d, $('em-ctl').value) : null;
+    return '<tr><td><input type="date" data-emh="' + i + '" data-k="d" value="' + (r.d || '') + '" style="padding:5px 7px"></td><td><input type="number" data-emh="' + i + '" data-k="w" min="30" max="250" step="0.1" inputmode="decimal" value="' + (r.w === null ? '' : r.w) + '" style="width:84px;padding:5px 7px"></td><td data-emg="' + i + '">' + (g === null ? '—' : fmt(g, 1)) + '</td><td><button type="button" class="btn small danger" data-emhrm="' + i + '">Quitar</button></td></tr>';
+  }).join('') + '</tbody></table></div>';
+}
+function emHistRefresh() { $('em-hist').innerHTML = emHistHTML(); }
+function emHistWeeks() { document.querySelectorAll('[data-emg]').forEach(function (td) { var r = EMH[+td.getAttribute('data-emg')], g = r && r.d ? emWeeksAt(r.d, $('em-ctl').value) : null; td.textContent = g === null ? '—' : fmt(g, 1); }); }
 function emCalc() {
-  var eg = emEG(), h = val('em-h'), wpre = val('em-wpre'), w = val('em-w'), wprev = val('em-wprev'), ctl = $('em-ctl').value, dprev = $('em-dprev').value;
+  var eg = emEG(), h = val('em-h'), wpre = val('em-wpre'), w = val('em-w'), ctl = $('em-ctl').value, wprev = null, dprev = '';
+  (function () { var c = emCtls(ctl); for (var i = c.length - 1; i >= 0; i--) { if (c[i].w) { wprev = c[i].w; dprev = c[i].d; break; } } })();
   var H = '<h3>Resultados</h3>', L = [], al = [];
   if (!h || !wpre) { $('em-result').innerHTML = '<div class="empty"><h3>Resultados</h3><p>Complete talla y peso pregestacional para ver el estado nutricional inicial. Con el peso actual y las semanas de gestación se evalúa la ganancia de peso.</p></div>'; EM_LAST = null; return; }
   var hm = h / 100, imc0 = wpre / (hm * hm), cat = IOM[0]; for (var i = 0; i < IOM.length; i++) { if (imc0 < IOM[i].max) { cat = IOM[i]; break; } }
@@ -1356,20 +1380,33 @@ function emSyncEG() {
   if (d !== null && d >= 0 && d <= 301) { $('em-egw').value = Math.floor(d / 7); $('em-egd').value = d % 7; }
 }
 function emHint() { var a = emAddAuto(); $('em-add-h').textContent = 'Si lo deja vacío se usa ' + a + ' kcal según el trimestre (IOM/DRI 2005; no figura en el cuadernillo).'; }
-['em-fum', 'em-ctl'].forEach(function (id) { $(id).addEventListener('input', function () { emSyncEG(); emHint(); emCalc(); }); });
-['em-id', 'em-age', 'em-egw', 'em-egd', 'em-h', 'em-wpre', 'em-w', 'em-wprev', 'em-dprev', 'em-multi', 'em-first', 'em-act', 'em-wb', 'em-add'].forEach(function (id) {
+['em-fum', 'em-ctl'].forEach(function (id) { $(id).addEventListener('input', function () { emSyncEG(); emHint(); emHistWeeks(); emCalc(); }); });
+['em-id', 'em-age', 'em-egw', 'em-egd', 'em-h', 'em-wpre', 'em-w', 'em-multi', 'em-first', 'em-act', 'em-wb', 'em-add'].forEach(function (id) {
   $(id).addEventListener('input', function () { if (id === 'em-age') emDRI(); emHint(); emCalc(); }); $(id).addEventListener('change', function () { emCalc(); });
 });
 $('em-clear').addEventListener('click', function () {
   document.querySelectorAll('#v-embarazo input').forEach(function (e) { if (e.type === 'checkbox') e.checked = false; else e.value = ''; });
-  $('em-act').value = '35'; $('em-wb').value = 'act'; $('em-ctl').value = todayISO(); emDRI(); emHint(); emCalc();
+  $('em-act').value = '35'; $('em-wb').value = 'act'; $('em-ctl').value = todayISO(); EMH = []; emHistRefresh(); emDRI(); emHint(); emCalc();
 });
 $('em-example').addEventListener('click', function () {
   $('em-age').value = 27; $('em-h').value = 160; $('em-wpre').value = 58; $('em-w').value = 66.5; $('em-egw').value = 28; $('em-egd').value = 3; $('em-fum').value = '';
-  $('em-wprev').value = 64.2; var d = new Date(); d.setDate(d.getDate() - 28); $('em-dprev').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); $('em-ctl').value = todayISO();
+  $('em-ctl').value = todayISO(); EMH = [[84, 59.4], [56, 61.8], [28, 64.2]].map(function (a) { return { d: plIsoAdd($('em-ctl').value, -a[0]), w: a[1] }; }); emHistRefresh();
   $('em-id').value = 'Ejemplo'; emDRI(); emHint(); emCalc();
 });
-$('em-ctl').value = todayISO(); emDRI(); emHint(); emCalc();
+$('em-ctl').value = todayISO(); emHistRefresh(); emDRI(); emHint(); emCalc();
+(function () {
+  var root = $('v-embarazo');
+  root.addEventListener('input', function (e) {
+    var t = e.target, g = t.getAttribute ? t.getAttribute('data-emh') : null; if (g === null) return;
+    var k = t.getAttribute('data-k'); if (k === 'd') EMH[+g].d = t.value; else { var v = t.value === '' ? null : parseFloat(String(t.value).replace(',', '.')); EMH[+g].w = isFinite(v) ? v : null; }
+    emHistWeeks(); emCalc();
+  });
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.id === 'em-add-ctl') { EMH.push({ d: '', w: null }); emHistRefresh(); emCalc(); }
+    if (b.hasAttribute('data-emhrm')) { EMH.splice(+b.getAttribute('data-emhrm'), 1); emHistRefresh(); emCalc(); }
+  });
+})();
 
 /* ============================ ALIMENTOS (base común) ============================ */
 /* [nombre, categoría, [HC, Prot, Grasas, Fibra, Na, K, P, G.sat, G.trans, G.mono, G.poli, Colesterol]] por 100 g; null = sin dato */
@@ -2483,8 +2520,12 @@ function plRecEs() {
 function plRecEm() {
   var E = EM_REC || {}, r = plBase('Embarazada', $('em-id').value.trim(), $('em-ctl') ? $('em-ctl').value : '', ''); r.dni = $('em-dni').value.replace(/\D/g, ''); r.nombre = $('em-nom').value.trim();
   r.sexo = 'Mujer'; r.edad_anios = val('em-age') === null ? '' : val('em-age'); r.talla_cm = E.h || ''; r.peso_kg = E.w || ''; r.peso_pregest_kg = E.wpre || ''; r.imc_pregest = E.imc0 ? Math.round(E.imc0 * 10) / 10 : ''; r.semanas_gest = E.eg === null || E.eg === undefined ? '' : Math.round(E.eg * 10) / 10; r.clasificacion = E.cat ? 'IMC pregestacional: ' + E.cat : '';
-  var wpv = val('em-wprev'), dpv = $('em-dprev').value, ctlE = $('em-ctl') ? $('em-ctl').value : '', ddE = emDays(dpv, ctlE);
-  if (wpv !== null && dpv && ddE !== null && ddE > 0) r.hist = [{ fecha: dpv, modulo: 'Embarazada', sexo: 'Mujer', edad_anios: r.edad_anios, peso_kg: wpv, talla_cm: E.h || '', peso_pregest_kg: E.wpre || '', imc_pregest: r.imc_pregest, semanas_gest: E.eg === null || E.eg === undefined ? '' : Math.round((E.eg - ddE / 7) * 10) / 10 }];
+  var ctlE = $('em-ctl') ? $('em-ctl').value : '', hs = [];
+  EMH.forEach(function (m) {
+    if (!m.d || m.w === null || !ctlE || m.d >= ctlE) return; var g = emWeeksAt(m.d, ctlE);
+    hs.push({ fecha: m.d, modulo: 'Embarazada', sexo: 'Mujer', edad_anios: r.edad_anios, peso_kg: m.w, talla_cm: E.h || '', peso_pregest_kg: E.wpre || '', imc_pregest: r.imc_pregest, semanas_gest: g === null ? '' : g });
+  });
+  if (hs.length) r.hist = hs;
   r.detalle = (EM_LAST || []).join('\n'); return r;
 }
 
