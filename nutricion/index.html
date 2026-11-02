@@ -241,6 +241,14 @@ details.card[open] > summary { margin-bottom: 12px; }
 #cc-printarea{display:none}
 .cc-in{max-width:110px}
 @media print{body.pcc>*:not(#cc-printarea){display:none!important}body.pcc>#cc-printarea{display:block!important;padding:12px;color:#000;background:#fff}body.pcc #cc-printarea .tbl{width:100%;border-collapse:collapse;font-size:11px}body.pcc #cc-printarea .tbl th,body.pcc #cc-printarea .tbl td{border:1px solid #999;padding:3px 5px;text-align:left}}
+
+.dt-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}.dt-chips button{padding:7px 12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;font:inherit;font-size:.86rem;cursor:pointer}.dt-chips button[aria-pressed="true"]{background:var(--teal);color:var(--teal-ink);border-color:var(--teal);font-weight:700}
+.dt-doc{background:#fff;color:#1a2433;border:1px solid var(--line);border-radius:10px;padding:18px 20px;font-size:.92rem;line-height:1.45}
+.dt-doc h2{margin:0;font-size:1.35rem;color:#14304f}.dt-doc .dt-sub{color:#4b5a6e;margin:2px 0 8px}.dt-doc h4{margin:14px 0 4px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:#0d7a85;border-bottom:2px solid #d3a53a;padding-bottom:2px}
+.dt-doc ul{margin:4px 0 0;padding-left:18px}.dt-doc li{margin:2px 0}.dt-doc table{width:100%;border-collapse:collapse;margin-top:4px}.dt-doc th,.dt-doc td{border:1px solid #c9d3de;padding:5px 8px;text-align:left;vertical-align:top}.dt-doc th{background:#e6f2f3;color:#14304f;font-size:.8rem}
+.dt-head{display:flex;gap:12px;align-items:center;border-bottom:3px solid #14304f;padding-bottom:8px;margin-bottom:8px}.dt-head img{width:54px;height:54px;border-radius:50%}.dt-head b{display:block;color:#14304f}.dt-meta{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.88rem;margin:6px 0}.dt-two{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.dt-ok h4{color:#1f7a3d}.dt-no h4{color:#8a1f3d}.dt-alarm{background:#fbeef1;border:1px solid #8a1f3d;border-radius:8px;padding:6px 10px;margin-top:6px}.dt-foot{margin-top:12px;font-size:.76rem;color:#4b5a6e;border-top:1px solid #c9d3de;padding-top:6px}
+@media(max-width:640px){.dt-two{grid-template-columns:1fr}}
+@media print{body.pdt>*:not(#dt-printarea){display:none!important}body.pdt>#dt-printarea{display:block!important;background:#fff;color:#000}body.pdt #dt-printarea .dt-doc{border:0;padding:0;font-size:10.5px}@page{margin:12mm}body.pdt #dt-printarea h4,body.pdt #dt-printarea .dt-head,body.pdt #dt-printarea table{break-inside:avoid}}
 </style>
 
 <header class="hdr">
@@ -255,6 +263,7 @@ details.card[open] > summary { margin-bottom: 12px; }
       <button class="tab" role="tab" id="tab-escolar" data-view="escolar" aria-selected="false">Escolar y adolescente</button>
       <button class="tab" role="tab" id="tab-embarazo" data-view="embarazo" aria-selected="false">Embarazadas</button>
       <button class="tab" role="tab" id="tab-r24" data-view="r24" aria-selected="false">Alimentación</button>
+      <button class="tab" role="tab" id="tab-dietas" data-view="dietas" aria-selected="false">Modelos de dieta</button>
       <button class="tab" role="tab" id="tab-base" data-view="base" aria-selected="false">Base de alimentos</button>
     </nav>
   </div>
@@ -289,6 +298,11 @@ details.card[open] > summary { margin-bottom: 12px; }
       <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
       <h3>Frecuencia de consumo</h3>
       <p>Porción y frecuencia por alimento: consumo promedio diario, nutrientes y aporte por grupo de alimentos.</p>
+    </button>
+    <button class="tile" data-go="dietas">
+      <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></span>
+      <h3>Modelos de dieta</h3>
+      <p>Diez planes para imprimir y entregar en la consulta: embarazo, lactancia, niño pequeño, escolar, adulto mayor, hipertensión, diabetes, dislipidemia, obesidad y celiaquía.</p>
     </button>
     <button class="tile" data-go="base">
       <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>
@@ -462,6 +476,26 @@ details.card[open] > summary { margin-bottom: 12px; }
 </section>
 
 <!-- ============ BASE DE ALIMENTOS ============ -->
+<section id="v-dietas" class="view" hidden>
+  <div class="view-head"><div><h2>Modelos de dieta</h2><p>Elija el momento biológico o la patología, ajuste las calorías y los datos de la persona, y entregue la hoja impresa. Son modelos orientativos: adáptelos a cada paciente.</p></div></div>
+  <div class="split">
+    <div class="col"><div class="card">
+      <div class="lbl">Momentos biológicos</div><div class="dt-chips" id="dt-chips-m"></div>
+      <div class="lbl">Patologías</div><div class="dt-chips" id="dt-chips-p"></div>
+      <div class="grid wide" style="margin-top:6px">
+        <label class="field"><span>Nombre de la persona (opcional)</span><input type="text" id="dt-nom" maxlength="80" autocomplete="off"></label>
+        <label class="field"><span>Profesional (opcional)</span><input type="text" id="dt-prof" maxlength="80" autocomplete="off"></label>
+        <label class="field"><span>Fecha</span><input type="date" id="dt-fecha"></label>
+        <label class="field" id="dt-kcal-f"><span>Calorías por día (kcal)</span><input type="number" id="dt-kcal" min="800" max="4500" step="50" inputmode="numeric"></label>
+      </div>
+      <label class="field" style="margin-top:10px"><span>Indicaciones personalizadas (se imprimen)</span><textarea id="dt-obs" rows="3" maxlength="600" placeholder="Ej.: alergias, horarios, preferencias, próximo control…" style="width:100%"></textarea></label>
+      <div class="actions" style="margin-top:12px"><button class="btn primary" id="dt-print" type="button">Imprimir o guardar PDF</button></div>
+      <p class="note" style="margin-top:10px"><small>Material orientativo. Debe ser revisado y adaptado por el profesional según la valoración individual (antecedentes, medicación, laboratorio). No reemplaza la consulta.</small></p>
+    </div></div>
+    <aside class="col"><div class="dt-doc" id="dt-view"></div></aside>
+  </div>
+</section>
+
 <section id="v-base" class="view" hidden>
   <div class="view-head">
     <div><h2>Base de alimentos</h2><p>Composición química por 100 g de alimento. «s/d» significa sin dato (no es cero): esos valores no se suman en los cálculos.</p></div>
@@ -678,7 +712,7 @@ function copyText(text, btn) {
 }
 
 /* ---------- Navegación ---------- */
-var VIEWS = ['inicio', 'lactantes', 'escolar', 'embarazo', 'r24', 'frecuencia', 'base'];
+var VIEWS = ['inicio', 'lactantes', 'escolar', 'embarazo', 'r24', 'frecuencia', 'dietas', 'base'];
 function show(v) {
   if (VIEWS.indexOf(v) < 0) v = 'inicio';
   VIEWS.forEach(function (n) { $('v-' + n).hidden = (n !== v); });
@@ -1796,6 +1830,152 @@ $('cc-print').addEventListener('click', function () {
   window.addEventListener('afterprint', done); window.print(); setTimeout(done, 1500);
 });
 ccCalc();
+
+var DIETAS = [
+{ id: 'emb', g: 'm', t: 'Embarazo', sub: 'Plan alimentario para la gestación', kcal: [2200, 1600, 3200], kcalN: 'Base según peso pregestacional y actividad; en el 2.º trimestre se suman unas 340 kcal y en el 3.º unas 450 kcal. Ajustar con la ganancia de peso.',
+  mac: { hc: [50, 55], p: [15, 20], g: [25, 30] },
+  obj: ['Lograr una ganancia de peso dentro del rango recomendado según el IMC pregestacional.', 'Cubrir las necesidades de hierro, calcio, ácido fólico, yodo y proteínas.', 'Prevenir infecciones transmitidas por alimentos.'],
+  com: [['Desayuno', '1 taza de leche o yogur (200 ml) + 2 rebanadas de pan integral con queso untable o huevo + 1 fruta.'], ['Media mañana', '1 yogur o 1 porción de queso fresco + 1 fruta o un puñado de frutos secos (30 g).'], ['Almuerzo', 'Plato con ½ de verduras de distintos colores, ¼ de carne magra bien cocida (1 porción del tamaño de la palma) o legumbres, ¼ de cereal (arroz, fideos, papa, polenta). 1 fruta.'], ['Merienda', 'Igual al desayuno; alternar con licuado de leche y fruta o tostada con palta.'], ['Cena', 'Tortilla de verduras al horno o pescado/pollo con ensalada y puré de zapallo. Agua o infusión.'], ['Antes de dormir', '1 vaso de leche o yogur si hay hambre o acidez.']],
+  si: ['Lácteos: 3 porciones por día (calcio).', 'Carnes rojas magras, hígado 1 vez por semana, legumbres con una fruta cítrica (mejora la absorción del hierro).', 'Verduras de hoja verde, frutas, cereales integrales.', 'Pescado 2 veces por semana (merluza, salmón, sardina, caballa chica).', 'Sal yodada en cantidad moderada.'],
+  lim: ['Alcohol: ninguno.', 'Cafeína: hasta 2 tazas de café por día (menos de 200 mg).', 'Pescados grandes (pez espada, cazón, tiburón, atún grande) por el mercurio.', 'Carnes, huevos y pescados crudos o poco cocidos; leche y quesos no pasteurizados; fiambres sin cocción.', 'Ultraprocesados, golosinas y bebidas azucaradas.'],
+  pau: ['Lavar bien frutas y verduras; lavarse las manos antes de cocinar.', 'Fraccionar en 4 a 6 comidas si hay náuseas, reflujo o saciedad precoz.', 'Tomar al menos 2 litros de líquidos por día (agua, infusiones, agua saborizada sin azúcar).', 'Los suplementos de ácido fólico y hierro se toman según indicación médica.', 'Caminar o realizar actividad suave si no hay contraindicación obstétrica.'],
+  ala: ['Vómitos que impiden comer o beber, o pérdida de peso.', 'Dolor de cabeza intenso, visión borrosa, hinchazón repentina de cara o manos.', 'Aumento de peso muy rápido o falta de aumento.', 'Fiebre o diarrea.'],
+  ref: ['IOM 2009; DRI 2005; Guías Alimentarias para la Población Argentina (GAPA) 2016; Ministerio de Salud de la Nación.'] },
+
+{ id: 'lac', g: 'm', t: 'Lactancia', sub: 'Plan alimentario para la mujer que amamanta', kcal: [2300, 1800, 3200], kcalN: 'Unas 330 kcal más que antes del embarazo durante los primeros 6 meses y unas 400 kcal más del 7.º mes en adelante (aproximado).',
+  mac: { hc: [50, 55], p: [15, 20], g: [25, 30] },
+  obj: ['Sostener la producción de leche y la reserva nutricional de la madre.', 'Recuperar el peso de forma gradual y sin restricciones.', 'Mantener una buena hidratación.'],
+  com: [['Desayuno', '1 taza de leche o yogur + 2 rebanadas de pan integral con queso o huevo + 1 fruta.'], ['Media mañana', '1 yogur + 1 puñado de frutos secos o 1 fruta.'], ['Almuerzo', 'Plato con ½ de verduras, ¼ de carne, pollo, pescado o legumbres, ¼ de cereal o papa. 1 fruta y 1 vaso de agua.'], ['Merienda', 'Licuado de leche con fruta o té con leche + tostadas con queso fresco o palta.'], ['Cena', 'Tarta de verduras con huevo o guiso de lentejas con arroz y ensalada.'], ['Durante la mamada', 'Tener a mano un vaso de agua o infusión y una colación (fruta, queso).']],
+  si: ['Lácteos: 3 a 4 porciones por día.', 'Proteínas todos los días: carne, pollo, pescado, huevo, legumbres.', 'Pescado 2 veces por semana; aceite de oliva, palta, frutos secos.', 'Frutas y verduras variadas.', 'Sal yodada moderada.'],
+  lim: ['Alcohol: evitar; si ocurre, esperar unas 2 horas por cada medida antes de amamantar.', 'Cafeína moderada (hasta 2 a 3 tazas de café por día).', 'Pescados grandes por el mercurio.', 'Ultraprocesados y bebidas azucaradas.', 'No hace falta evitar alimentos «por las dudas» (legumbres, repollo, cítricos): sólo si el bebé reacciona de forma repetida.'],
+  pau: ['Tomar agua en cada mamada: unos 2,5 a 3 litros de líquidos por día en total.', 'No hacer dietas restrictivas: el descenso de peso, si se busca, debe ser lento (como máximo 0,5 kg por semana) y después del primer mes.', 'No saltear comidas; fraccionar en 5 a 6 al día.', 'Consultar antes de tomar suplementos, hierbas o infusiones «para la leche».', 'Dormir y descansar cuando sea posible.'],
+  ala: ['Dolor, fiebre o enrojecimiento en la mama.', 'El bebé no aumenta de peso o moja pocos pañales.', 'Cansancio extremo, mareos o tristeza persistente.'],
+  ref: ['DRI 2005; OMS/UNICEF; Guías Alimentarias para la Población Argentina 2016; Ministerio de Salud de la Nación.'] },
+
+{ id: 'cmp', g: 'm', t: 'Niño de 6 a 24 meses', sub: 'Alimentación complementaria', kcal: null, kcalN: 'La energía la cubren la lactancia (o fórmula) y los alimentos que se agregan. No se calculan kcal ni macronutrientes: se guía por frecuencia y consistencia.',
+  mac: null,
+  obj: ['Continuar con la leche materna y sumar alimentos desde los 6 meses.', 'Asegurar hierro, zinc y energía con alimentos variados.', 'Acompañar la alimentación con respuesta: respetar el hambre y la saciedad del niño.'],
+  com: [['6 meses', 'Lactancia a demanda + 2 a 3 comidas de puré espeso o papilla (zapallo, zanahoria, papa, calabaza con carne bien cocida desmenuzada) y fruta pisada.'], ['7 a 8 meses', 'Lactancia + 3 comidas; sumar legumbres pisadas, huevo cocido entero, pescado sin espinas, yogur natural.'], ['9 a 11 meses', 'Lactancia + 3 comidas y 1 a 2 colaciones; alimentos picados o en trocitos blandos, comida de la olla familiar sin sal.'], ['12 a 24 meses', 'Lactancia si continúa + 4 comidas y 1 a 2 colaciones; leche de vaca como bebida desde los 12 meses; comida familiar con poca sal.'], ['Colaciones', 'Fruta en trocitos o pisada, yogur natural, queso fresco, pan o galleta sin sal.']],
+  si: ['Carne vacuna, pollo, hígado y pescado: todos los días, para el hierro.', 'Legumbres y huevo entero (clara y yema) desde los 6 meses.', 'Verduras y frutas de todos los colores.', 'Aceite (1 cucharadita en cada comida) y palta.', 'Alimentos nuevos: ofrecerlos varias veces; puede hacer falta 8 a 10 intentos.'],
+  lim: ['Sal y azúcar agregadas, caldos y sopas de sobre.', 'Miel antes de los 12 meses.', 'Leche de vaca como bebida antes de los 12 meses; jugos, gaseosas e infusiones.', 'Frutos secos enteros, uvas enteras, salchichas en rodajas: riesgo de atragantamiento.', 'Golosinas, snacks y ultraprocesados.'],
+  pau: ['No retrasar la introducción de alérgenos (huevo, pescado, maní molido) salvo indicación del pediatra.', 'Sentar al niño con la familia; no usar pantallas ni forzar a comer.', 'Ofrecer agua segura en vaso o taza desde los 6 meses.', 'Lavarse las manos y conservar bien los alimentos.', 'El control de peso y talla en el centro de salud acompaña esta etapa.'],
+  ala: ['Rechazo persistente de alimentos o pérdida de peso.', 'Diarrea, vómitos o reacciones en la piel después de comer.', 'Atragantamiento o tos repetida al comer.', 'Palidez, decaimiento o poco aumento de peso (posible anemia).'],
+  ref: ['OMS 2023 (alimentación complementaria); Guías Alimentarias para la Población Argentina 2016; Sociedad Argentina de Pediatría; Ministerio de Salud de la Nación (Guía de alimentación para niños de 0 a 2 años).'] },
+
+{ id: 'esc', g: 'm', t: 'Escolar', sub: 'Alimentación de 6 a 12 años', kcal: [1800, 1400, 2400], kcalN: 'Orientativo: alrededor de 1600 kcal a los 6 a 8 años y 1800 a 2200 kcal a los 9 a 13 años según sexo y actividad. Ajustar con el crecimiento.',
+  mac: { hc: [50, 60], p: [10, 25], g: [25, 35] },
+  obj: ['Sostener un crecimiento y un peso adecuados para la edad.', 'Formar hábitos: desayuno, agua, frutas y verduras.', 'Cubrir las necesidades de calcio, hierro y fibra.'],
+  com: [['Desayuno', '1 taza de leche o yogur + pan o cereales sin azúcar agregada + 1 fruta.'], ['Colación escolar', '1 fruta, 1 yogur o un sándwich chico de queso. Agua.'], ['Almuerzo', 'Plato con verduras de 2 colores, carne, pollo, pescado, huevo o legumbres y una porción de cereal o papa. Fruta.'], ['Merienda', 'Leche o yogur + tostada con queso o dulce + 1 fruta; alternar con licuado.'], ['Cena', 'Comida casera simple: tortilla, tarta, guiso, milanesa al horno con ensalada. Fruta.']],
+  si: ['Lácteos: 3 porciones por día.', 'Frutas y verduras: 5 porciones por día en distintos colores.', 'Legumbres, huevo, carne y pescado.', 'Agua como bebida principal.', 'Cereales integrales y pan.'],
+  lim: ['Gaseosas, jugos y aguas saborizadas con azúcar.', 'Golosinas, alfajores, snacks y papas fritas de bolsa.', 'Fiambres y embutidos.', 'Comidas rápidas frecuentes.', 'Más de 2 horas de pantallas por día.'],
+  pau: ['Hacer 4 comidas diarias y no saltear el desayuno.', 'Comer en familia, sin pantallas.', 'Al menos 60 minutos de actividad física o juego activo por día.', 'Dormir entre 9 y 11 horas.', 'Revisar el kiosco escolar: elegir fruta, lácteos y agua.'],
+  ala: ['Pérdida o ganancia de peso rápida.', 'Cansancio, palidez o bajo rendimiento escolar.', 'Rechazo de comidas o preocupación excesiva por el cuerpo.', 'Dolor abdominal o diarrea repetida.'],
+  ref: ['OMS 2007 (crecimiento); DRI 2005; Guías Alimentarias para la Población Argentina 2016; Sociedad Argentina de Pediatría.'] },
+
+{ id: 'may', g: 'm', t: 'Adulto mayor', sub: 'Alimentación a partir de los 65 años', kcal: [1800, 1400, 2400], kcalN: 'Orientativo: 25 a 30 kcal/kg. Priorizar la proteína (1,0 a 1,2 g/kg por día) aunque disminuya el apetito.',
+  mac: { hc: [50, 55], p: [15, 25], g: [25, 30] },
+  obj: ['Mantener la masa muscular, el peso y la autonomía.', 'Prevenir la desnutrición, la deshidratación y la pérdida de hueso.', 'Adaptar texturas y horarios a las posibilidades de cada persona.'],
+  com: [['Desayuno', 'Leche o yogur + pan integral con queso blando o huevo + 1 fruta.'], ['Media mañana', 'Fruta cocida o yogur con avena + 1 puñado de frutos secos molidos.'], ['Almuerzo', 'Carne, pollo, pescado o legumbres bien cocidos + verduras cocidas + 1 porción de arroz, papa o fideos. Fruta cocida.'], ['Merienda', 'Té con leche + tostadas con queso blando, o licuado de leche y fruta.'], ['Cena', 'Sopa crema de verduras con legumbre o huevo, o tortilla de verduras. Postre de leche.'], ['Antes de dormir', '1 vaso de leche o yogur si hay hambre.']],
+  si: ['Proteínas en cada comida: huevo, lácteos, carnes, pescado, legumbres.', 'Lácteos: 3 porciones por día (calcio y vitamina D).', 'Verduras y frutas cocidas o ralladas si cuesta masticar.', 'Líquidos: 1,5 a 2 litros por día aunque no haya sed (agua, caldos, infusiones, gelatina).', 'Fibra: avena, legumbres, fruta con cáscara si se tolera.'],
+  lim: ['Sal agregada, caldos y fiambres.', 'Azúcar y dulces en exceso.', 'Alcohol.', 'Ayunos largos y comidas muy abundantes.', 'Dietas de descenso de peso sin indicación profesional.'],
+  pau: ['Hacer 5 comidas pequeñas si el apetito es bajo.', 'Comer acompañado siempre que se pueda.', 'Caminar y hacer ejercicios de fuerza suaves.', 'Tomar sol de forma segura para la vitamina D.', 'Controlar el peso una vez por mes.'],
+  ala: ['Pérdida de peso sin buscarla (más del 5% en un mes).', 'Atragantamiento o tos al tragar.', 'Boca seca, orina muy oscura, mareos.', 'Falta de apetito sostenida.'],
+  ref: ['ESPEN 2019 (nutrición geriátrica); DRI 2005; Guías Alimentarias para la Población Argentina 2016.'] },
+
+{ id: 'hta', g: 'p', t: 'Hipertensión arterial', sub: 'Dieta tipo DASH, baja en sodio', kcal: [1800, 1200, 3000], kcalN: 'Ajustar según el peso: si hay sobrepeso, usar un plan hipocalórico.',
+  mac: { hc: [50, 55], p: [15, 20], g: [25, 30] },
+  obj: ['Reducir el consumo de sodio (menos de 5 g de sal por día, equivalente a 2 g de sodio).', 'Aumentar potasio, calcio y magnesio con alimentos naturales.', 'Bajar de peso si hay sobrepeso.'],
+  com: [['Desayuno', 'Leche descremada o yogur + pan integral sin sal con queso fresco sin sal o huevo + 1 fruta.'], ['Media mañana', '1 fruta o 1 yogur descremado + puñado de frutos secos sin sal.'], ['Almuerzo', 'Carne, pollo o pescado a la plancha o al horno con hierbas + ensalada grande de verduras con aceite y limón + 1 porción de arroz o papa hervida. Fruta.'], ['Merienda', 'Té o mate con 2 tostadas de pan sin sal con queso untable descremado, o 1 fruta.'], ['Cena', 'Legumbres o tortilla de verduras con ensalada. Fruta o gelatina.']],
+  si: ['Frutas y verduras: 5 o más porciones por día.', 'Lácteos descremados: 2 a 3 porciones.', 'Cereales integrales, legumbres, frutos secos sin sal.', 'Pescado 2 veces por semana; aceite de oliva o girasol alto oleico.', 'Condimentar con ajo, cebolla, perejil, orégano, pimentón, limón, ají y especias.'],
+  lim: ['Sal de mesa: sacar el salero de la mesa; cocinar sin sal o con muy poca.', 'Fiambres, embutidos, quesos duros, enlatados, sopas y caldos de sobre, snacks.', 'Pan y galletitas con sal en exceso.', 'Salsas listas y aderezos industriales.', 'Alcohol: lo menos posible.'],
+  pau: ['Leer los rótulos: elegir productos con menos de 120 mg de sodio cada 100 g.', 'Acostumbrar el paladar de a poco: en 3 a 4 semanas el gusto se adapta.', 'Hacer actividad física aeróbica: 150 minutos por semana.', 'Controlar la presión en forma periódica y no suspender la medicación.', 'Consultar antes de usar sustitutos de la sal: tienen potasio y pueden no ser adecuados con enfermedad renal o ciertos medicamentos.'],
+  ala: ['Presión mayor a 180/110 o dolor de cabeza intenso.', 'Dolor en el pecho, falta de aire o visión borrosa.', 'Hinchazón de piernas o aumento de peso rápido.'],
+  ref: ['DASH (NHLBI); OMS 2012 (sodio); Sociedad Argentina de Cardiología; Guías Alimentarias para la Población Argentina 2016.'] },
+
+{ id: 'dm2', g: 'p', t: 'Diabetes tipo 2', sub: 'Plan con control de hidratos de carbono', kcal: [1600, 1200, 2600], kcalN: 'Si hay sobrepeso, plan hipocalórico con una pérdida de 5 a 10% del peso inicial. Distribuir los hidratos en forma pareja en el día.',
+  mac: { hc: [45, 55], p: [15, 20], g: [25, 35] },
+  obj: ['Mantener la glucemia en el rango acordado con el equipo de salud.', 'Bajar de peso si hay sobrepeso u obesidad.', 'Cuidar el corazón: menos grasa saturada y sal.'],
+  com: [['Desayuno', 'Leche o yogur sin azúcar + 2 rebanadas de pan integral con queso o huevo + 1 fruta chica.'], ['Media mañana', '1 yogur sin azúcar o 1 fruta + frutos secos (20 g).'], ['Almuerzo', 'Plato: ½ verduras, ¼ proteína magra (carne, pollo, pescado, huevo), ¼ hidrato con fibra (legumbres, arroz integral, papa con cáscara). Fruta o postre sin azúcar.'], ['Merienda', 'Infusión sin azúcar + 2 tostadas integrales con queso untable, o 1 fruta con yogur.'], ['Cena', 'Similar al almuerzo con menos hidrato; tortilla de verduras, pescado con ensalada y zapallo.'], ['Colación nocturna', 'Si hay hipoglucemias con tratamiento: 1 yogur o 1 rebanada de pan con queso.']],
+  si: ['Hidratos con fibra: legumbres, cereales integrales, avena, verduras, frutas enteras.', 'Verduras sin almidón a voluntad.', 'Proteínas magras y pescado.', 'Aceite de oliva, palta, frutos secos.', 'Agua, soda, infusiones sin azúcar.'],
+  lim: ['Azúcar, dulces, golosinas, mermeladas comunes y miel.', 'Gaseosas, jugos y bebidas azucaradas.', 'Harinas refinadas, facturas, galletitas dulces, panificados.', 'Grasas saturadas: fiambres, embutidos, vísceras, manteca.', 'Alcohol: sólo con comida y en poca cantidad, si está permitido.'],
+  pau: ['Hacer 4 a 5 comidas y no saltear ninguna, sobre todo si se toma insulina o sulfonilureas.', 'Distribuir los hidratos de carbono de manera similar en cada comida.', 'Caminar o hacer actividad física al menos 150 minutos por semana.', 'Controlar la glucemia según indicación y revisar los pies todos los días.', 'Llevar siempre una fuente de azúcar rápida (caramelos, jugo) por si hay hipoglucemia.'],
+  ala: ['Glucemias muy altas de forma repetida, mucha sed, orina en exceso.', 'Síntomas de hipoglucemia: temblor, sudor frío, confusión.', 'Heridas en los pies que no cicatrizan.', 'Vómitos o dolor abdominal con glucemias altas.'],
+  ref: ['ADA Standards of Care 2024; Sociedad Argentina de Diabetes; Guías Alimentarias para la Población Argentina 2016.'] },
+
+{ id: 'dis', g: 'p', t: 'Dislipidemia', sub: 'Dieta para colesterol y triglicéridos', kcal: [1800, 1200, 3000], kcalN: 'Ajustar a la meta de peso. En hipertrigliceridemia, el peso y los azúcares son lo que más cuenta.',
+  mac: { hc: [50, 55], p: [15, 20], g: [25, 35] },
+  obj: ['Bajar el colesterol LDL: grasa saturada menos del 7% de las calorías y colesterol menos de 200 mg por día.', 'Eliminar las grasas trans.', 'Bajar los triglicéridos: menos azúcar y alcohol, y descenso de peso si hay sobrepeso.'],
+  com: [['Desayuno', 'Leche descremada o yogur + avena (3 cucharadas) + 1 fruta; o pan integral con queso fresco descremado.'], ['Media mañana', '1 fruta + 1 puñado de nueces o almendras (30 g).'], ['Almuerzo', 'Pescado, pollo sin piel o legumbres + verduras crudas y cocidas con aceite de oliva + arroz integral o papa. Fruta.'], ['Merienda', 'Té + 2 tostadas integrales con palta o queso untable descremado.'], ['Cena', 'Guiso de lentejas o tortilla de verduras al horno con ensalada. Gelatina o fruta.']],
+  si: ['Pescado graso (caballa, sardina, salmón, atún): 2 veces por semana.', 'Avena, legumbres, frutas y verduras (fibra soluble).', 'Aceite de oliva, palta, frutos secos.', 'Lácteos descremados; carnes magras (pollo sin piel, cortes magros vacunos).', 'Cereales integrales.'],
+  lim: ['Fiambres, embutidos, achuras y vísceras, cortes grasos, piel del pollo.', 'Manteca, crema, quesos duros y grasos, helados.', 'Productos con grasas trans: margarinas duras, alimentos fritos y de pastelería industrial.', 'Azúcar, gaseosas, jugos, dulces, alcohol.', 'Yema: hasta 3 a 4 por semana (hay variación según cada paciente).'],
+  pau: ['Cocinar al horno, a la plancha, al vapor o hervido; evitar la fritura.', 'Sacar la grasa visible de la carne antes de cocinar.', 'Hacer 150 minutos de actividad por semana.', 'No fumar; limitar el alcohol (en hipertrigliceridemia: suspenderlo).', 'Control de lípidos según indicación médica.'],
+  ala: ['Dolor en el pecho o falta de aire con esfuerzo.', 'Dolor abdominal intenso (riesgo de pancreatitis con triglicéridos muy altos).', 'Dolor muscular con medicación para el colesterol.'],
+  ref: ['ATP III / NCEP; Sociedad Argentina de Cardiología; ESC/EAS 2019; Guías Alimentarias para la Población Argentina 2016.'] },
+
+{ id: 'obe', g: 'p', t: 'Sobrepeso y obesidad', sub: 'Plan de descenso de peso gradual (adultos)', kcal: [1500, 1200, 2200], kcalN: 'Déficit de 500 a 750 kcal respecto del gasto. Sin control profesional, no bajar de 1200 kcal (mujeres) ni de 1500 kcal (varones).',
+  mac: { hc: [45, 55], p: [20, 25], g: [25, 30] },
+  obj: ['Perder 5 a 10% del peso inicial en 6 meses (0,5 a 1 kg por semana).', 'Mejorar la glucemia, la presión y los lípidos.', 'Aprender hábitos que se puedan sostener.'],
+  com: [['Desayuno', 'Leche o yogur descremado + 2 rebanadas de pan integral con queso untable descremado o huevo + 1 fruta.'], ['Media mañana', '1 fruta o 1 yogur descremado sin azúcar.'], ['Almuerzo', 'Plato: ½ verduras (crudas y cocidas), ¼ proteína magra, ¼ hidrato con fibra. 1 cucharada de aceite. Fruta.'], ['Merienda', 'Infusión sin azúcar + 2 tostadas integrales con queso untable o 1 fruta.'], ['Cena', 'Sopa de verduras o ensalada completa con huevo, pollo o legumbres. Gelatina light o fruta.']],
+  si: ['Verduras en gran cantidad: llenan y tienen pocas calorías.', 'Proteínas magras en cada comida (dan saciedad).', 'Legumbres, avena y cereales integrales.', 'Agua: 2 litros por día.', 'Frutas enteras: 2 a 3 porciones.'],
+  lim: ['Gaseosas, jugos, alcohol y bebidas azucaradas.', 'Golosinas, facturas, galletitas, snacks y comidas rápidas.', 'Frituras, fiambres, embutidos y salsas cremosas.', 'Porciones grandes: servirse en plato chico.', 'Picar entre comidas frente a la pantalla.'],
+  pau: ['Comer despacio, sentado y sin pantallas.', 'No saltear comidas ni llegar con mucha hambre a la cena.', 'Caminar 30 a 60 minutos casi todos los días y sumar ejercicios de fuerza.', 'Dormir 7 a 8 horas: la falta de sueño aumenta el apetito.', 'Registrar lo que se come y pesarse una vez por semana.', 'Evitar dietas de moda, ayunos extremos y suplementos «quemagrasa».'],
+  ala: ['Mareos, debilidad o palpitaciones.', 'Pérdida de más de 1 kg por semana.', 'Atracones, vómitos o culpa intensa con la comida.', 'Aparición de síntomas de diabetes o presión alta.'],
+  ref: ['OMS; ESPEN/EASO; Sociedad Argentina de Nutrición; Guías Alimentarias para la Población Argentina 2016. En niños y adolescentes se requiere otro abordaje.'] },
+
+{ id: 'cel', g: 'p', t: 'Celiaquía', sub: 'Alimentación sin gluten (sin TACC)', kcal: [2000, 1400, 3000], kcalN: 'La cantidad de energía se ajusta al peso y a la actividad; en la recuperación de la mucosa puede hacer falta más.',
+  mac: { hc: [50, 55], p: [15, 20], g: [25, 30] },
+  obj: ['Excluir por completo y de por vida el trigo, avena, cebada y centeno (TACC) y sus derivados.', 'Evitar la contaminación cruzada en casa y fuera de casa.', 'Corregir deficiencias de hierro, calcio, fibra y vitaminas.'],
+  com: [['Desayuno', 'Leche o yogur + pan sin TACC o tostadas de arroz con queso o huevo + 1 fruta.'], ['Media mañana', '1 fruta o galletitas de arroz con queso untable sin TACC.'], ['Almuerzo', 'Carne, pollo o pescado + ensalada + arroz, papa, mandioca, polenta o choclo. Fruta.'], ['Merienda', 'Té con leche + pan casero de harina de arroz o maíz, o torta de zanahoria con harina sin TACC.'], ['Cena', 'Tortilla de papa y verduras o guiso de lentejas con arroz. Postre de leche sin TACC.']],
+  si: ['Naturalmente sin gluten: carnes, pollo, pescado, huevos, leche, quesos, frutas, verduras, legumbres, arroz, maíz, papa, mandioca, quinoa, amaranto, mijo, trigo sarraceno (alforfón).', 'Productos que tienen en el envase la leyenda «Libre de gluten» y el logo «Sin TACC» (ANMAT).', 'Harinas de arroz, maíz, mandioca, legumbres y almidones sin TACC.', 'Fruta, verdura y legumbres para la fibra.', 'Lácteos para el calcio.'],
+  lim: ['Trigo, avena, cebada, centeno y todos sus derivados: pan, fideos, galletitas, pizzas, empanadas, rebozados, cerveza.', 'Embutidos, salchichas, fiambres, salsas, caldos, aderezos y golosinas sin rótulo seguro.', 'Alimentos «a granel» o sin rótulo.', 'Comer fuera sin saber cómo se preparó.', 'Medicamentos y suplementos que no declaren estar libres de gluten (consultar al farmacéutico).'],
+  pau: ['Revisar el listado vigente de ANMAT de alimentos libres de gluten antes de comprar.', 'Evitar la contaminación cruzada: tablas, tostadoras, cucharas, aceite de fritura y harinas compartidas.', 'Lavar muy bien los utensilios; guardar los productos sin TACC aparte y por encima de los demás.', 'Mantener los controles médicos y de laboratorio indicados.', 'Informar a todo el grupo familiar y a la escuela o el trabajo.'],
+  ala: ['Diarrea, dolor abdominal, hinchazón o pérdida de peso.', 'Anemia, cansancio o aftas frecuentes.', 'En niños: falta de crecimiento.', 'Síntomas después de comer algo dudoso.'],
+  ref: ['Ley 26.588 y Código Alimentario Argentino; ANMAT (alimentos libres de gluten); Ministerio de Salud de la Nación (Guía de práctica clínica de enfermedad celíaca); ESPGHAN 2020.'] }
+];
+
+/* ============================ MODELOS DE DIETA ============================ */
+var DT_CUR = DIETAS[0];
+function dtDoc() {
+  var D = DT_CUR, kcal = val('dt-kcal'), nom = $('dt-nom').value.trim(), prof = $('dt-prof').value.trim(), f = $('dt-fecha').value, obs = $('dt-obs').value.trim();
+  var ul = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
+  var img = document.querySelector('.brand img'), logo = img ? '<img src="' + img.src + '" alt="">' : '';
+  var H = '<div class="dt-head">' + logo + '<div><b>Centro de Salud N.º 61 · Solidaridad</b><span>Nutrición · Plan de alimentación</span></div></div>';
+  H += '<h2>' + esc(D.t) + '</h2><div class="dt-sub">' + esc(D.sub) + '</div>';
+  var meta = []; if (nom) meta.push('<span><b>Persona:</b> ' + esc(nom) + '</span>'); meta.push('<span><b>Fecha:</b> ' + (f ? f.split('-').reverse().join('/') : fmtDate(new Date())) + '</span>'); if (prof) meta.push('<span><b>Profesional:</b> ' + esc(prof) + '</span>');
+  H += '<div class="dt-meta">' + meta.join('') + '</div>';
+  H += '<h4>Objetivos</h4>' + ul(D.obj);
+  if (D.kcal && D.mac) {
+    var k = kcal || D.kcal[0], rows = [['Hidratos de carbono', D.mac.hc, 4], ['Proteínas', D.mac.p, 4], ['Grasas', D.mac.g, 9]];
+    H += '<h4>Energía y distribución</h4><p style="margin:4px 0"><b>' + fmt(k, 0) + ' kcal por día</b> (orientativo). ' + esc(D.kcalN) + '</p><table><thead><tr><th>Nutriente</th><th>% de las calorías</th><th>Gramos por día</th></tr></thead><tbody>' + rows.map(function (r) {
+      return '<tr><td>' + r[0] + '</td><td>' + r[1][0] + ' a ' + r[1][1] + ' %</td><td>' + fmt(k * r[1][0] / 100 / r[2], 0) + ' a ' + fmt(k * r[1][1] / 100 / r[2], 0) + ' g</td></tr>'; }).join('') + '</tbody></table>';
+  } else H += '<h4>Energía</h4><p style="margin:4px 0">' + esc(D.kcalN) + '</p>';
+  H += '<h4>' + (D.id === 'cmp' ? 'Esquema por edad' : 'Menú de ejemplo') + '</h4><table><thead><tr><th style="width:22%">' + (D.id === 'cmp' ? 'Edad' : 'Comida') + '</th><th>Qué comer</th></tr></thead><tbody>' + D.com.map(function (r) { return '<tr><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table>';
+  H += '<div class="dt-two"><div class="dt-ok"><h4>Preferir</h4>' + ul(D.si) + '</div><div class="dt-no"><h4>Limitar o evitar</h4>' + ul(D.lim) + '</div></div>';
+  H += '<h4>Recomendaciones</h4>' + ul(D.pau);
+  H += '<div class="dt-alarm"><b>Consulte pronto si presenta:</b>' + ul(D.ala) + '</div>';
+  if (obs) H += '<h4>Indicaciones personalizadas</h4><p style="margin:4px 0;white-space:pre-wrap">' + esc(obs) + '</p>';
+  H += '<div class="dt-foot">Material orientativo; no reemplaza la consulta individual. Fuentes: ' + esc(D.ref.join(' ')) + '</div>';
+  return H;
+}
+function dtRender() { $('dt-view').innerHTML = dtDoc(); }
+function dtPick(id) {
+  DT_CUR = DIETAS.filter(function (d) { return d.id === id; })[0] || DIETAS[0];
+  document.querySelectorAll('.dt-chips button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-dt') === DT_CUR.id ? 'true' : 'false'); });
+  $('dt-kcal-f').style.display = DT_CUR.kcal ? '' : 'none'; if (DT_CUR.kcal) $('dt-kcal').value = DT_CUR.kcal[0]; dtRender();
+}
+(function () {
+  ['m', 'p'].forEach(function (g) { $('dt-chips-' + g).innerHTML = DIETAS.filter(function (d) { return d.g === g; }).map(function (d) { return '<button type="button" data-dt="' + d.id + '" aria-pressed="false">' + esc(d.t) + '</button>'; }).join(''); });
+  document.querySelector('#v-dietas').addEventListener('click', function (e) { var b = e.target.closest('[data-dt]'); if (b) dtPick(b.getAttribute('data-dt')); });
+  ['dt-nom', 'dt-prof', 'dt-fecha', 'dt-kcal', 'dt-obs'].forEach(function (i) { $(i).addEventListener('input', dtRender); });
+  $('dt-fecha').value = todayISO();
+  $('dt-print').addEventListener('click', function () {
+    var pa = $('dt-printarea'); if (!pa) { pa = document.createElement('div'); pa.id = 'dt-printarea'; document.body.appendChild(pa); }
+    pa.innerHTML = '<div class="dt-doc">' + dtDoc() + '</div>'; document.body.classList.add('pdt');
+    var done = function () { document.body.classList.remove('pdt'); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done); window.print(); setTimeout(done, 1500);
+  });
+  dtPick('emb');
+})();
 
 var DB_SHOWN = 60;
 function fillSrc() { var s = $('db-src'), cur = s.value; s.innerHTML = '<option value="">Todas las fuentes</option>' + srcList().map(function (x) { return '<option>' + esc(x) + '</option>'; }).join(''); s.value = srcList().indexOf(cur) >= 0 ? cur : ''; }

@@ -280,6 +280,7 @@ details.card[open] > summary { margin-bottom: 12px; }
     <nav class="tabs" role="tablist" aria-label="Herramientas">
       <button class="tab" role="tab" id="tab-ecv" data-view="ecv" aria-selected="true">Supervisión cardiovascular</button>
       <button class="tab" role="tab" id="tab-findrisc" data-view="findrisc" aria-selected="false">Test FINDRISC</button>
+      <button class="tab" role="tab" id="tab-otras" data-view="otras" aria-selected="false">Otras herramientas</button>
       <button class="tab" role="tab" id="tab-excel" data-view="excel" aria-selected="false">Excel y respaldo</button>
     </nav>
   </div>
@@ -438,6 +439,35 @@ details.card[open] > summary { margin-bottom: 12px; }
 </section>
 
 <!-- ============ EXCEL Y RESPALDO ============ -->
+<section id="v-otras" class="view" hidden>
+  <div class="view-head">
+    <div><h2>Otras herramientas</h2><p>Herramientas de apoyo para la consulta que no se guardan en el registro.</p></div>
+    <div class="actions"><button class="btn danger" id="eg-clear" type="button">Limpiar</button></div>
+  </div>
+  <div class="split">
+    <div class="col"><div class="card">
+      <h3>Edad gestacional y fecha probable de parto</h3>
+      <p class="sub">Calcula por la fecha de la última menstruación (FUM) con la regla de Naegele (FUM + 280 días). Si la FUM no es confiable, use la ecografía más temprana.</p>
+      <div class="seg" role="tablist" aria-label="Método" style="margin-top:10px">
+        <label><input type="radio" name="eg-m" value="fum" checked><span>Por FUM</span></label>
+        <label><input type="radio" name="eg-m" value="eco"><span>Por ecografía</span></label>
+      </div>
+      <div class="grid wide" style="margin-top:12px">
+        <label class="field" id="eg-f-fum"><span>FUM (primer día de la última menstruación)</span><input type="date" id="eg-fum"></label>
+        <div id="eg-f-eco" style="display:none">
+          <label class="field"><span>Fecha de la ecografía</span><input type="date" id="eg-eco-d"></label>
+          <label class="field"><span>Semanas en la ecografía</span><input type="number" id="eg-eco-w" min="4" max="42" inputmode="numeric"></label>
+          <label class="field"><span>Más días</span><input type="number" id="eg-eco-dd" min="0" max="6" inputmode="numeric"></label>
+        </div>
+        <label class="field"><span>Calcular a la fecha</span><input type="date" id="eg-ref"></label>
+      </div>
+      <p class="note" style="margin-top:10px"><small>Ciclos distintos de 28 días: indique la duración para ajustar (si no, deje 28).</small></p>
+      <div class="grid wide"><label class="field"><span>Duración habitual del ciclo (días)</span><input type="number" id="eg-cyc" min="21" max="45" value="28" inputmode="numeric"></label></div>
+    </div></div>
+    <aside class="col sticky"><div class="card" id="eg-out"></div></aside>
+  </div>
+</section>
+
 <section id="v-excel" class="view" hidden>
   <div class="view-head"><div><h2>Excel y respaldo</h2><p>Descargue todo en un solo libro de Excel (planilla de supervisión, registro FINDRISC y las estadísticas de ambos) o vuelva a cargar un Excel descargado antes.</p></div></div>
   <div class="card">
@@ -509,7 +539,51 @@ function acuBind(pref) {
 }
 
 /* ---------- Navegación ---------- */
-var VIEWS = ['ecv', 'findrisc', 'excel'];
+var VIEWS = ['ecv', 'findrisc', 'otras', 'excel'];
+
+/* ---- Otras herramientas: edad gestacional ---- */
+(function () {
+  function U(iso) { var p = String(iso || '').split('-'); if (p.length !== 3) return null; var t = Date.UTC(+p[0], +p[1] - 1, +p[2]); return isFinite(t) ? t : null; }
+  function iso(t) { var d = new Date(t); return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0'); }
+  function dmy(t) { var d = new Date(t); return String(d.getUTCDate()).padStart(2, '0') + '/' + String(d.getUTCMonth() + 1).padStart(2, '0') + '/' + d.getUTCFullYear(); }
+  var DAY = 864e5, last = '';
+  function mode() { return document.querySelector('input[name="eg-m"]:checked').value; }
+  function esc2(x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+  function calc() {
+    var m = mode(), ref = U($('eg-ref').value), cyc = parseInt($('eg-cyc').value, 10) || 28, fum = null, note = '';
+    $('eg-f-fum').style.display = m === 'fum' ? '' : 'none'; $('eg-f-eco').style.display = m === 'eco' ? 'contents' : 'none';
+    if (m === 'fum') { fum = U($('eg-fum').value); }
+    else {
+      var ed = U($('eg-eco-d').value), w = parseInt($('eg-eco-w').value, 10), dd = parseInt($('eg-eco-dd').value, 10) || 0;
+      if (ed !== null && isFinite(w)) fum = ed - (w * 7 + dd) * DAY;
+    }
+    var out = $('eg-out'); last = '';
+    if (fum === null || ref === null) { out.innerHTML = '<h3>Resultados</h3><p class="sub">Ingrese ' + (m === 'fum' ? 'la FUM' : 'la fecha y la edad gestacional de la ecografía') + ' para calcular.</p>'; return; }
+    var adj = (cyc - 28) * DAY, fpp = fum + 280 * DAY + adj, days = Math.round((ref - fum - adj) / DAY), H = '<h3>Resultados</h3>';
+    if (days < 0) { out.innerHTML = H + '<div class="alert warn"><span>La fecha de cálculo es anterior a la FUM.</span></div>'; return; }
+    var w = Math.floor(days / 7), d = days % 7, tri = days < 91 ? '1.er trimestre' : (days < 189 ? '2.º trimestre' : '3.er trimestre');
+    var lines = [];
+    H += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:8px">'
+      + '<div class="card" style="padding:12px"><div class="sub">Edad gestacional</div><div style="font-size:1.6rem;font-weight:700;color:var(--teal)">' + w + '+' + d + '</div><div class="sub">semanas+días · ' + tri + '</div></div>'
+      + '<div class="card" style="padding:12px"><div class="sub">Fecha probable de parto</div><div style="font-size:1.4rem;font-weight:700;color:var(--teal)">' + dmy(fpp) + '</div><div class="sub">' + (fpp - ref >= 0 ? 'faltan ' + Math.floor((fpp - ref) / DAY / 7) + ' sem ' + Math.round((fpp - ref) / DAY) % 7 + ' d' : 'ya superada') + '</div></div></div>';
+    lines.push('Edad gestacional: ' + w + ' semanas ' + d + ' días (' + tri + ') al ' + dmy(ref) + '.', 'FUM' + (m === 'eco' ? ' estimada por ecografía' : '') + ': ' + dmy(fum) + (cyc !== 28 ? ' · ciclo de ' + cyc + ' días' : '') + '.', 'Fecha probable de parto: ' + dmy(fpp) + '.');
+    if (days > 301) H += '<div class="alert bad" style="margin-top:10px"><span>Más de 43 semanas: revise la fecha ingresada.</span></div>';
+    else if (days >= 294) H += '<div class="alert warn" style="margin-top:10px"><span>Embarazo prolongado (42 semanas o más): requiere evaluación obstétrica.</span></div>';
+    else if (days >= 287) H += '<div class="alert info" style="margin-top:10px"><span>Posterior al término (41+ semanas): seguimiento obstétrico estrecho.</span></div>';
+    var hitos = [[8, 'Primer control prenatal (idealmente antes de la semana 12)'], [12, 'Ecografía del primer trimestre / translucencia nucal (11 a 14 sem)'], [20, 'Ecografía morfológica (18 a 22 sem)'], [24, 'Pruebas de glucemia / PTOG (24 a 28 sem)'], [28, 'Vacuna dTpa (desde la semana 20) y control de anticuerpos si Rh negativo'], [35, 'Cultivo de estreptococo B (35 a 37 sem)'], [40, 'Fecha probable de parto']];
+    H += '<div class="lbl" style="margin-top:14px;font-weight:700">Hitos habituales del control prenatal</div><table class="tbl" style="margin-top:6px"><thead><tr><th>Semana</th><th>Fecha aprox.</th><th>Qué corresponde</th></tr></thead><tbody>' + hitos.map(function (h) {
+      var f = fum + adj + h[0] * 7 * DAY, pas = f <= ref; return '<tr' + (pas ? ' style="opacity:.55"' : '') + '><td>' + h[0] + '</td><td>' + dmy(f) + '</td><td style="text-align:left">' + esc2(h[1]) + (pas ? ' ✓' : '') + '</td></tr>';
+    }).join('') + '</tbody></table><p class="note" style="margin-top:8px"><small>Hitos orientativos según las recomendaciones habituales de control prenatal; confirme con el protocolo vigente del servicio.</small></p>';
+    H += '<div class="actions" style="margin-top:12px"><button class="btn primary" id="eg-copy" type="button">Copiar resumen</button></div>';
+    last = lines.join('\n'); out.innerHTML = H;
+    $('eg-copy').addEventListener('click', function () { var b = this; (navigator.clipboard ? navigator.clipboard.writeText(last) : Promise.reject()).then(function () { b.textContent = 'Copiado'; }).catch(function () { var t = document.createElement('textarea'); t.value = last; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); b.textContent = 'Copiado'; } catch (e) { } document.body.removeChild(t); }); });
+  }
+  $('eg-ref').value = todayISO();
+  ['eg-fum', 'eg-eco-d', 'eg-eco-w', 'eg-eco-dd', 'eg-ref', 'eg-cyc'].forEach(function (id) { $(id).addEventListener('input', calc); });
+  document.querySelectorAll('input[name="eg-m"]').forEach(function (r) { r.addEventListener('change', calc); });
+  $('eg-clear').addEventListener('click', function () { ['eg-fum', 'eg-eco-d', 'eg-eco-w', 'eg-eco-dd'].forEach(function (i) { $(i).value = ''; }); $('eg-cyc').value = 28; $('eg-ref').value = todayISO(); calc(); });
+  calc();
+})();
 function show(v) {
   if (VIEWS.indexOf(v) < 0) v = 'ecv';
   VIEWS.forEach(function (n) { $('v-' + n).hidden = (n !== v); $('tab-' + n).setAttribute('aria-selected', n === v ? 'true' : 'false'); });
