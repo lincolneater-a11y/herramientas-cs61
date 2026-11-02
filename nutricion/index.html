@@ -249,6 +249,18 @@ details.card[open] > summary { margin-bottom: 12px; }
 .dt-head{display:flex;gap:12px;align-items:center;border-bottom:3px solid #14304f;padding-bottom:8px;margin-bottom:8px}.dt-head img{width:54px;height:54px;border-radius:50%}.dt-head b{display:block;color:#14304f}.dt-meta{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.88rem;margin:6px 0}.dt-two{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.dt-ok h4{color:#1f7a3d}.dt-no h4{color:#8a1f3d}.dt-alarm{background:#fbeef1;border:1px solid #8a1f3d;border-radius:8px;padding:6px 10px;margin-top:6px}.dt-foot{margin-top:12px;font-size:.76rem;color:#4b5a6e;border-top:1px solid #c9d3de;padding-top:6px}
 @media(max-width:640px){.dt-two{grid-template-columns:1fr}}
 @media print{body.pdt>*:not(#dt-printarea){display:none!important}body.pdt>#dt-printarea{display:block!important;background:#fff;color:#000}body.pdt #dt-printarea .dt-doc{border:0;padding:0;font-size:10.5px}@page{margin:12mm}body.pdt #dt-printarea h4,body.pdt #dt-printarea .dt-head,body.pdt #dt-printarea table{break-inside:avoid}}
+
+.dt-doc{max-width:860px}.dt-blk{position:relative;margin-top:6px;border-radius:8px}.dt-blk:hover{outline:1px dashed #0d7a85;outline-offset:4px}
+.dt-ctl{position:absolute;right:0;top:0;display:flex;gap:4px;opacity:.35}.dt-blk:hover .dt-ctl,.dt-ctl:focus-within{opacity:1}.dt-ctl .btn{padding:2px 9px;min-width:0}
+[contenteditable="true"]:focus{outline:2px solid #0d7a85;outline-offset:2px;border-radius:4px}
+.dt-bd p,.dt-bd ul,.dt-bd ol{margin:4px 0}.dt-bd ul,.dt-bd ol{padding-left:20px}.dt-blk h4{padding-right:120px}
+.dt-rc{display:grid;grid-template-columns:150px 1fr;gap:12px;border:1px solid #c9d3de;border-radius:10px;padding:10px;margin:10px 0;position:relative;break-inside:avoid}.dt-img svg,.dt-img img{width:100%;height:auto;border-radius:8px;display:block;aspect-ratio:4/3;object-fit:cover}
+.dt-rb h5{margin:0 0 3px;font-size:1.02rem;color:#14304f}.dt-rm{font-size:.84rem;background:#e6f2f3;border-radius:6px;padding:4px 8px;margin-bottom:6px}.dt-cols{display:grid;grid-template-columns:1fr 1.2fr;gap:0 14px}.dt-cols ul,.dt-cols ol{margin:2px 0 0;padding-left:18px}.dt-tip{margin:6px 0 0;font-size:.84rem;color:#4b5a6e}
+.dt-rc>.dt-ui{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}
+.dt-note{font-size:.82rem;color:#4b5a6e}.dt-s{margin:12px 0 4px;color:#14304f;font-size:.95rem}.dt-ln{border-bottom:1px solid #9aa9ba;height:24px}.dt-day{margin-top:12px;font-size:.95rem}.dt-dt td{height:32px}.dt-ag{font-size:.84rem;margin:4px 0 10px;color:#14304f}
+.dt-k-dia .pb{break-before:page}
+@media(max-width:700px){.dt-rc{grid-template-columns:1fr}.dt-cols{grid-template-columns:1fr}}
+@media print{body.pdt #dt-printarea .dt-rc{grid-template-columns:130px 1fr}body.pdt #dt-printarea .dt-blk{break-inside:auto}body.pdt #dt-printarea .dt-blk h4{break-after:avoid}body.pdt #dt-printarea .dt-k-rec{break-before:page}body.pdt #dt-printarea .dt-k-dia{break-before:page}body.pdt #dt-printarea .dt-dt td{height:30px}body.pdt #dt-printarea .dt-blk{outline:0}body.pdt #dt-printarea *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 
 <header class="hdr">
@@ -477,22 +489,34 @@ details.card[open] > summary { margin-bottom: 12px; }
 
 <!-- ============ BASE DE ALIMENTOS ============ -->
 <section id="v-dietas" class="view" hidden>
-  <div class="view-head"><div><h2>Modelos de dieta</h2><p>Elija el momento biológico o la patología, ajuste las calorías y los datos de la persona, y entregue la hoja impresa. Son modelos orientativos: adáptelos a cada paciente.</p></div></div>
-  <div class="split">
-    <div class="col"><div class="card">
+  <div class="view-head"><div><h2>Modelos de dieta</h2><p>Elija el modelo y edite la hoja directamente: toque cualquier texto para cambiarlo, mueva los bloques con ↑ ↓ y agregue recetas o un diario. Lo que ve en la hoja es lo que se imprime.</p></div></div>
+  <div>
+    <div><div class="card">
       <div class="lbl">Momentos biológicos</div><div class="dt-chips" id="dt-chips-m"></div>
       <div class="lbl">Patologías</div><div class="dt-chips" id="dt-chips-p"></div>
       <div class="grid wide" style="margin-top:6px">
-        <label class="field"><span>Nombre de la persona (opcional)</span><input type="text" id="dt-nom" maxlength="80" autocomplete="off"></label>
+        <label class="field"><span>Nombre del paciente (opcional)</span><input type="text" id="dt-nom" maxlength="80" autocomplete="off"></label>
         <label class="field"><span>Profesional (opcional)</span><input type="text" id="dt-prof" maxlength="80" autocomplete="off"></label>
         <label class="field"><span>Fecha</span><input type="date" id="dt-fecha"></label>
-        <label class="field" id="dt-kcal-f"><span>Calorías por día (kcal)</span><input type="number" id="dt-kcal" min="800" max="4500" step="50" inputmode="numeric"></label>
       </div>
-      <label class="field" style="margin-top:10px"><span>Indicaciones personalizadas (se imprimen)</span><textarea id="dt-obs" rows="3" maxlength="600" placeholder="Ej.: alergias, horarios, preferencias, próximo control…" style="width:100%"></textarea></label>
-      <div class="actions" style="margin-top:12px"><button class="btn primary" id="dt-print" type="button">Imprimir o guardar PDF</button></div>
-      <p class="note" style="margin-top:10px"><small>Material orientativo. Debe ser revisado y adaptado por el profesional según la valoración individual (antecedentes, medicación, laboratorio). No reemplaza la consulta.</small></p>
+      <div class="lbl" style="margin-top:14px">Agregar a la hoja</div>
+      <div class="actions" style="margin-top:6px"><button class="btn small" id="dt-add-txt" type="button">Bloque de texto</button><button class="btn small" id="dt-add-dia" type="button">Diario nutricional</button></div>
+      <div id="dt-dform" hidden style="margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px">
+        <div class="grid wide"><label class="field"><span>Cantidad de días</span><input type="number" id="dt-dn" min="1" max="14" value="3" inputmode="numeric"></label></div>
+        <label class="check" style="margin-top:6px"><input type="checkbox" id="dt-dm" checked> Mis metas</label>
+        <label class="check"><input type="checkbox" id="dt-dd" checked> Mis dudas y preguntas</label>
+        <label class="check"><input type="checkbox" id="dt-da" checked> Agua, actividad y cómo me sentí</label>
+        <div class="actions" style="margin-top:8px"><button class="btn primary small" id="dt-dok" type="button">Agregar diario</button></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><select id="dt-lib" style="flex:1;min-width:180px"></select><button class="btn small" id="dt-add-rec" type="button">Agregar receta</button></div>
+      <div class="actions" style="margin-top:14px"><button class="btn primary" id="dt-print" type="button">Imprimir o guardar PDF</button><button class="btn" id="dt-reset" type="button">Volver al modelo original</button></div>
+      <input type="file" id="dt-file" accept="image/*" hidden>
+      <details class="card" open style="margin-top:14px;background:var(--surface-2,transparent)"><summary><b>Para el profesional</b> <small>(no se imprime)</small></summary>
+        <label class="field" id="dt-kcal-f" style="margin-top:8px"><span>Calorías por día (kcal)</span><input type="number" id="dt-kcal" min="800" max="4500" step="50" inputmode="numeric"></label>
+        <div id="dt-pro"></div></details>
+      <p class="note" style="margin-top:10px"><small>Material orientativo. Debe ser revisado y adaptado por el profesional según la valoración individual. Las recetas tienen una ilustración: con «Cambiar foto» puede poner una foto propia.</small></p>
     </div></div>
-    <aside class="col"><div class="dt-doc" id="dt-view"></div></aside>
+    <div style="margin-top:16px"><div class="dt-doc" id="dt-view" style="margin:0 auto"></div></div>
   </div>
 </section>
 
@@ -1933,48 +1957,235 @@ var DIETAS = [
   ref: ['Ley 26.588 y Código Alimentario Argentino; ANMAT (alimentos libres de gluten); Ministerio de Salud de la Nación (Guía de práctica clínica de enfermedad celíaca); ESPGHAN 2020.'] }
 ];
 
+var RECETAS = [
+/* ---- Embarazo ---- */
+{ id: 'emb1', m: 'emb', ic: 'tort', t: 'Tortilla de espinaca y queso al horno', rinde: '4 porciones (1 cuarto de tortilla)', eq: '1 huevo + ½ porción de verdura + ½ porción de lácteos',
+  ing: ['4 huevos', '2 tazas de espinaca hervida y bien escurrida (1 atado)', '1 cebolla mediana picada', '4 cucharadas soperas de queso fresco en cubos', '1 cucharada sopera de aceite', 'Pimienta y nuez moscada a gusto'],
+  pas: ['Rehogar la cebolla con la mitad del aceite hasta que esté transparente.', 'Mezclar con la espinaca picada, el queso y los huevos batidos.', 'Aceitar un molde, volcar la mezcla y hornear 25 a 30 minutos a 180 °C.', 'Verificar que quede bien cocida por dentro, sin parte líquida.'], tip: 'En el embarazo los huevos siempre bien cocidos.' },
+{ id: 'emb2', m: 'emb', ic: 'pot', t: 'Guiso de lentejas con verduras', rinde: '4 porciones (1 plato hondo)', eq: '1 porción de legumbres + 1 porción de verduras',
+  ing: ['1 taza de lentejas secas (lavadas)', '1 zanahoria en cubos', '1 cebolla picada', '½ morrón en cubos', '1 papa mediana en cubos', '1 diente de ajo', '1 cucharada sopera de aceite', '1 cucharadita de pimentón', '4 tazas de agua'],
+  pas: ['Rehogar la cebolla, el ajo y el morrón con el aceite.', 'Agregar la zanahoria, la papa, el pimentón, las lentejas y el agua.', 'Cocinar tapado a fuego bajo 30 a 40 minutos hasta que las lentejas estén tiernas.', 'Servir con una fruta cítrica de postre para ayudar a absorber el hierro.'], tip: 'Se puede sumar 1 taza de carne magra en cubos para más hierro.' },
+{ id: 'emb3', m: 'emb', ic: 'glass', t: 'Licuado de banana, leche y avena', rinde: '2 vasos', eq: '1 porción de lácteos + ½ fruta + ½ cereal (por vaso)',
+  ing: ['2 tazas de leche (400 ml)', '1 banana madura', '2 cucharadas soperas de avena', 'Canela en polvo'],
+  pas: ['Poner todo en la licuadora.', 'Licuar 1 minuto y tomar enseguida.'], tip: 'Usar siempre leche pasteurizada o hervida.' },
+/* ---- Lactancia ---- */
+{ id: 'lac1', m: 'lac', ic: 'plate', t: 'Pollo al horno con verduras', rinde: '4 porciones', eq: '1 porción de carne + 1 porción de verduras + ½ de papa o batata',
+  ing: ['4 presas chicas de pollo sin piel (600 g)', '2 papas medianas', '1 batata', '1 zanahoria', '1 cebolla', '1 cucharada sopera de aceite', '2 dientes de ajo', 'Orégano y pimienta a gusto'],
+  pas: ['Cortar las verduras en gajos gruesos y disponerlas en una asadera.', 'Colocar el pollo encima, con el ajo, el orégano y el aceite.', 'Hornear 45 minutos a 200 °C, dando vuelta una vez.', 'Controlar que el pollo esté bien cocido.'], tip: 'Acompañar con ensalada cruda para completar el plato.' },
+{ id: 'lac2', m: 'lac', ic: 'pie', t: 'Tarta de acelga y ricota', rinde: '6 porciones', eq: '½ porción de lácteos + ½ huevo + ½ porción de verduras + ½ de cereal',
+  ing: ['1 tapa de tarta (o masa casera)', '1 atado de acelga (2 tazas hervida y picada)', '1 taza de ricota (200 g)', '2 huevos', '1 cebolla chica', '1 cucharadita de aceite', 'Nuez moscada y pimienta'],
+  pas: ['Hervir la acelga 3 minutos, escurrir bien y picar.', 'Rehogar la cebolla; mezclar con acelga, ricota y huevos.', 'Forrar un molde con la masa, volcar el relleno y cubrir con otra tapa o dejar abierta.', 'Hornear 35 minutos a 180 °C hasta dorar.'], tip: 'Se conserva 2 días en la heladera.' },
+{ id: 'lac3', m: 'lac', ic: 'jar', t: 'Yogur con fruta, avena y nueces', rinde: '1 porción', eq: '1 porción de lácteos + 1 fruta + ½ porción de frutos secos',
+  ing: ['1 pote de yogur natural (200 g)', '1 banana chica o ½ taza de frutilla', '1 cucharada sopera de avena', '1 cucharada sopera de nueces picadas'],
+  pas: ['Servir el yogur en un bowl.', 'Agregar la fruta cortada, la avena y las nueces.'], tip: 'Ideal como colación mientras se amamanta.' },
+/* ---- 6 a 24 meses ---- */
+{ id: 'cmp1', m: 'cmp', ic: 'bowl', t: 'Puré de zapallo con carne', rinde: '3 porciones (3 a 4 cucharadas soperas)', eq: '½ verdura + ½ papa + 1 carne (2 cucharadas)',
+  ing: ['1 taza de zapallo en cubos (150 g)', '½ papa chica', '2 cucharadas soperas de carne vacuna magra o pollo', '1 cucharadita de aceite crudo'],
+  pas: ['Hervir las verduras y la carne en agua sin sal unos 20 minutos, hasta que estén bien blandas.', 'Escurrir y pisar con tenedor; desmenuzar bien la carne.', 'Mezclar y agregar el aceite en crudo al final.', 'Servir tibio, con cuchara.'], tip: 'Sin sal ni caldos. Congelar en porciones y no recongelar.' },
+{ id: 'cmp2', m: 'cmp', ic: 'bowl', t: 'Papilla de lentejas y zanahoria', rinde: '2 porciones (4 cucharadas soperas)', eq: '1 porción de legumbres + ½ verdura',
+  ing: ['½ taza de lentejas bien cocidas', '1 zanahoria hervida', '1 cucharadita de aceite', 'Unas gotas de limón (opcional)'],
+  pas: ['Pisar las lentejas con la zanahoria hasta formar un puré.', 'Agregar el aceite y mezclar.', 'Ofrecer con una fruta cítrica de postre para ayudar a absorber el hierro.'], tip: 'Desde los 6 meses; la consistencia se vuelve más espesa con la edad.' },
+{ id: 'cmp3', m: 'cmp', ic: 'tort', t: 'Tiritas de omelette de zapallito', rinde: '1 porción (desde los 9 meses)', eq: '1 huevo + ½ verdura',
+  ing: ['1 huevo entero', '2 cucharadas soperas de zapallito rallado', '1 cucharadita de aceite'],
+  pas: ['Batir el huevo con el zapallito.', 'Cocinar en sartén aceitada hasta que cuaje del todo por ambos lados.', 'Cortar en tiras para que el bebé las tome con la mano.'], tip: 'El huevo siempre bien cocido; sin sal.' },
+/* ---- Escolar ---- */
+{ id: 'esc1', m: 'esc', ic: 'plate', t: 'Milanesas de pollo al horno', rinde: '4 porciones (1 milanesa)', eq: '1 porción de carne',
+  ing: ['2 pechugas medianas cortadas en 4 filetes finos', '1 huevo batido', '½ taza de pan rallado o avena molida', '1 diente de ajo picado y perejil', '1 cucharadita de aceite'],
+  pas: ['Pasar los filetes por el huevo con ajo y perejil y luego por el pan rallado.', 'Disponer en una placa aceitada.', 'Hornear 12 minutos a 200 °C de cada lado.'], tip: 'Acompañar con ensalada de colores.' },
+{ id: 'esc2', m: 'esc', ic: 'plate', t: 'Hamburguesas de lentejas', rinde: '4 porciones (2 hamburguesas chicas)', eq: '½ porción de legumbres + ½ verdura',
+  ing: ['1 taza de lentejas cocidas', '1 huevo', '3 cucharadas soperas de avena', '½ cebolla rallada', '1 zanahoria rallada', '½ cucharadita de comino'],
+  pas: ['Pisar las lentejas y mezclar con el resto de los ingredientes.', 'Formar 8 hamburguesas y apoyarlas en una placa aceitada.', 'Hornear 15 minutos a 200 °C dando vuelta a la mitad.'], tip: 'Sirven para la vianda escolar.' },
+{ id: 'esc3', m: 'esc', ic: 'pie', t: 'Muffins de banana y avena', rinde: '8 muffins', eq: '½ porción de cereal + ½ fruta (por muffin)',
+  ing: ['3 bananas bien maduras', '2 huevos', '1 ½ tazas de avena', '½ taza de leche', '1 cucharadita de polvo de hornear', 'Canela a gusto'],
+  pas: ['Pisar las bananas y mezclar con los huevos y la leche.', 'Agregar la avena, el polvo de hornear y la canela.', 'Distribuir en 8 moldes y hornear 25 minutos a 180 °C.'], tip: 'No lleva azúcar: la dulzura es de la banana.' },
+/* ---- Adulto mayor ---- */
+{ id: 'may1', m: 'may', ic: 'bowl', t: 'Sopa crema de zapallo y lentejas', rinde: '4 porciones (1 taza grande)', eq: '1 porción de verduras + ½ de legumbres',
+  ing: ['3 tazas de zapallo en cubos', '½ taza de lentejas rojas', '1 cebolla', '1 papa chica', '4 tazas de agua o caldo casero', '1 cucharada sopera de aceite'],
+  pas: ['Rehogar la cebolla con el aceite.', 'Agregar el zapallo, la papa, las lentejas y el agua.', 'Cocinar 25 minutos y procesar hasta lograr una crema lisa.', 'Se puede enriquecer con 1 cucharada de queso crema por plato.'], tip: 'Textura blanda, fácil de tragar.' },
+{ id: 'may2', m: 'may', ic: 'pie', t: 'Budín de pollo y verduras', rinde: '4 porciones', eq: '1 porción de carne + ½ porción de verduras + ½ de lácteos',
+  ing: ['2 tazas de pollo cocido desmenuzado', '2 huevos', '½ taza de leche', '1 zanahoria rallada', '4 cucharadas soperas de queso cremoso', '1 cucharadita de aceite'],
+  pas: ['Mezclar todos los ingredientes.', 'Volcar en un molde aceitado.', 'Hornear 35 minutos a 180 °C hasta que esté firme.'], tip: 'Rico en proteínas y blando.' },
+{ id: 'may3', m: 'may', ic: 'jar', t: 'Flan de leche al baño María', rinde: '4 porciones', eq: '½ porción de lácteos + ½ huevo',
+  ing: ['2 tazas de leche', '2 huevos', '2 cucharadas soperas de azúcar', '1 cucharadita de esencia de vainilla'],
+  pas: ['Mezclar la leche, los huevos, el azúcar y la vainilla sin hacer espuma.', 'Repartir en 4 moldes.', 'Cocinar al baño María en el horno 35 a 40 minutos a 160 °C, hasta que cuaje.'], tip: 'Postre blando y con proteína.' },
+/* ---- Hipertensión ---- */
+{ id: 'hta1', m: 'hta', ic: 'plate', t: 'Merluza al horno con limón y hierbas', rinde: '4 porciones', eq: '1 porción de carne (pescado) + ½ verdura',
+  ing: ['4 filetes de merluza (600 g)', '1 limón', '2 dientes de ajo', '2 tomates en rodajas', 'Perejil y orégano', '1 cucharada sopera de aceite'],
+  pas: ['Acomodar los tomates en una fuente y apoyar encima los filetes.', 'Agregar ajo picado, hierbas, jugo de limón y el aceite.', 'Hornear 20 minutos a 180 °C.'], tip: 'No lleva sal: el limón y las hierbas dan el sabor.' },
+{ id: 'hta2', m: 'hta', ic: 'salad', t: 'Ensalada de lentejas y vegetales', rinde: '2 porciones', eq: '1 porción de legumbres + 1 porción de verduras',
+  ing: ['1 taza de lentejas cocidas en casa', '1 tomate', '½ morrón', '½ cebolla morada', 'Perejil picado', '1 cucharada sopera de aceite', 'Jugo de 1 limón'],
+  pas: ['Cortar las verduras en cubos chicos.', 'Mezclar con las lentejas.', 'Aderezar con el aceite y el limón.'], tip: 'Cocinar las legumbres en casa: las enlatadas tienen mucha sal.' },
+{ id: 'hta3', m: 'hta', ic: 'plate', t: 'Arroz integral con verduras salteadas', rinde: '4 porciones', eq: '1 porción de cereal + 1 porción de verduras',
+  ing: ['1 taza de arroz integral crudo', '1 zanahoria', '1 zucchini', '½ morrón', '1 cebolla', '1 diente de ajo', '1 cucharada sopera de aceite', 'Pimentón y comino'],
+  pas: ['Hervir el arroz según el paquete (40 minutos) sin sal.', 'Saltear las verduras cortadas en tiras con el ajo y el aceite.', 'Mezclar con el arroz y condimentar.'], tip: 'Sin cubitos de caldo.' },
+/* ---- Diabetes tipo 2 ---- */
+{ id: 'dm21', m: 'dm2', ic: 'salad', t: 'Ensalada completa de pollo y garbanzos', rinde: '2 porciones', eq: '1 porción de carne + ¼ de legumbres + 2 de verduras',
+  ing: ['1 pechuga cocida desmenuzada (150 g)', '½ taza de garbanzos cocidos', '2 tazas de hojas verdes', '1 tomate', '½ pepino', '1 cucharada sopera de aceite de oliva', 'Jugo de ½ limón'],
+  pas: ['Mezclar las hojas con el tomate y el pepino cortados.', 'Agregar el pollo y los garbanzos.', 'Aderezar con aceite y limón.'], tip: 'Los garbanzos aportan fibra que modera la glucemia.' },
+{ id: 'dm22', m: 'dm2', ic: 'tort', t: 'Tortilla de zucchini y cebolla', rinde: '4 porciones', eq: '1 huevo + 1 porción de verduras',
+  ing: ['4 huevos', '2 zucchini medianos rallados (3 tazas)', '1 cebolla', '1 cucharada sopera de aceite', 'Pimienta y orégano'],
+  pas: ['Rehogar la cebolla; agregar el zucchini y cocinar 5 minutos.', 'Mezclar con los huevos batidos.', 'Volcar en un molde aceitado y hornear 25 minutos a 180 °C.'], tip: 'Sin harinas: casi no aporta hidratos de carbono.' },
+{ id: 'dm23', m: 'dm2', ic: 'jar', t: 'Yogur natural con frutillas y chía', rinde: '1 porción', eq: '1 porción de lácteos + ½ fruta',
+  ing: ['1 pote de yogur natural sin azúcar (200 g)', '½ taza de frutillas picadas', '1 cucharadita de chía', 'Canela'],
+  pas: ['Mezclar la chía con el yogur y dejar reposar 5 minutos.', 'Agregar las frutillas y la canela.'], tip: 'Sin miel ni azúcar agregada.' },
+/* ---- Dislipidemia ---- */
+{ id: 'dis1', m: 'dis', ic: 'plate', t: 'Caballa o salmón al horno con verduras', rinde: '4 porciones', eq: '1 porción de carne (pescado graso) + 1 porción de verduras',
+  ing: ['4 filetes chicos de caballa o salmón (500 g)', '2 zucchini en rodajas', '1 berenjena en rodajas', '2 tomates', '1 cucharada sopera de aceite de oliva', 'Limón y romero'],
+  pas: ['Disponer las verduras en una fuente y apoyar el pescado encima.', 'Agregar limón, romero y aceite.', 'Hornear 20 a 25 minutos a 190 °C.'], tip: 'Pescado graso 2 veces por semana: aporta omega-3.' },
+{ id: 'dis2', m: 'dis', ic: 'bowl', t: 'Avena cocida con manzana y canela', rinde: '1 porción', eq: '1 porción de lácteos + 1 de cereal + 1 fruta',
+  ing: ['½ taza de copos de avena', '1 taza de leche descremada', '½ manzana rallada', 'Canela', '1 cucharadita de nueces picadas'],
+  pas: ['Calentar la leche con la avena a fuego bajo 5 minutos, revolviendo.', 'Agregar la manzana y la canela.', 'Servir con las nueces.'], tip: 'La avena aporta fibra soluble que ayuda a bajar el colesterol.' },
+{ id: 'dis3', m: 'dis', ic: 'jar', t: 'Hummus casero con palitos de verduras', rinde: '4 porciones (3 cucharadas soperas)', eq: '½ porción de legumbres + ½ de grasas saludables',
+  ing: ['1 taza de garbanzos cocidos', '1 cucharada sopera de aceite de oliva', 'Jugo de ½ limón', '1 diente de ajo', '2 cucharadas soperas de agua', 'Zanahoria y apio en palitos'],
+  pas: ['Procesar los garbanzos con el ajo, el limón, el aceite y el agua hasta hacer una pasta.', 'Servir con los palitos de verduras.'], tip: 'Reemplaza a los untables con grasa saturada.' },
+/* ---- Obesidad ---- */
+{ id: 'obe1', m: 'obe', ic: 'bowl', t: 'Sopa de verduras con pollo', rinde: '4 porciones (1 plato hondo)', eq: '1 porción de verduras + ½ de carne',
+  ing: ['1 pechuga chica (200 g)', '3 tazas de verduras mixtas picadas (zapallito, zanahoria, apio, repollo)', '1 cebolla', '6 tazas de agua', 'Perejil'],
+  pas: ['Hervir el pollo con la cebolla 15 minutos.', 'Agregar las verduras y cocinar 20 minutos más.', 'Desmenuzar el pollo, volver a la olla y servir con perejil.'], tip: 'Mucho volumen y pocas calorías: sacia.' },
+{ id: 'obe2', m: 'obe', ic: 'plate', t: 'Fideos de zucchini con atún y tomate', rinde: '2 porciones', eq: '1 porción de carne (pescado) + 2 de verduras',
+  ing: ['2 zucchini grandes en juliana fina', '1 lata de atún al natural escurrido (120 g)', '2 tomates picados', '½ cebolla', '1 diente de ajo', '1 cucharada sopera de aceite', 'Albahaca'],
+  pas: ['Rehogar la cebolla y el ajo; agregar el tomate y cocinar 10 minutos.', 'Sumar el atún y la juliana de zucchini 3 minutos.', 'Servir con albahaca.'], tip: 'Reemplaza a los fideos de harina.' },
+{ id: 'obe3', m: 'obe', ic: 'plate', t: 'Zapallitos rellenos de carne magra', rinde: '4 porciones (1 zapallito)', eq: '1 porción de carne + 1 de verduras',
+  ing: ['4 zapallitos redondos', '200 g de carne picada magra', '1 cebolla', '1 tomate', '2 cucharadas soperas de queso rallado', '1 cucharadita de aceite'],
+  pas: ['Hervir los zapallitos 8 minutos, ahuecarlos y picar la pulpa.', 'Rehogar la cebolla, la carne, el tomate y la pulpa.', 'Rellenar, espolvorear con queso y gratinar 10 minutos.'], tip: 'Una porción cubre la mitad del plato.' },
+/* ---- Celiaquía ---- */
+{ id: 'cel1', m: 'cel', ic: 'tort', t: 'Tortilla de papa y cebolla al horno', rinde: '4 porciones', eq: '1 huevo + 1 porción de papa + ½ de verduras',
+  ing: ['3 papas medianas en rodajas finas', '1 cebolla', '4 huevos', '1 cucharada sopera de aceite', 'Pimienta'],
+  pas: ['Hervir las papas 8 minutos y rehogar la cebolla.', 'Mezclar con los huevos batidos.', 'Hornear en molde aceitado 30 minutos a 180 °C.'], tip: 'Naturalmente sin gluten. Controlar que el aceite y los condimentos tengan el logo «Sin TACC».' },
+{ id: 'cel2', m: 'cel', ic: 'pie', t: 'Chipá de queso (almidón de mandioca)', rinde: '20 bollitos chicos (5 porciones)', eq: '4 chipás = 1 porción de cereal + ½ de lácteos',
+  ing: ['2 tazas de almidón de mandioca con logo «Sin TACC» (250 g)', '1 taza de queso rallado (125 g)', '1 huevo', '3 cucharadas soperas de aceite', '¼ taza de leche', '1 pizca de sal'],
+  pas: ['Mezclar el almidón con el queso y la sal.', 'Agregar el huevo, el aceite y la leche; amasar hasta formar una masa que no se pegue.', 'Armar bollitos del tamaño de una nuez y apoyarlos en una placa.', 'Hornear 20 minutos a 200 °C.'], tip: 'Usar utensilios y placa sin restos de harina de trigo.' },
+{ id: 'cel3', m: 'cel', ic: 'pot', t: 'Polenta con salsa de pollo y verduras', rinde: '4 porciones', eq: '1 porción de cereal + 1 de carne + 1 de verduras',
+  ing: ['1 taza de polenta (sin TACC)', '4 tazas de agua', '200 g de pollo en cubos', '2 tomates', '1 cebolla', '½ morrón', '1 cucharada sopera de aceite', '2 cucharadas soperas de queso rallado'],
+  pas: ['Cocinar la polenta en el agua hirviendo 10 minutos, revolviendo.', 'Rehogar la cebolla, el morrón y el pollo; agregar el tomate y cocinar 20 minutos.', 'Servir la polenta cubierta con la salsa y el queso.'], tip: 'Revisar que la polenta diga «Sin TACC» en el envase.' }
+];
+
 /* ============================ MODELOS DE DIETA ============================ */
-var DT_CUR = DIETAS[0];
-function dtDoc() {
-  var D = DT_CUR, kcal = val('dt-kcal'), nom = $('dt-nom').value.trim(), prof = $('dt-prof').value.trim(), f = $('dt-fecha').value, obs = $('dt-obs').value.trim();
-  var ul = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
+var DT = { D: DIETAS[0], title: '', sub: '', blocks: [], dirty: false }, DT_UID = 0, DT_IMG = null;
+function dtIcon(k) {
+  var bg = { tort: '#fbf0d0', pot: '#f6e1d6', glass: '#e1f1f3', plate: '#e6f2f3', bowl: '#f6e1d6', salad: '#e3f1e3', jar: '#e9e5f4', pie: '#fbf0d0' }[k] || '#e6f2f3';
+  var g = {
+    tort: '<ellipse cx="60" cy="52" rx="38" ry="22" fill="#e0b25a"/><ellipse cx="60" cy="48" rx="32" ry="17" fill="#f3d27a"/><circle cx="48" cy="46" r="4" fill="#5e9b4a"/><circle cx="66" cy="50" r="4" fill="#c8553d"/><circle cx="74" cy="42" r="3" fill="#5e9b4a"/>',
+    pot: '<path d="M26 40h68v26a16 16 0 0 1-16 16H42a16 16 0 0 1-16-16z" fill="#14304f"/><rect x="22" y="36" width="76" height="7" rx="3" fill="#0d7a85"/><path d="M44 28c-4-6 4-8 0-14M60 28c-4-6 4-8 0-14M76 28c-4-6 4-8 0-14" stroke="#a87615" stroke-width="3" fill="none" stroke-linecap="round"/>',
+    glass: '<path d="M42 18h36l-5 60H47z" fill="#ffffff" stroke="#0d7a85" stroke-width="3"/><path d="M45 38h30l-3 38H48z" fill="#f3d27a"/><rect x="62" y="8" width="5" height="40" rx="2" transform="rotate(12 62 8)" fill="#7a1f3a"/>',
+    plate: '<ellipse cx="60" cy="48" rx="46" ry="30" fill="#fff" stroke="#14304f" stroke-width="3"/><ellipse cx="60" cy="48" rx="33" ry="20" fill="#f3f6f8"/><path d="M38 48a22 14 0 0 1 22-14v14z" fill="#5e9b4a"/><path d="M60 34a22 14 0 0 1 22 14H60z" fill="#d98c3a"/><path d="M60 48h22a22 14 0 0 1-22 14z" fill="#c8553d"/><path d="M38 48h22v14a22 14 0 0 1-22-14z" fill="#f3d27a"/>',
+    bowl: '<path d="M20 44h80a40 34 0 0 1-80 0z" fill="#0d7a85"/><ellipse cx="60" cy="44" rx="40" ry="8" fill="#f3d27a"/><path d="M48 30c-3-5 3-7 0-12M62 30c-3-5 3-7 0-12M76 30c-3-5 3-7 0-12" stroke="#a87615" stroke-width="3" fill="none" stroke-linecap="round"/>',
+    salad: '<path d="M18 40h84a42 36 0 0 1-84 0z" fill="#14304f"/><circle cx="40" cy="36" r="12" fill="#5e9b4a"/><circle cx="62" cy="30" r="13" fill="#7fb55e"/><circle cx="82" cy="36" r="11" fill="#5e9b4a"/><circle cx="52" cy="38" r="6" fill="#c8553d"/><circle cx="72" cy="40" r="5" fill="#e0b25a"/>',
+    jar: '<rect x="36" y="30" width="48" height="50" rx="8" fill="#fff" stroke="#0d7a85" stroke-width="3"/><rect x="40" y="52" width="40" height="24" rx="4" fill="#f6e1d6"/><rect x="40" y="38" width="40" height="14" fill="#f3f6f8"/><circle cx="50" cy="44" r="5" fill="#7a1f3a"/><circle cx="64" cy="46" r="4" fill="#7a1f3a"/><rect x="32" y="22" width="56" height="9" rx="3" fill="#a87615"/>',
+    pie: '<ellipse cx="60" cy="60" rx="44" ry="18" fill="#c9852f"/><path d="M16 60v-8c0-10 20-18 44-18s44 8 44 18v8c0 10-20 18-44 18S16 70 16 60z" fill="#e0b25a"/><ellipse cx="60" cy="50" rx="36" ry="12" fill="#f3d27a"/><path d="M40 48l10 3M62 44l10 4M76 52l8 2" stroke="#c9852f" stroke-width="3" stroke-linecap="round"/>'
+  }[k] || '';
+  return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración de la receta"><rect width="120" height="90" rx="8" fill="' + bg + '"/>' + g + '</svg>';
+}
+function dtL(a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; }
+function dtRecHTML(r) {
+  return '<article class="dt-rc"><div class="dt-img" contenteditable="false">' + dtIcon(r.ic) + '</div><div class="dt-rb"><h5>' + esc(r.t) + '</h5>'
+    + '<div class="dt-rm"><b>Rinde:</b> ' + esc(r.rinde) + ' · <b>Cada porción equivale a:</b> ' + esc(r.eq) + '</div>'
+    + '<div class="dt-cols"><div><b>Ingredientes (medidas caseras)</b>' + dtL(r.ing) + '</div><div><b>Preparación</b><ol>' + r.pas.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol></div></div>'
+    + (r.tip ? '<p class="dt-tip"><b>Consejo:</b> ' + esc(r.tip) + '</p>' : '') + '</div>'
+    + '<div class="dt-ui" contenteditable="false"><button type="button" class="btn small" data-img="1">Cambiar foto</button> <button type="button" class="btn small danger" data-rrm="1">Quitar receta</button></div></article>';
+}
+var DT_DCOL = { dm2: 'Glucemia', hta: 'Sal agregada (sí / no)', cel: 'Síntomas', emb: 'Náuseas / acidez', cmp: 'Cómo lo aceptó', obe: 'Hambre (1 a 5)', may: 'Apetito (1 a 5)' };
+function dtDiarioHTML(o) {
+  var D = DT.D, col = DT_DCOL[D.id] || 'Hambre / saciedad (1 a 5)', h = '<p>Anote todo lo que come y bebe, con las cantidades en medidas caseras (tazas, cucharadas, porciones). No cambie lo que come: lo importante es que el registro sea real.</p>';
+  var lines = function (n) { var s = ''; for (var i = 0; i < n; i++) s += '<div class="dt-ln">&nbsp;</div>'; return s; };
+  if (o.metas) h += '<h5 class="dt-s">Mis metas</h5>' + lines(3);
+  if (o.dudas) h += '<h5 class="dt-s">Mis dudas y preguntas para la próxima consulta</h5>' + lines(5);
+  var cs = ['Desayuno', 'Colación', 'Almuerzo', 'Merienda', 'Cena', 'Antes de dormir u otros'];
+  for (var d = 1; d <= o.dias; d++) {
+    h += '<div class="dt-day' + ((d - 1) % 2 === 0 && d > 1 ? ' pb' : '') + '"><b>Día ' + d + '</b> · Fecha: ____ / ____ / ________</div><table class="dt-dt"><thead><tr><th style="width:17%">Comida</th><th style="width:9%">Hora</th><th>Qué comí y bebí, y cuánto</th><th style="width:17%">' + esc(col) + '</th></tr></thead><tbody>'
+      + cs.map(function (c) { return '<tr><td><b>' + c + '</b></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>'; }).join('') + '</tbody></table>';
+    if (o.agua) h += '<div class="dt-ag">Agua (vasos): ○ ○ ○ ○ ○ ○ ○ ○ &nbsp;·&nbsp; Actividad física: ________ min &nbsp;·&nbsp; Cómo me sentí: ________________________</div>';
+  }
+  return h;
+}
+function dtBuild(D) {
+  var port = D.id === 'cel';
+  var rec = RECETAS.filter(function (r) { return r.m === D.id; });
+  var B = [];
+  B.push({ k: 'obj', t: 'Objetivos', h: dtL(D.obj) });
+  B.push({ k: 'ali', t: port ? 'Alimentos permitidos y prohibidos' : 'Alimentos recomendados y a limitar', h: '<div class="dt-two"><div class="dt-ok"><b>' + (port ? 'Permitidos' : 'Preferir') + '</b>' + dtL(D.si) + '</div><div class="dt-no"><b>' + (port ? 'Prohibidos y a evitar' : 'Limitar o evitar') + '</b>' + dtL(D.lim) + '</div></div>' });
+  B.push({ k: 'menu', t: D.id === 'cmp' ? 'Esquema por edad' : 'Menú de ejemplo', h: '<table class="dt-mt"><thead><tr><th style="width:22%">' + (D.id === 'cmp' ? 'Edad' : 'Comida') + '</th><th>Qué comer</th></tr></thead><tbody>' + D.com.map(function (r) { return '<tr><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table>' });
+  B.push({ k: 'rec', t: 'Recetario', h: '<p class="dt-note">Medidas: 1 taza = 200 ml · 1 cucharada sopera = 15 ml · 1 cucharadita = 5 ml.</p>' + rec.map(dtRecHTML).join('') });
+  B.push({ k: 'pau', t: 'Recomendaciones', h: dtL(D.pau) + '<div class="dt-alarm"><b>Consulte pronto si presenta:</b>' + dtL(D.ala) + '</div>' });
+  B.forEach(function (b) { b.id = ++DT_UID; });
+  return B;
+}
+function dtLoad(id, force) {
+  if (DT.dirty && !force && !window.confirm('Se perderán los cambios hechos en este modelo. ¿Cambiar de modelo?')) return;
+  DT.D = DIETAS.filter(function (d) { return d.id === id; })[0] || DIETAS[0]; DT.title = DT.D.t; DT.sub = DT.D.sub; DT.blocks = dtBuild(DT.D); DT.dirty = false;
+  document.querySelectorAll('.dt-chips button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-dt') === DT.D.id ? 'true' : 'false'); });
+  dtPro(); dtRender();
+}
+function dtPro() {
+  var D = DT.D, k = val('dt-kcal'); if (D.kcal && (k === null || !$('dt-kcal').getAttribute('data-m') || $('dt-kcal').getAttribute('data-m') !== D.id)) { $('dt-kcal').value = D.kcal[0]; $('dt-kcal').setAttribute('data-m', D.id); k = D.kcal[0]; }
+  $('dt-kcal-f').style.display = D.kcal ? '' : 'none';
+  var H = '<p style="margin:4px 0">' + esc(D.kcalN) + '</p>';
+  if (D.kcal && D.mac) {
+    var rows = [['Hidratos de carbono', D.mac.hc, 4], ['Proteínas', D.mac.p, 4], ['Grasas', D.mac.g, 9]];
+    H += '<div class="tw"><table class="tbl"><thead><tr><th>Nutriente</th><th>% VCT</th><th>g/día</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1][0] + '–' + r[1][1] + ' %</td><td>' + fmt(k * r[1][0] / 100 / r[2], 0) + '–' + fmt(k * r[1][1] / 100 / r[2], 0) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+  }
+  $('dt-pro').innerHTML = H;
+}
+function dtRender() {
+  var D = DT.D, nom = $('dt-nom').value.trim(), prof = $('dt-prof').value.trim(), f = $('dt-fecha').value;
   var img = document.querySelector('.brand img'), logo = img ? '<img src="' + img.src + '" alt="">' : '';
   var H = '<div class="dt-head">' + logo + '<div><b>Centro de Salud N.º 61 · Solidaridad</b><span>Nutrición · Plan de alimentación</span></div></div>';
-  H += '<h2>' + esc(D.t) + '</h2><div class="dt-sub">' + esc(D.sub) + '</div>';
-  var meta = []; if (nom) meta.push('<span><b>Persona:</b> ' + esc(nom) + '</span>'); meta.push('<span><b>Fecha:</b> ' + (f ? f.split('-').reverse().join('/') : fmtDate(new Date())) + '</span>'); if (prof) meta.push('<span><b>Profesional:</b> ' + esc(prof) + '</span>');
+  H += '<h2 contenteditable="true" data-ed="title">' + esc(DT.title) + '</h2><div class="dt-sub" contenteditable="true" data-ed="sub">' + esc(DT.sub) + '</div>';
+  var meta = []; if (nom) meta.push('<span><b>Paciente:</b> ' + esc(nom) + '</span>'); meta.push('<span><b>Fecha:</b> ' + (f ? f.split('-').reverse().join('/') : fmtDate(new Date())) + '</span>'); if (prof) meta.push('<span><b>Profesional:</b> ' + esc(prof) + '</span>');
   H += '<div class="dt-meta">' + meta.join('') + '</div>';
-  H += '<h4>Objetivos</h4>' + ul(D.obj);
-  if (D.kcal && D.mac) {
-    var k = kcal || D.kcal[0], rows = [['Hidratos de carbono', D.mac.hc, 4], ['Proteínas', D.mac.p, 4], ['Grasas', D.mac.g, 9]];
-    H += '<h4>Energía y distribución</h4><p style="margin:4px 0"><b>' + fmt(k, 0) + ' kcal por día</b> (orientativo). ' + esc(D.kcalN) + '</p><table><thead><tr><th>Nutriente</th><th>% de las calorías</th><th>Gramos por día</th></tr></thead><tbody>' + rows.map(function (r) {
-      return '<tr><td>' + r[0] + '</td><td>' + r[1][0] + ' a ' + r[1][1] + ' %</td><td>' + fmt(k * r[1][0] / 100 / r[2], 0) + ' a ' + fmt(k * r[1][1] / 100 / r[2], 0) + ' g</td></tr>'; }).join('') + '</tbody></table>';
-  } else H += '<h4>Energía</h4><p style="margin:4px 0">' + esc(D.kcalN) + '</p>';
-  H += '<h4>' + (D.id === 'cmp' ? 'Esquema por edad' : 'Menú de ejemplo') + '</h4><table><thead><tr><th style="width:22%">' + (D.id === 'cmp' ? 'Edad' : 'Comida') + '</th><th>Qué comer</th></tr></thead><tbody>' + D.com.map(function (r) { return '<tr><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</tbody></table>';
-  H += '<div class="dt-two"><div class="dt-ok"><h4>Preferir</h4>' + ul(D.si) + '</div><div class="dt-no"><h4>Limitar o evitar</h4>' + ul(D.lim) + '</div></div>';
-  H += '<h4>Recomendaciones</h4>' + ul(D.pau);
-  H += '<div class="dt-alarm"><b>Consulte pronto si presenta:</b>' + ul(D.ala) + '</div>';
-  if (obs) H += '<h4>Indicaciones personalizadas</h4><p style="margin:4px 0;white-space:pre-wrap">' + esc(obs) + '</p>';
-  H += '<div class="dt-foot">Material orientativo; no reemplaza la consulta individual. Fuentes: ' + esc(D.ref.join(' ')) + '</div>';
-  return H;
+  DT.blocks.forEach(function (b, i) {
+    H += '<section class="dt-blk dt-k-' + b.k + '" data-b="' + b.id + '"><div class="dt-ctl dt-ui"><button type="button" class="btn small" data-mv="-1" title="Subir" aria-label="Subir bloque"' + (i === 0 ? ' disabled' : '') + '>↑</button><button type="button" class="btn small" data-mv="1" title="Bajar" aria-label="Bajar bloque"' + (i === DT.blocks.length - 1 ? ' disabled' : '') + '>↓</button><button type="button" class="btn small danger" data-brm="1" title="Quitar bloque" aria-label="Quitar bloque">✕</button></div>'
+      + '<h4 contenteditable="true" data-ed="bt">' + esc(b.t) + '</h4><div class="dt-bd" contenteditable="true" data-ed="bh">' + b.h + '</div></section>';
+  });
+  H += '<div class="dt-foot" contenteditable="true">Material orientativo; no reemplaza la consulta individual. Fuentes: ' + esc(D.ref.join(' ')) + '</div>';
+  $('dt-view').innerHTML = H;
 }
-function dtRender() { $('dt-view').innerHTML = dtDoc(); }
-function dtPick(id) {
-  DT_CUR = DIETAS.filter(function (d) { return d.id === id; })[0] || DIETAS[0];
-  document.querySelectorAll('.dt-chips button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-dt') === DT_CUR.id ? 'true' : 'false'); });
-  $('dt-kcal-f').style.display = DT_CUR.kcal ? '' : 'none'; if (DT_CUR.kcal) $('dt-kcal').value = DT_CUR.kcal[0]; dtRender();
+function dtBlk(el) { var s = el.closest('.dt-blk'); if (!s) return null; var id = +s.getAttribute('data-b'); return DT.blocks.filter(function (b) { return b.id === id; })[0]; }
+function dtSync(el) {
+  var ed = el.getAttribute('data-ed'); if (!ed) return; DT.dirty = true;
+  if (ed === 'title') DT.title = el.textContent; else if (ed === 'sub') DT.sub = el.textContent;
+  else { var b = dtBlk(el); if (!b) return; if (ed === 'bt') b.t = el.textContent; else b.h = el.innerHTML; }
+}
+function dtSaveAll() { document.querySelectorAll('#dt-view [data-ed]').forEach(dtSync); }
+function dtMove(id, d) { dtSaveAll(); var i = DT.blocks.findIndex(function (b) { return b.id === id; }), j = i + d; if (i < 0 || j < 0 || j >= DT.blocks.length) return; var t = DT.blocks[i]; DT.blocks[i] = DT.blocks[j]; DT.blocks[j] = t; DT.dirty = true; dtRender(); }
+function dtAddBlock(b) { dtSaveAll(); b.id = ++DT_UID; DT.blocks.push(b); DT.dirty = true; dtRender(); var el = document.querySelector('[data-b="' + b.id + '"]'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); }
+function dtPrint() {
+  dtSaveAll(); var pa = $('dt-printarea'); if (!pa) { pa = document.createElement('div'); pa.id = 'dt-printarea'; document.body.appendChild(pa); }
+  var c = $('dt-view').cloneNode(true); c.removeAttribute('id'); c.querySelectorAll('.dt-ui').forEach(function (e) { e.parentNode.removeChild(e); }); c.querySelectorAll('[contenteditable]').forEach(function (e) { e.removeAttribute('contenteditable'); });
+  pa.innerHTML = ''; pa.appendChild(c); document.body.classList.add('pdt');
+  var done = function () { document.body.classList.remove('pdt'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done); window.print(); setTimeout(done, 1500);
 }
 (function () {
   ['m', 'p'].forEach(function (g) { $('dt-chips-' + g).innerHTML = DIETAS.filter(function (d) { return d.g === g; }).map(function (d) { return '<button type="button" data-dt="' + d.id + '" aria-pressed="false">' + esc(d.t) + '</button>'; }).join(''); });
-  document.querySelector('#v-dietas').addEventListener('click', function (e) { var b = e.target.closest('[data-dt]'); if (b) dtPick(b.getAttribute('data-dt')); });
-  ['dt-nom', 'dt-prof', 'dt-fecha', 'dt-kcal', 'dt-obs'].forEach(function (i) { $(i).addEventListener('input', dtRender); });
-  $('dt-fecha').value = todayISO();
-  $('dt-print').addEventListener('click', function () {
-    var pa = $('dt-printarea'); if (!pa) { pa = document.createElement('div'); pa.id = 'dt-printarea'; document.body.appendChild(pa); }
-    pa.innerHTML = '<div class="dt-doc">' + dtDoc() + '</div>'; document.body.classList.add('pdt');
-    var done = function () { document.body.classList.remove('pdt'); window.removeEventListener('afterprint', done); };
-    window.addEventListener('afterprint', done); window.print(); setTimeout(done, 1500);
+  $('dt-lib').innerHTML = '<option value="">Agregar receta de la biblioteca…</option>' + DIETAS.map(function (d) { return '<optgroup label="' + esc(d.t) + '">' + RECETAS.filter(function (r) { return r.m === d.id; }).map(function (r) { return '<option value="' + r.id + '">' + esc(r.t) + '</option>'; }).join('') + '</optgroup>'; }).join('');
+  var root = $('v-dietas');
+  root.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+    if (t.hasAttribute('data-dt')) { dtLoad(t.getAttribute('data-dt')); return; }
+    if (t.hasAttribute('data-mv')) { var b = dtBlk(t); if (b) dtMove(b.id, +t.getAttribute('data-mv')); return; }
+    if (t.hasAttribute('data-brm')) { var b2 = dtBlk(t); if (b2 && window.confirm('¿Quitar el bloque «' + b2.t + '»?')) { dtSaveAll(); DT.blocks = DT.blocks.filter(function (x) { return x !== b2; }); DT.dirty = true; dtRender(); } return; }
+    if (t.hasAttribute('data-rrm')) { var a = t.closest('.dt-rc'); if (a) { a.parentNode.removeChild(a); dtSaveAll(); } return; }
+    if (t.hasAttribute('data-img')) { DT_IMG = t.closest('.dt-rc').querySelector('.dt-img'); $('dt-file').value = ''; $('dt-file').click(); return; }
+    if (t.id === 'dt-add-txt') { dtAddBlock({ k: 'txt', t: 'Nuevo bloque', h: '<p>Escriba aquí…</p>' }); return; }
+    if (t.id === 'dt-add-rec') { var rid = $('dt-lib').value; if (!rid) return; var r = RECETAS.filter(function (x) { return x.id === rid; })[0]; dtSaveAll(); var rb = DT.blocks.filter(function (x) { return x.k === 'rec'; })[0];
+      if (!rb) { rb = { id: ++DT_UID, k: 'rec', t: 'Recetario', h: '<p class="dt-note">Medidas: 1 taza = 200 ml · 1 cucharada sopera = 15 ml · 1 cucharadita = 5 ml.</p>' }; DT.blocks.push(rb); }
+      rb.h += dtRecHTML(r); DT.dirty = true; dtRender(); var el = document.querySelector('[data-b="' + rb.id + '"] .dt-rc:last-child'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); return; }
+    if (t.id === 'dt-add-dia') { $('dt-dform').hidden = !$('dt-dform').hidden; return; }
+    if (t.id === 'dt-dok') { var n = Math.max(1, Math.min(14, parseInt($('dt-dn').value, 10) || 3)); dtAddBlock({ k: 'dia', t: 'Mi diario nutricional', h: dtDiarioHTML({ dias: n, metas: $('dt-dm').checked, dudas: $('dt-dd').checked, agua: $('dt-da').checked }) }); $('dt-dform').hidden = true; return; }
+    if (t.id === 'dt-reset') { if (window.confirm('¿Volver al modelo original? Se pierden los cambios.')) dtLoad(DT.D.id, true); return; }
+    if (t.id === 'dt-print') dtPrint();
   });
-  dtPick('emb');
+  root.addEventListener('input', function (e) { if (e.target.getAttribute && e.target.getAttribute('data-ed')) dtSync(e.target); });
+  $('dt-file').addEventListener('change', function () {
+    var f = this.files && this.files[0]; if (!f || !DT_IMG) return; var fr = new FileReader();
+    fr.onload = function () { var im = new Image(); im.onload = function () { var s = Math.min(1, 640 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); DT_IMG.innerHTML = '<img alt="Foto de la receta" src="' + c.toDataURL('image/jpeg', 0.82) + '">'; dtSaveAll(); }; im.src = fr.result; };
+    fr.readAsDataURL(f);
+  });
+  ['dt-nom', 'dt-prof', 'dt-fecha'].forEach(function (i) { $(i).addEventListener('input', function () { dtSaveAll(); dtRender(); }); });
+  $('dt-kcal').addEventListener('input', dtPro);
+  $('dt-fecha').value = todayISO();
+  dtLoad('emb', true);
 })();
 
 var DB_SHOWN = 60;
