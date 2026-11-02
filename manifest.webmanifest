@@ -1,7 +1,8 @@
 {
+  "id": "./",
   "name": "Herramientas CS 61",
   "short_name": "CS 61",
-  "description": "Registro cardiovascular y herramientas de nutrición del Centro de Salud N.º 61.",
+  "description": "Herramientas del Centro de Salud N.º 61 Solidaridad.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
