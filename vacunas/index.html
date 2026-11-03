@@ -51,7 +51,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 </div>
 </main>
 <script>
-var VAC_VERSION = 'Calendario Nacional de Vacunación 2026, compilado en octubre de 2026';
+var VAC_VERSION = 'Calendario Nacional de Vacunación 2026 (Ministerio de Salud de la Nación, versión de marzo de 2026)';
 var $ = function (i) { return document.getElementById(i); };
 function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function todayISO() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -76,19 +76,19 @@ var V = [
   { g: '5 años (ingreso escolar)', v: 'Polio inactivada (IPV)', d: 'Refuerzo', a: 60, b: 72 }, { g: '5 años (ingreso escolar)', v: 'Triple bacteriana celular (DTP)', d: 'Refuerzo', a: 60, b: 72 },
   { g: '5 años (ingreso escolar)', v: 'Varicela', d: '2.ª dosis', a: 60, b: 72, n: 'Cohortes 2021 a primer semestre de 2024. Verifique el esquema vigente para otras cohortes.', w: function (c) { return c.dob >= '2021-01-01' && c.dob < '2024-07-01'; } },
   { g: '5 años (ingreso escolar)', v: 'Triple viral', d: '2.ª dosis', a: 60, b: 72, n: 'Si no tiene 2 dosis de triple viral (o 1 de triple y 1 de doble viral).', w: function (c) { return c.dob < '2024-07-01'; } },
-  { g: '11 años', v: 'Meningococo ACYW', d: 'Dosis única', a: 132, b: 156 }, { g: '11 años', v: 'VPH (papiloma humano)', d: 'Esquema de 2 dosis', a: 132, b: 216, n: 'Varones y mujeres. Verifique el esquema y la edad límite vigentes.' },
+  { g: '11 años', v: 'Meningococo ACYW', d: 'Dosis única', a: 132, b: 156 }, { g: '11 años', v: 'VPH (papiloma humano)', d: 'Dosis única', a: 132, b: 216, n: 'Varones y mujeres (calendario 2026: dosis única).' },
   { g: '11 años', v: 'Triple bacteriana acelular (dTpa)', d: 'Refuerzo', a: 132, b: 156 },
   { g: '11 años', v: 'Triple viral', d: 'Completar 2 dosis', a: 132, b: 216, n: 'Nacidos antes de 2021 sin refuerzo.', w: function (c) { return c.dob < '2021-01-01'; } },
-  { g: '11 años', v: 'Fiebre amarilla', d: 'Refuerzo', a: 132, b: 156, n: 'Sólo en zona de riesgo.', w: function (c) { return c.zr; } },
+  { g: '11 años', v: 'Fiebre amarilla', d: 'Refuerzo', a: 132, b: 156, n: 'Residentes en zona de riesgo, si la 1.ª dosis la recibió antes de los 2 años.', w: function (c) { return c.zr; } },
   { g: 'Adolescentes y adultos', v: 'Doble bacteriana (dT)', d: 'Refuerzo cada 10 años', a: 180, b: null, n: 'Tras el refuerzo de dTpa a los 11 años.' },
-  { g: 'Adolescentes y adultos', v: 'Hepatitis B', d: 'Completar esquema si no está vacunado', a: 180, b: null },
+  { g: '11 años y más', v: 'Hepatitis B', d: 'Iniciar o completar esquema', a: 132, b: null, n: 'Si no tiene esquema completo: 1.ª dosis, 2.ª al mes y 3.ª a los 6 meses de la primera.' },
   { g: 'Adolescentes y adultos', v: 'Triple viral', d: 'Completar 2 dosis si no las tiene', a: 180, b: null, w: function (c) { return c.m < 720; } },
   { g: 'Adolescentes y adultos', v: 'Fiebre hemorrágica argentina', d: 'Dosis única', a: 180, b: null, n: 'Residentes o trabajadores de zona de riesgo.', w: function (c) { return c.zr; } },
   { g: 'Adolescentes y adultos', v: 'Fiebre amarilla', d: 'Dosis única (2 a 59 años)', a: 216, b: 708, n: 'Sólo en zona de riesgo.', w: function (c) { return c.zr; } },
-  { g: 'Adultos con factores de riesgo', v: 'Antigripal', d: 'Anual', a: 72, b: null, n: 'Grupos de riesgo.', w: function (c) { return c.fr && c.m >= 25 && c.m < 780; } },
-  { g: 'Adultos con factores de riesgo', v: 'Neumococo conjugada', d: 'Según esquema de riesgo', a: 24, b: null, w: function (c) { return c.fr && c.m >= 24 && c.m < 780; } },
+  { g: 'Grupos de riesgo', v: 'Antigripal', d: 'Anual', a: 6, b: null, n: 'Personas con enfermedades crónicas (cardíacas, respiratorias, diabetes, renales, obesidad, inmunosupresión, otras). Surge de los lineamientos de grupos de riesgo, no del afiche del calendario.', w: function (c) { return c.fr && c.m < 780; } },
+  { g: 'Grupos de riesgo', v: 'Neumococo conjugada', d: 'Según la condición de riesgo', a: 24, b: null, n: 'Esquema (conjugada y/o polisacárida) según la condición: confirmar con los lineamientos vigentes del Ministerio. No figura en el afiche del calendario.', w: function (c) { return c.fr && c.m >= 24 && c.m < 780; } },
   { g: '65 años y más', v: 'Antigripal', d: 'Anual', a: 780, b: null },
-  { g: '65 años y más', v: 'Neumococo conjugada', d: 'Según esquema del calendario', a: 780, b: null, n: 'Verifique el esquema vigente (conjugada y polisacárida).' },
+  { g: '65 años y más', v: 'Neumococo conjugada', d: 'Dosis única', a: 780, b: null },
   { g: 'Embarazo', v: 'Triple bacteriana acelular (dTpa)', d: 'En cada embarazo', n: 'A partir de la semana 20 de gestación.', ps: [20, 42], w: function (c) { return c.emb; } },
   { g: 'Embarazo', v: 'Antigripal', d: 'En cada embarazo', n: 'En cualquier trimestre.', ps: [1, 42], w: function (c) { return c.emb; } },
   { g: 'Embarazo', v: 'Virus sincicial respiratorio (VSR)', d: 'Dosis única', n: 'Entre las semanas 32 y 36,6, en la temporada de circulación del virus.', ps: [32, 36.9], w: function (c) { return c.emb; } },
