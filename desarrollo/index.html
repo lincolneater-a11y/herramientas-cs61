@@ -1,0 +1,188 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Desarrollo infantil en la visita · CS 61</title>
+<style>
+:root{--bg:#f1f5f8;--s:#fff;--ink:#14243a;--ink2:#4a5d73;--line:#d2dce5;--hdr:#14304f;--teal:#0d7a85;--tealsoft:#e2f1f3;--gold:#a87615;--goldsoft:#fbf1d8;--bord:#8a1f3d;--bordsoft:#fbeaee;--ok:#1f7a3d;--oksoft:#e3f3e8;--gr:#d9e6a8;--or:#fcb74f;--rd:#e8584a;--orsoft:#fff1dc}
+@media (prefers-color-scheme:dark){:root{--bg:#0c1722;--s:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--hdr:#0a2038;--teal:#4fc1c9;--tealsoft:#12353b;--gold:#e0b25a;--goldsoft:#3a2f12;--bord:#e58ba3;--bordsoft:#3a1a25;--ok:#6fcf8d;--oksoft:#143325;--orsoft:#3a2a10}}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.hdr{background:var(--hdr);color:#fff;padding:12px 16px}.hdr-in{max-width:1100px;margin:0 auto}.brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.brand img{width:48px;height:48px;border-radius:50%;background:#fff}.brand h1{margin:0;font-size:1.1rem}.brand small{color:#b8cadb}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 48px}h2{margin:0 0 4px}.sub{color:var(--ink2);margin:0}
+.split{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:16px;margin-top:14px;align-items:start}@media(max-width:900px){.split{grid-template-columns:1fr}}
+.card{background:var(--s);border:1px solid var(--line);border-radius:12px;padding:16px}.card+.card{margin-top:14px}.card h3{margin:0 0 6px;font-size:1.02rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}label.field{display:flex;flex-direction:column;gap:4px;font-size:.86rem;font-weight:600}
+input[type=date],input[type=number],select,textarea{width:100%;padding:8px 10px;background:var(--s);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid var(--teal);outline-offset:1px}
+.check{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:.92rem}
+.btn{background:var(--s);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.btn.danger{color:var(--bord)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.note{font-size:.84rem;color:var(--ink2);background:var(--tealsoft);border-radius:8px;padding:8px 10px}
+.warnb{background:var(--goldsoft);border:1px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:.86rem;margin-top:12px}
+.age{font-size:1.2rem;font-weight:800;color:var(--teal)}.age small{display:block;font-size:.84rem;font-weight:500;color:var(--ink2)}
+.sec{margin:16px 0 6px;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;font-weight:800;display:flex;gap:8px;align-items:center}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.25)}.sw.g{background:var(--gr)}.sw.o{background:var(--or)}.sw.r{background:var(--rd)}
+.secd{font-size:.84rem;color:var(--ink2);margin:0 0 6px}
+.it{border:1px solid var(--line);border-left-width:6px;border-radius:8px;padding:9px 10px;margin:7px 0;background:var(--s)}
+.it.g{border-left-color:var(--gr)}.it.o{border-left-color:var(--or)}.it.r{border-left-color:var(--rd)}.it.c{border-left-color:var(--teal)}
+.it .q{font-weight:600}.it .q small{font-weight:400;color:var(--ink2)}
+.opts{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.opts button{flex:1 1 90px;padding:8px 6px;border:1px solid var(--line);background:var(--s);color:var(--ink);border-radius:8px;font:inherit;font-size:.86rem;font-weight:600;cursor:pointer}
+.opts button[aria-pressed=true].y{background:var(--ok);color:#fff;border-color:var(--ok)}.opts button[aria-pressed=true].n{background:var(--bord);color:#fff;border-color:var(--bord)}.opts button[aria-pressed=true].x{background:var(--ink2);color:#fff;border-color:var(--ink2)}
+.why{margin-top:8px;border-radius:8px;padding:9px 11px;font-size:.88rem;background:var(--orsoft)}.why.r{background:var(--bordsoft)}.why.g{background:var(--tealsoft)}
+.why b.t{display:block;margin-bottom:3px}.why ul{margin:4px 0 6px 18px;padding:0}.why h5{margin:8px 0 2px;font-size:.82rem}
+.sum{border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.92rem}.sum.r{background:var(--bordsoft);border:1px solid var(--bord)}.sum.o{background:var(--orsoft);border:1px solid var(--gold)}.sum.g{background:var(--oksoft);border:1px solid var(--ok)}
+details{margin-top:10px}summary{cursor:pointer;font-weight:700}
+@media print{.hdr,.actions,.noprint,.opts{display:none!important}body{background:#fff;color:#000}.card{border:0;padding:0}.split{display:block}}
+</style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><style>.sw-tool{order:99;margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;font-family:inherit}.sw-tool:hover,.sw-tool:focus-visible{background:rgba(255,255,255,.14);outline:2px solid #e0b25a;outline-offset:2px}@media print{.sw-tool{display:none!important}}@media(max-width:520px){.sw-tool{padding:5px 9px;font-size:.74rem}}</style></head><body>
+<header class="hdr"><div class="hdr-in"><div class="brand"><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Desarrollo infantil en la visita</h1><small>Centro de Salud N.º 61 · Agentes sanitarios · Basado en el IODI del Ministerio de Salud</small></div></div></div></header>
+<main>
+<h2>¿Qué debería estar haciendo este niño o niña?</h2>
+<p class="sub">Cargue la fecha de nacimiento y la de la visita: la herramienta calcula la edad y muestra qué se espera que ya haga. Si algo todavía no lo logra, indica qué mirar y qué hacer. No guarda datos: todo queda en este navegador.</p>
+<div class="warnb"><b>Es una ayuda para observar, no un diagnóstico.</b> Se usa en todas las visitas, observando al niño y preguntando a quien lo cuida. Ante cualquier duda o señal de alarma, avise al equipo de salud del centro. Rangos de edad según el Instrumento de Observación del Desarrollo Infantil (IODI), Ministerio de Salud de la Nación, hasta los 47 meses.</div>
+<div class="split">
+<div>
+ <div class="card">
+  <h3>1 · El niño o la niña</h3>
+  <div class="grid">
+   <label class="field"><span>Fecha de nacimiento</span><input type="date" id="d-dob"></label>
+   <label class="field"><span>Fecha de la visita</span><input type="date" id="d-ctl"></label>
+  </div>
+  <label class="check" style="margin-top:10px"><input type="checkbox" id="d-pre"> Nació antes de término (antes de las 37 semanas)</label>
+  <div id="d-prew" hidden style="margin:0 0 6px 26px"><label class="field" style="max-width:220px"><span>Semanas de gestación al nacer</span><input type="number" id="d-eg" min="22" max="36" inputmode="numeric"></label></div>
+  <div class="age" id="d-age" style="margin-top:10px"></div>
+  <div class="actions" style="margin-top:12px"><button class="btn" id="d-ex" type="button">Cargar ejemplo</button><button class="btn danger" id="d-cl" type="button">Limpiar</button></div>
+ </div>
+ <div class="card" id="d-alert" hidden>
+  <h3>2 · Señales generales</h3>
+  <label class="check"><input type="checkbox" id="d-loss"> La familia cuenta que perdió algo que ya sabía hacer</label>
+ </div>
+ <div class="card noprint" id="d-sumcard" hidden><h3>Resumen de la visita</h3><div id="d-sum"></div>
+  <label class="field" style="margin-top:10px"><span>Observaciones (opcional)</span><textarea id="d-obs" rows="3"></textarea></label>
+  <div class="actions" style="margin-top:10px"><button class="btn primary" id="d-copy" type="button">Copiar resumen</button><button class="btn" id="d-print" type="button">Imprimir</button></div>
+ </div>
+</div>
+<div><div class="card" id="d-out"></div></div>
+</div>
+</main>
+<script>
+var ITEMS = [[4, "vinc", "Se calma cuando lo alza su cuidador", "GGOO............"], [5, "audi", "Reacciona a un sonido o a una voz", "GGOOR..........."], [6, "vinc", "Demuestra gestualmente estados de placer o displacer", "GGOOR..........."], [7, "vis", "Fija la mirada / muestra interés en el rostro del adulto", "GGGOR..........."], [8, "vinc", "Sonríe cuando lo miran (sonrisa social)", ".GGOO..........."], [9, "vis", "Sigue con la mirada un objeto de un lado a otro", "GGGGOR.........."], [10, "audi", "Emite sonidos / gorjeo", ".GGGGR.........."], [11, "mot", "Sostiene la cabeza (sostén cefálico)", "..GGGR.........."], [12, "vinc", "Interactúa con el adulto (busca con la mirada, sonríe, grita)", "..GGGOR........."], [13, "fino", "Lleva las manos a la línea media", "...GGGO........."], [14, "audi", "Busca con la mirada la fuente de un sonido", "...GGGGR........"], [15, "fino", "Intenta tomar un objeto", "....GGGO........"], [16, "mot", "Intenta ponerse de costado", "...GGGGGO......."], [17, "fino", "Toma un objeto cercano, lo mira, lo lleva a la boca", ".....GGGOO......"], [18, "jue", "Participa del juego de las escondidas («acá está»)", ".....GGGGO......"], [19, "vinc", "Se angustia frente a desconocidos (llanto, sorpresa)", "......GGGOO....."], [20, "mot", "Se sienta solo, sin apoyo", "......GGGOOR...."], [21, "vinc", "Expresa sus emociones (enojo, miedo, alegría, tristeza)", "......GGGGOR...."], [22, "audi", "Emite sílabas (balbuceo: ma-pa-ta)", "......GGGGGR...."], [23, "mot", "Se desplaza (repta o gatea)", "......GGGGGOR..."], [24, "mot", "Se para solo, con apoyo", ".......GGGGGO..."], [25, "audi", "Responde cuando lo llaman por su nombre", ".........GGGO..."], [26, "audi", "El niño se comunica de forma verbal o no verbal", "......GGGGGOOR.."], [27, "jue", "Imita gestos (aplaude, baila, saluda)", ".......GGGGOOR.."], [28, "audi", "Reacciona al «NO» del adulto", "........GGGGOR.."], [29, "mot", "Da pasos con sostén", "........GGGGGR.."], [30, "audi", "Realiza gestos para pedir y mostrar", "..........GGGR.."], [31, "fino", "Juega a poner o sacar objetos", "..........GGGOR."], [32, "mot", "Camina solo", "...........GGRR."], [33, "audi", "Comprende consignas simples (da la mano, abre la boca)", "...........GGRR."], [34, "audi", "Dice por lo menos 1 palabra o emite sonidos con significado", "...........GGRR."], [35, "aut", "Colabora para vestirse o desvestirse", ".........GGGGGO."], [36, "aut", "Logra comer solo parte del alimento", "............GGO."], [37, "mot", "Patea una pelota", "............GGO."], [38, "aut", "Avisa algunas veces que se hizo pis o caca", ".............GO."], [39, "audi", "Reconoce y señala partes de su cuerpo ante la pregunta", ".............GGO"], [40, "fino", "Garabatea", ".............GGO"], [41, "jue", "Utiliza el «NO» (se afirma)", ".............GGO"], [42, "audi", "Utiliza frases de dos palabras (dame agua, nene cayó)", ".............GGR"], [43, "aut", "Pide algunas veces para hacer pis o caca", "..............GR"], [44, "jue", "Juega al lado de otros niños/as", "..............GO"], [45, "jue", "Juega a dar de comer o hace dormir a los muñecos", "..............GO"], [46, "audi", "Dice su nombre o sobrenombre", "..............GO"], [47, "aut", "Se saca o se pone alguna ropa solo", "..............GO"], [48, "audi", "Utiliza el «mío», «yo»", "..............GO"], [49, "aut", "Logra el control de esfínteres durante el día", "..............GG"], [50, "audi", "Puede hacer un relato sencillo", "..............GG"], [51, "jue", "Muestra interés y disfruta de interactuar con otros niños", "..............GG"], [52, "jue", "Espera su turno para jugar o hablar", "...............G"], [53, "mot", "Puede correr sin dificultad", "...............G"], [54, "fino", "Dibuja al menos un círculo", "...............G"]];
+var COLS = ['0','1','2','3','4','5','6','7','8','9','10','11','12 a 17','18 a 23','24 a 35','36 a 47'];
+var AREAS = {
+ vinc: { n: 'Vínculo y emociones', why: ['Cuidador muy cansado, triste, con depresión posparto o con mucho estrés.', 'Violencia en la casa, cambios frecuentes de quien lo cuida, poca red de apoyo.', 'Poco contacto cara a cara, o bebé muy irritable, con dolor o cólicos.', 'Nació antes de término o con bajo peso.'], tips: ['Mirarlo a los ojos, hablarle y cantarle durante la alimentación y el baño.', 'Responder a su llanto y alzarlo: no se “malcría”.', 'Mantener rutinas estables.', 'Si quien lo cuida está angustiado o hay violencia, avisar al equipo de salud.'] },
+ audi: { n: 'Audición, comunicación y lenguaje', why: ['Posible problema de audición: ¿pasó la pesquisa auditiva al nacer? ¿infecciones de oído, ictericia fuerte, meningitis, nació antes de término?', 'Se le habla poco o casi no se conversa con él.', 'Mucha televisión, celular o ruido de fondo todo el día.', 'Se le adelantan los pedidos y no necesita pedir.'], tips: ['Hablarle mucho, contarle lo que se hace y nombrar objetos.', 'Responder a sus sonidos y gestos; cantar, leer cuentos o mirar imágenes juntos.', 'Reducir pantallas y ruido de fondo.', 'Si no reacciona a los sonidos, pedir control de audición.'] },
+ vis: { n: 'Visión', why: ['Posible problema de visión (nació antes de término, antecedentes familiares).', 'Poco contacto cara a cara.'], tips: ['Acercar el rostro a unos 20-30 cm y moverlo despacio.', 'Mostrar objetos de colores fuertes y seguirlos con la mirada.', 'Si no fija o no sigue con la mirada, pedir control oftalmológico.'] },
+ mot: { n: 'Movimiento (motricidad gruesa)', why: ['Pasa mucho tiempo en cuna, practicuna, cochecito, andador o en brazos, y poco tiempo en el piso.', 'Nació antes de término, con bajo peso, o tiene desnutrición o anemia.', 'Cuerpo muy blando o muy duro, o una enfermedad reciente.', 'Ropa o espacio que limita el movimiento; miedo de la familia a que se lastime.'], tips: ['Jugar en el piso, sobre una manta, todos los días y con supervisión.', 'Ponerlo boca abajo despierto, con juguetes a distancia para que se estire.', 'No usar andador; dejarlo descalzo y con ropa cómoda.', 'Si hay asimetría (usa más un lado) o el cuerpo está muy blando o duro, avisar al equipo.'] },
+ fino: { n: 'Manos y manipulación (motricidad fina)', why: ['Tiene pocas oportunidades de agarrar objetos distintos.', 'Miedo de la familia a que se lleve cosas a la boca.', 'Manos cerradas o muy duras, problemas de visión o nació antes de término.'], tips: ['Ofrecer objetos seguros de distintas formas y texturas, sonajeros, cucharas de madera.', 'Jugar a poner y sacar, tapar y destapar; después papel y crayones gruesos.', 'Si siempre tiene los puños cerrados o no usa una mano, avisar al equipo.'] },
+ jue: { n: 'Juego y relación con otros', why: ['Juega poco con adultos o con otros niños; está mucho tiempo solo o frente a pantallas.', 'Pocos juguetes u objetos para explorar, o se lo protege de más.', 'Dificultades de comunicación o de audición.', 'Cambios en la familia (hermano nuevo, mudanza).'], tips: ['Jugar todos los días: escondidas, imitar gestos, muñecos, cacharros de la cocina.', 'Armar momentos con otros niños.', 'Dejarlo explorar con seguridad.', 'Si casi no mira ni busca a las personas, avisar al equipo.'] },
+ aut: { n: 'Autonomía y hábitos', why: ['Los adultos lo hacen todo por apuro y no le dan oportunidad de intentarlo.', 'Se le pide antes de tiempo, con presión o retos.', 'Constipación u otros problemas físicos; cambios en la familia.', 'Todavía no está maduro: cada niño tiene su ritmo dentro del rango.'], tips: ['Dejar que lo intente solo, con ropa fácil, vaso y cuchara.', 'Armar rutinas (comida, baño, sueño) y acompañar sin retar ni castigar.', 'No empezar a sacar el pañal si está enfermo o hay cambios grandes en casa.', 'Si pasa el rango y no hay avances, avisar al equipo.'] }
+};
+var COMMON_WHY = 'Siempre preguntar también: nacimiento antes de término o bajo peso, enfermedades o internaciones recientes, alimentación (anemia, desnutrición), sueño, vacunas al día, tiempo de pantallas, quién lo cuida y cómo está la familia.';
+var $ = function (i) { return document.getElementById(i); };
+function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function todayISO() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+var S = {}, CARE = [
+ { k: 'c1', t: 'El cuidador responde a las necesidades del bebé o niño', n: 1 },
+ { k: 'c2', t: 'El cuidador lo mira cuando le habla', n: 2 },
+ { k: 'c3', t: 'Hay intercambio de miradas entre el niño y su cuidador', n: 3 }
+];
+function colOf(m) { if (m < 12) return Math.floor(m); if (m < 18) return 12; if (m < 24) return 13; if (m < 36) return 14; if (m < 48) return 15; return null; }
+function ageTxt(m) { var y = Math.floor(m / 12), mm = Math.floor(m % 12), d = Math.floor((m - Math.floor(m)) * 30.4375); var s = (y ? y + ' año' + (y > 1 ? 's' : '') + (mm ? ' y ' : '') : '') + (mm || !y ? mm + ' mes' + (mm === 1 ? '' : 'es') : ''); if (!y && mm === 0) s = d + ' día' + (d === 1 ? '' : 's'); return s; }
+function ctx() {
+  var dob = $('d-dob').value, ctl = $('d-ctl').value, eg = parseFloat($('d-eg').value), pre = $('d-pre').checked;
+  var days = dob && ctl ? (new Date(ctl + 'T00:00:00') - new Date(dob + 'T00:00:00')) / 864e5 : null, m = days !== null && days >= 0 ? days / 30.4375 : null;
+  var mc = m, corr = false;
+  if (m !== null && pre && eg >= 22 && eg < 37 && m < 24) { mc = Math.max(0, m - (40 - eg) * 7 / 30.4375); corr = true; }
+  return { dob: dob, ctl: ctl, m: m, mc: mc, corr: corr, pre: pre, eg: eg, bad: dob && ctl && m === null };
+}
+function lvl(ch) { return ch === 'G' ? 'g' : ch === 'O' ? 'o' : 'r'; }
+function whyHtml(it, L) {
+  var A = AREAS[it.a || it[1]], head, act;
+  if (L === 'g') { head = 'Todavía dentro de lo habitual para esta edad'; act = 'Seguir observando y volver a evaluarlo en la próxima visita. Mientras tanto, proponer a la familia estas ideas:'; }
+  else if (L === 'o') { head = 'Zona de riesgo: conviene profundizar'; act = 'Preguntar a la familia por los motivos de abajo, dar las pautas y avisar al equipo de salud para evaluar la situación. Volver a verlo en la próxima visita (idealmente dentro del mes).'; }
+  else { head = 'Señal de alarma'; act = 'Avisar al equipo de salud del centro el mismo día para gestionar una interconsulta o derivación a un equipo interdisciplinario o especializado (Centro de Referencia de la Red de Desarrollo Infantil).'; }
+  return '<div class="why ' + (L === 'o' ? '' : L) + '"><b class="t">' + head + ' · ' + esc(A.n) + '</b>' + esc(act) + '<h5>Motivos posibles para preguntar</h5><ul>' + A.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul><p style="margin:0 0 4px;font-size:.84rem">' + esc(COMMON_WHY) + '</p><h5>Qué puede hacer la familia</h5><ul>' + A.tips.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></div>';
+}
+function btns(k) {
+  var v = S[k] || '';
+  return '<div class="opts" role="group" aria-label="Respuesta">' +
+    '<button type="button" class="y" data-k="' + k + '" data-v="o" aria-pressed="' + (v === 'o') + '">Lo hace (lo vi)</button>' +
+    '<button type="button" class="y" data-k="' + k + '" data-v="p" aria-pressed="' + (v === 'p') + '">Lo hace (me contaron)</button>' +
+    '<button type="button" class="n" data-k="' + k + '" data-v="n" aria-pressed="' + (v === 'n') + '">Aún no lo hace</button>' +
+    '<button type="button" class="x" data-k="' + k + '" data-v="x" aria-pressed="' + (v === 'x') + '">No pude evaluar</button></div>';
+}
+function render() {
+  var c = ctx(), out = '';
+  $('d-prew').hidden = !$('d-pre').checked;
+  if (c.bad) { $('d-age').textContent = 'La fecha de la visita es anterior al nacimiento.'; }
+  else if (c.m === null) { $('d-age').textContent = ''; }
+  else { $('d-age').innerHTML = 'Edad: ' + esc(ageTxt(c.m)) + (c.corr ? '<small>Edad corregida por prematurez: ' + esc(ageTxt(c.mc)) + ' (se usa para el IODI hasta los 2 años)</small>' : ''); }
+  $('d-alert').hidden = c.m === null; $('d-sumcard').hidden = c.m === null;
+  if (c.m === null) { $('d-out').innerHTML = '<h3>Resultado</h3><p class="sub">Cargue la fecha de nacimiento y la de la visita.</p>'; $('d-sum').innerHTML = ''; window.__sum = ''; return; }
+  var col = colOf(c.mc);
+  if (col === null) { $('d-out').innerHTML = '<h3>Resultado</h3><p class="sub">Este instrumento llega hasta los 47 meses. Para niños mayores, consulte con el equipo de salud.</p>'; $('d-alert').hidden = true; $('d-sumcard').hidden = true; window.__sum = ''; return; }
+  var cur = { G: [], O: [], R: [] }, prev = [], next = [];
+  ITEMS.forEach(function (it) {
+    var g = it[3], ch = g[col];
+    if (ch !== '.') cur[ch].push(it);
+    else if (col > 0 && g[col - 1] !== '.') prev.push(it);
+    else { var s = -1; for (var j = col + 1; j < 16; j++) if (g[j] !== '.') { s = j; break; } if (s > -1 && s <= col + 2) next.push(it); }
+  });
+  var resp = { r: 0, o: 0, g: 0, prev: 0, care: 0 }, lines = [];
+  out += '<h3>Franja del IODI: ' + COLS[col] + ' meses</h3><p class="sub">Marque cada pauta. Si el niño aún no la hace, aparece qué hacer.</p>';
+  out += '<div class="sec">Siempre, en todas las visitas</div><p class="secd">Observar cómo se relaciona quien lo cuida con el niño.</p>';
+  CARE.forEach(function (it) {
+    var k = it.k, v = S[k] || '';
+    out += '<div class="it c"><div class="q">' + esc(it.t) + '</div><div class="opts"><button type="button" class="y" data-k="' + k + '" data-v="o" aria-pressed="' + (v === 'o') + '">Sí</button><button type="button" class="n" data-k="' + k + '" data-v="n" aria-pressed="' + (v === 'n') + '">No</button><button type="button" class="x" data-k="' + k + '" data-v="x" aria-pressed="' + (v === 'x') + '">No pude evaluar</button></div>';
+    if (v === 'n') { resp.care++; lines.push('Vínculo: ' + it.t + ' (no)'); out += whyHtml({ a: 'vinc' }, 'o'); }
+    out += '</div>';
+  });
+  var secs = [
+   ['R', 'Ya lo hacen casi todos los niños de esta edad', 'Si todavía no lo hace, es señal de alarma.', cur.R],
+   ['O', 'Muchos niños ya lo logran', 'Si todavía no lo hace, está en zona de riesgo.', cur.O],
+   ['G', 'Lo está logrando en esta etapa', 'Es habitual a esta edad. Si todavía no lo hace, seguir observando.', cur.G]
+  ];
+  secs.forEach(function (s) {
+    if (!s[3].length) return; var L = lvl(s[0]);
+    out += '<div class="sec"><span class="sw ' + L + '"></span>' + esc(s[1]) + '</div><p class="secd">' + esc(s[2]) + '</p>';
+    s[3].forEach(function (it) { out += itemHtml(it, L, resp, lines); });
+  });
+  if (prev.length) {
+    out += '<div class="sec"><span class="sw r"></span>Del período anterior: ya tendría que hacerlo</div><p class="secd">Si no lo hace, ya pasó el rango esperado: tratarlo como señal de alarma.</p>';
+    prev.forEach(function (it) { out += itemHtml(it, 'r', resp, lines, true); });
+  }
+  if (next.length) {
+    out += '<details><summary>Lo que viene en los próximos meses (' + next.length + ')</summary><p class="secd" style="margin-top:6px">Para conversar con la familia qué esperar.</p><ul style="margin:0 0 0 18px;padding:0">' + next.map(function (it) { return '<li>' + esc(it[2]) + '</li>'; }).join('') + '</ul></details>';
+  }
+  $('d-out').innerHTML = out;
+  var loss = $('d-loss').checked, bits = [];
+  if (loss) { bits.push('La familia refiere pérdida de habilidades que ya tenía.'); }
+  var sumLevel = (resp.r || resp.prev || loss) ? 'r' : (resp.o || resp.care) ? 'o' : 'g', sm = '';
+  if (loss) sm += '<p><b>Pérdida de habilidades:</b> avisar al equipo de salud el mismo día para derivación.</p>';
+  if (resp.r + resp.prev) sm += '<p><b>Señales de alarma:</b> ' + (resp.r + resp.prev) + ' pauta(s) sin lograr en zona de alarma. Avisar al equipo el mismo día.</p>';
+  if (resp.o) sm += '<p><b>Zona de riesgo:</b> ' + resp.o + ' pauta(s). Profundizar, orientar a la familia y avisar al equipo.</p>';
+  if (resp.g) sm += '<p><b>Dentro de lo habitual:</b> ' + resp.g + ' pauta(s) aún no logradas. Volver a observar.</p>';
+  if (resp.care) sm += '<p><b>Vínculo:</b> ' + resp.care + ' pauta(s) del cuidador sin observar. Explorar cómo está la familia.</p>';
+  if (!sm) sm = '<p>Hasta ahora no se marcaron pautas sin lograr.</p>';
+  $('d-sum').innerHTML = '<div class="sum ' + sumLevel + '">' + sm + '</div>';
+  var obs = $('d-obs').value.trim();
+  window.__sum = 'IODI · Edad ' + ageTxt(c.m) + (c.corr ? ' (corregida ' + ageTxt(c.mc) + ')' : '') + ' · Franja ' + COLS[col] + ' meses · Visita ' + new Date(c.ctl + 'T00:00:00').toLocaleDateString('es-AR') + '. ' +
+    (lines.length ? 'Pautas sin lograr: ' + lines.join('; ') + '.' : 'Sin pautas marcadas como no logradas.') + (loss ? ' Refiere pérdida de habilidades.' : '') + (obs ? ' Obs.: ' + obs : '') + ' (Instrumento de Observación del Desarrollo Infantil, Min. Salud de la Nación; ayuda de observación, no diagnóstico.)';
+}
+var LB = { r: 'ALARMA', o: 'RIESGO', g: 'habitual' };
+function itemHtml(it, L, resp, lines, isPrev) {
+  var k = 'i' + it[0], v = S[k] || '', h = '<div class="it ' + L + '"><div class="q">' + esc(it[2]) + '</div>' + btns(k);
+  if (v === 'n') {
+    if (isPrev) resp.prev++; else resp[L]++;
+    lines.push(it[2] + ' [' + (isPrev ? 'ALARMA, período anterior' : LB[L]) + ']');
+    h += whyHtml(it, isPrev ? 'r' : L);
+  }
+  return h + '</div>';
+}
+document.addEventListener('input', function (e) { if (e.target.id === 'd-obs') { var c = ctx(); if (c.m !== null) { render(); } return; } if (e.target.tagName === 'INPUT') { S = e.target.id === 'd-dob' ? {} : S; render(); } });
+document.addEventListener('change', function (e) { if (e.target.id === 'd-loss' || e.target.id === 'd-pre') render(); });
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.k) { S[b.dataset.k] = S[b.dataset.k] === b.dataset.v ? '' : b.dataset.v; var y = window.scrollY; render(); window.scrollTo(0, y); return; }
+  if (b.id === 'd-copy') { (navigator.clipboard ? navigator.clipboard.writeText(window.__sum) : Promise.reject()).then(function () { b.textContent = 'Copiado'; }, function () { var t = document.createElement('textarea'); t.value = window.__sum; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); b.textContent = 'Copiado'; } catch (x) { } document.body.removeChild(t); }); }
+  if (b.id === 'd-print') window.print();
+  if (b.id === 'd-cl') { $('d-dob').value = ''; $('d-eg').value = ''; $('d-obs').value = ''; $('d-pre').checked = false; $('d-loss').checked = false; $('d-ctl').value = todayISO(); S = {}; render(); }
+  if (b.id === 'd-ex') { var d = new Date(); d.setMonth(d.getMonth() - 7); $('d-dob').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); $('d-ctl').value = todayISO(); S = {}; render(); }
+});
+$('d-ctl').value = todayISO(); render();
+</script><script>/*EMBED*/try{if(window.top!==window){var a=document.querySelector(".sw-tool");if(a)a.style.display="none"}}catch(e){}</script><script>/*CFGSYNC*/(function(){try{fetch("../config.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(c){if(!c||!c.url||!/^https:\/\/script\.google\.com\//.test(c.url))return;["cs61_pl","cs61_plcv","cs61_cons_api"].forEach(function(k){try{var o=JSON.parse(localStorage.getItem(k)||"null");if(o&&o.key&&o.url!==c.url){o.url=c.url;localStorage.setItem(k,JSON.stringify(o))}}catch(e){}})}).catch(function(){})}catch(e){}})();</script><script src="../egg.js"></script></body></html>
