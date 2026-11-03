@@ -1,0 +1,151 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendario de vacunación · CS 61</title>
+<style>
+:root{--bg:#f1f5f8;--s:#fff;--ink:#14243a;--ink2:#4a5d73;--line:#d2dce5;--hdr:#14304f;--teal:#0d7a85;--tealsoft:#e2f1f3;--gold:#a87615;--goldsoft:#fbf1d8;--bord:#8a1f3d;--bordsoft:#fbeaee;--ok:#1f7a3d;--oksoft:#e3f3e8}
+@media (prefers-color-scheme:dark){:root{--bg:#0c1722;--s:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--hdr:#0a2038;--teal:#4fc1c9;--tealsoft:#12353b;--gold:#e0b25a;--goldsoft:#3a2f12;--bord:#e58ba3;--bordsoft:#3a1a25;--ok:#6fcf8d;--oksoft:#143325}}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.hdr{background:var(--hdr);color:#fff;padding:12px 16px}.hdr-in{max-width:1100px;margin:0 auto}.brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.brand img{width:48px;height:48px;border-radius:50%;background:#fff}.brand h1{margin:0;font-size:1.1rem}.brand small{color:#b8cadb}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 48px}h2{margin:0 0 4px}.sub{color:var(--ink2);margin:0}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:16px;margin-top:14px;align-items:start}@media(max-width:860px){.split{grid-template-columns:1fr}}
+.card{background:var(--s);border:1px solid var(--line);border-radius:12px;padding:16px}.card+.card{margin-top:14px}.card h3{margin:0 0 6px;font-size:1.02rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}label.field{display:flex;flex-direction:column;gap:4px;font-size:.86rem;font-weight:600}
+input[type=date],input[type=number],select{width:100%;padding:8px 10px;background:var(--s);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--teal);outline-offset:1px}
+.check{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:.92rem}
+.btn{background:var(--s);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.btn.danger{color:var(--bord)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.note{font-size:.84rem;color:var(--ink2);background:var(--tealsoft);border-radius:8px;padding:8px 10px}
+.warnb{background:var(--goldsoft);border:1px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:.86rem;margin-top:12px}
+.vs{margin-top:10px}.vs h4{margin:14px 0 6px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase}.vs h4.now{color:var(--bord)}.vs h4.next{color:var(--teal)}.vs h4.prev{color:var(--ink2)}
+.vr{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border:1px solid var(--line);border-left-width:5px;border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--s)}
+.vr.now{border-left-color:var(--bord);background:var(--bordsoft)}.vr.next{border-left-color:var(--teal)}.vr.prev{border-left-color:var(--line)}.vr.ok{border-left-color:var(--ok);background:var(--oksoft)}
+.vr b{display:block}.vr small{color:var(--ink2)}.vr select{width:120px}
+.age{font-size:1.25rem;font-weight:800;color:var(--teal)}
+@media print{.hdr,.actions,.noprint,.vr select{display:none!important}body{background:#fff;color:#000}.card{border:0;padding:0}}
+</style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><style>.sw-tool{order:99;margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;font-family:inherit}.sw-tool:hover,.sw-tool:focus-visible{background:rgba(255,255,255,.14);outline:2px solid #e0b25a;outline-offset:2px}@media print{.sw-tool{display:none!important}}@media(max-width:520px){.sw-tool{padding:5px 9px;font-size:.74rem}}</style></head><body>
+<header class="hdr"><div class="hdr-in"><div class="brand"><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Calendario de vacunación</h1><small>Centro de Salud N.º 61 · Qué vacunas corresponden según la edad</small></div></div></div></header>
+<main>
+<h2>Qué le corresponde a la persona que consulta</h2>
+<p class="sub">Cargue la fecha de nacimiento y la de la consulta: la herramienta marca qué corresponde ahora, qué sigue y qué conviene revisar en el carnet. Todo se calcula en este navegador y no se guarda.</p>
+<div class="warnb"><b>Verifique siempre con el Calendario Nacional vigente</b> (Ministerio de Salud de la Nación, argentina.gob.ar/salud/vacunas) y con las notas oficiales: los esquemas cambian. Esta lista es una ayuda para la consulta y no reemplaza la indicación del equipo de salud. Fuente cargada: <span id="v-ver"></span>.</div>
+<div class="split">
+<div>
+ <div class="card">
+  <h3>1 · Persona</h3>
+  <div class="grid">
+   <label class="field"><span>Fecha de nacimiento</span><input type="date" id="v-dob"></label>
+   <label class="field"><span>Fecha de la consulta</span><input type="date" id="v-ctl"></label>
+  </div>
+  <div class="age" id="v-age" style="margin-top:10px"></div>
+ </div>
+ <div class="card">
+  <h3>2 · Situación especial</h3>
+  <label class="check"><input type="checkbox" id="v-emb"> Embarazada</label>
+  <div id="v-embw" hidden style="margin:0 0 6px 26px"><label class="field" style="max-width:200px"><span>Semanas de gestación</span><input type="number" id="v-sem" min="1" max="42" inputmode="numeric"></label></div>
+  <label class="check"><input type="checkbox" id="v-pue"> Puérpera (hasta 10 días después del parto)</label>
+  <label class="check"><input type="checkbox" id="v-ps"> Personal de salud</label>
+  <label class="check"><input type="checkbox" id="v-zr"> Vive o trabaja en zona de riesgo (fiebre amarilla o fiebre hemorrágica argentina)</label>
+  <label class="check"><input type="checkbox" id="v-fr"> Factor de riesgo (enfermedad crónica, inmunosupresión, otro)</label>
+  <div class="actions" style="margin-top:10px"><button class="btn" id="v-ex" type="button">Cargar ejemplo</button><button class="btn danger" id="v-cl" type="button">Limpiar</button></div>
+ </div>
+</div>
+<div><div class="card" id="v-out"></div></div>
+</div>
+</main>
+<script>
+var VAC_VERSION = 'Calendario Nacional de Vacunación 2026, compilado en octubre de 2026';
+var $ = function (i) { return document.getElementById(i); };
+function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function todayISO() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+$('v-ver').textContent = VAC_VERSION;
+/* a = edad (meses) desde la que corresponde; b = hasta qué edad (meses) se considera «ahora»; n = nota. w(c) = si aplica. */
+var V = [
+  { g: 'Recién nacido', v: 'BCG', d: 'Dosis única', a: 0, b: 0, n: 'Antes del alta de la maternidad.' },
+  { g: 'Recién nacido', v: 'Hepatitis B', d: 'Dosis neonatal', a: 0, b: 0, n: 'En las primeras 12 horas de vida.' },
+  { g: '2 meses', v: 'Quíntuple (pentavalente)', d: '1.ª dosis', a: 2, b: 3 }, { g: '2 meses', v: 'Neumococo conjugada', d: '1.ª dosis', a: 2, b: 3 }, { g: '2 meses', v: 'Polio inactivada (IPV)', d: '1.ª dosis', a: 2, b: 3 },
+  { g: '2 meses', v: 'Rotavirus', d: '1.ª dosis', a: 2, b: 3.5, lim: 1, n: 'Hasta las 14 semanas y 6 días de vida.' },
+  { g: '3 meses', v: 'Meningococo ACYW', d: '1.ª dosis', a: 3, b: 4 },
+  { g: '4 meses', v: 'Quíntuple (pentavalente)', d: '2.ª dosis', a: 4, b: 5 }, { g: '4 meses', v: 'Neumococo conjugada', d: '2.ª dosis', a: 4, b: 5 }, { g: '4 meses', v: 'Polio inactivada (IPV)', d: '2.ª dosis', a: 4, b: 5 },
+  { g: '4 meses', v: 'Rotavirus', d: '2.ª dosis', a: 4, b: 5.5, lim: 1, n: 'Hasta las 24 semanas (6 meses).' },
+  { g: '5 meses', v: 'Meningococo ACYW', d: '2.ª dosis', a: 5, b: 6 },
+  { g: '6 meses', v: 'Quíntuple (pentavalente)', d: '3.ª dosis', a: 6, b: 7 }, { g: '6 meses', v: 'Polio inactivada (IPV)', d: '3.ª dosis', a: 6, b: 7 },
+  { g: '6 meses', v: 'Antigripal', d: 'Anual', a: 6, b: 24, n: 'Primera vez: 2 dosis separadas por al menos 4 semanas; luego 1 por año.' },
+  { g: '12 meses', v: 'Triple viral', d: '1.ª dosis', a: 12, b: 13 }, { g: '12 meses', v: 'Neumococo conjugada', d: 'Refuerzo', a: 12, b: 13 }, { g: '12 meses', v: 'Hepatitis A', d: 'Dosis única', a: 12, b: 13 },
+  { g: '15 meses', v: 'Meningococo ACYW', d: 'Refuerzo', a: 15, b: 16 }, { g: '15 meses', v: 'Varicela', d: '1.ª dosis', a: 15, b: 16 },
+  { g: '15 a 18 meses', v: 'Triple viral', d: '2.ª dosis', a: 15, b: 18, n: 'Para nacidos desde el 1.º de julio de 2024. Cohortes anteriores: la 2.ª dosis es a los 5 años.', w: function (c) { return c.dob >= '2024-07-01'; } },
+  { g: '15 a 18 meses', v: 'Quíntuple (pentavalente)', d: 'Refuerzo', a: 15, b: 18 },
+  { g: '18 meses', v: 'Fiebre amarilla', d: '1.ª dosis', a: 18, b: 19, n: 'Sólo en zona de riesgo.', w: function (c) { return c.zr; } },
+  { g: '5 años (ingreso escolar)', v: 'Polio inactivada (IPV)', d: 'Refuerzo', a: 60, b: 72 }, { g: '5 años (ingreso escolar)', v: 'Triple bacteriana celular (DTP)', d: 'Refuerzo', a: 60, b: 72 },
+  { g: '5 años (ingreso escolar)', v: 'Varicela', d: '2.ª dosis', a: 60, b: 72, n: 'Cohortes 2021 a primer semestre de 2024. Verifique el esquema vigente para otras cohortes.', w: function (c) { return c.dob >= '2021-01-01' && c.dob < '2024-07-01'; } },
+  { g: '5 años (ingreso escolar)', v: 'Triple viral', d: '2.ª dosis', a: 60, b: 72, n: 'Si no tiene 2 dosis de triple viral (o 1 de triple y 1 de doble viral).', w: function (c) { return c.dob < '2024-07-01'; } },
+  { g: '11 años', v: 'Meningococo ACYW', d: 'Dosis única', a: 132, b: 156 }, { g: '11 años', v: 'VPH (papiloma humano)', d: 'Esquema de 2 dosis', a: 132, b: 216, n: 'Varones y mujeres. Verifique el esquema y la edad límite vigentes.' },
+  { g: '11 años', v: 'Triple bacteriana acelular (dTpa)', d: 'Refuerzo', a: 132, b: 156 },
+  { g: '11 años', v: 'Triple viral', d: 'Completar 2 dosis', a: 132, b: 216, n: 'Nacidos antes de 2021 sin refuerzo.', w: function (c) { return c.dob < '2021-01-01'; } },
+  { g: '11 años', v: 'Fiebre amarilla', d: 'Refuerzo', a: 132, b: 156, n: 'Sólo en zona de riesgo.', w: function (c) { return c.zr; } },
+  { g: 'Adolescentes y adultos', v: 'Doble bacteriana (dT)', d: 'Refuerzo cada 10 años', a: 180, b: null, n: 'Tras el refuerzo de dTpa a los 11 años.' },
+  { g: 'Adolescentes y adultos', v: 'Hepatitis B', d: 'Completar esquema si no está vacunado', a: 180, b: null },
+  { g: 'Adolescentes y adultos', v: 'Triple viral', d: 'Completar 2 dosis si no las tiene', a: 180, b: null, w: function (c) { return c.m < 720; } },
+  { g: 'Adolescentes y adultos', v: 'Fiebre hemorrágica argentina', d: 'Dosis única', a: 180, b: null, n: 'Residentes o trabajadores de zona de riesgo.', w: function (c) { return c.zr; } },
+  { g: 'Adolescentes y adultos', v: 'Fiebre amarilla', d: 'Dosis única (2 a 59 años)', a: 216, b: 708, n: 'Sólo en zona de riesgo.', w: function (c) { return c.zr; } },
+  { g: 'Adultos con factores de riesgo', v: 'Antigripal', d: 'Anual', a: 72, b: null, n: 'Grupos de riesgo.', w: function (c) { return c.fr && c.m >= 25 && c.m < 780; } },
+  { g: 'Adultos con factores de riesgo', v: 'Neumococo conjugada', d: 'Según esquema de riesgo', a: 24, b: null, w: function (c) { return c.fr && c.m >= 24 && c.m < 780; } },
+  { g: '65 años y más', v: 'Antigripal', d: 'Anual', a: 780, b: null },
+  { g: '65 años y más', v: 'Neumococo conjugada', d: 'Según esquema del calendario', a: 780, b: null, n: 'Verifique el esquema vigente (conjugada y polisacárida).' },
+  { g: 'Embarazo', v: 'Triple bacteriana acelular (dTpa)', d: 'En cada embarazo', n: 'A partir de la semana 20 de gestación.', ps: [20, 42], w: function (c) { return c.emb; } },
+  { g: 'Embarazo', v: 'Antigripal', d: 'En cada embarazo', n: 'En cualquier trimestre.', ps: [1, 42], w: function (c) { return c.emb; } },
+  { g: 'Embarazo', v: 'Virus sincicial respiratorio (VSR)', d: 'Dosis única', n: 'Entre las semanas 32 y 36,6, en la temporada de circulación del virus.', ps: [32, 36.9], w: function (c) { return c.emb; } },
+  { g: 'Puerperio', v: 'Antigripal', d: 'Si no la recibió en el embarazo', n: 'Antes del alta y hasta 10 días después del parto.', ps: 'now', w: function (c) { return c.pue; } },
+  { g: 'Personal de salud', v: 'Triple bacteriana acelular (dTpa)', d: 'Refuerzo cada 5 años', n: 'Personal que atiende niños menores de 12 meses.', a: 216, b: null, w: function (c) { return c.ps; } },
+  { g: 'Personal de salud', v: 'Hepatitis B', d: 'Esquema completo (3 dosis)', a: 216, b: null, w: function (c) { return c.ps; } },
+  { g: 'Personal de salud', v: 'Antigripal', d: 'Anual', a: 216, b: null, w: function (c) { return c.ps; } },
+  { g: 'Personal de salud', v: 'Triple viral', d: 'Completar 2 dosis si no las tiene', a: 216, b: null, w: function (c) { return c.ps; } }
+];
+V.forEach(function (it) { if (it.a >= 2 && it.a <= 18 && it.b !== null && !it.lim && it.b - it.a < 3) it.b = it.a + 3; });
+var VS = {};
+function ctx() {
+  var dob = $('v-dob').value, ctl = $('v-ctl').value, d = dob && ctl ? (new Date(ctl + 'T00:00:00') - new Date(dob + 'T00:00:00')) / 864e5 : null, m = d !== null && d >= 0 ? d / 30.4375 : null;
+  return { dob: dob, ctl: ctl, m: m, emb: $('v-emb').checked, sem: parseFloat($('v-sem').value), pue: $('v-pue').checked, ps: $('v-ps').checked, zr: $('v-zr').checked, fr: $('v-fr').checked };
+}
+function addM(iso, m) { var d = new Date(iso + 'T00:00:00'); d.setMonth(d.getMonth() + Math.floor(m)); d.setDate(d.getDate() + Math.round((m % 1) * 30)); return d.toLocaleDateString('es-AR'); }
+function stOf(it, c) {
+  if (it.ps) { if (it.ps === 'now') return 'now'; if (isNaN(c.sem)) return 'now?'; if (c.sem < it.ps[0]) return 'next'; if (c.sem <= it.ps[1]) return 'now'; return 'prev'; }
+  if (c.m === null) return null; if (c.m < it.a) return (it.a - c.m <= 12) ? 'next' : null; if (it.b === null || c.m <= it.b) return 'now'; return 'prev';
+}
+function render() {
+  var c = ctx(), out = '', age = '';
+  $('v-embw').hidden = !c.emb;
+  if (c.m !== null) { var y = Math.floor(c.m / 12), mm = Math.floor(c.m % 12); age = 'Edad: ' + (y ? y + ' año' + (y > 1 ? 's' : '') + ' ' : '') + mm + ' mes' + (mm === 1 ? '' : 'es'); } else if (c.dob && c.ctl) age = 'La fecha de consulta es anterior al nacimiento.';
+  $('v-age').textContent = age;
+  var groups = { now: [], next: [], prev: [] }, ids = [], summ = [];
+  V.forEach(function (it, i) {
+    if (it.w && !it.w(c)) return; if (!it.ps && c.m === null) return; if (it.ps && !c.emb && !c.pue) return;
+    var s = stOf(it, c); if (!s) return; var key = s.replace('?', ''); groups[key].push({ it: it, i: i, s: s });
+  });
+  var row = function (o, cls) {
+    var it = o.it, k = 'v' + o.i, v = VS[k] || '', due = (cls === 'next' && !it.ps && c.dob) ? ' · desde el ' + addM(c.dob, it.a) : '';
+    var c2 = v === 'si' ? 'ok' : cls;
+    return '<div class="vr ' + c2 + '"><div><b>' + esc(it.v) + ' · ' + esc(it.d) + '</b><small>' + esc(it.g) + due + (it.n ? ' · ' + esc(it.n) : '') + (o.s === 'now?' ? ' · Indique las semanas de gestación para precisar.' : '') + '</small></div><select data-k="' + k + '" aria-label="Carnet: ' + esc(it.v) + '"><option value="">Carnet…</option><option value="si"' + (v === 'si' ? ' selected' : '') + '>Aplicada</option><option value="no"' + (v === 'no' ? ' selected' : '') + '>No consta</option></select></div>';
+  };
+  var pend = [];
+  var sect = function (t, cls, arr, empty) { out += '<h4 class="' + cls + '">' + t + '</h4>'; if (!arr.length) out += '<p class="sub">' + empty + '</p>'; arr.forEach(function (o) { out += row(o, cls); if ((cls === 'now' || cls === 'prev') && VS['v' + o.i] !== 'si') pend.push((VS['v' + o.i] === 'no' ? '[No consta] ' : '') + o.it.v + ' (' + o.it.d + ')'); }); };
+  if (c.m === null && !c.emb && !c.pue) out = '<h3>Resultado</h3><p class="sub">Cargue la fecha de nacimiento y la de la consulta, o marque una situación especial.</p>';
+  else {
+    out = '<h3>Resultado</h3>';
+    sect('Corresponde ahora (o atrasada reciente)', 'now', groups.now, 'No hay vacunas con indicación para esta edad en este momento. Revise el carnet por el esquema anterior.');
+    groups.prev.sort(function (x, y) { return (y.it.a || 0) - (x.it.a || 0); });
+    sect('Esquema anterior: verificar en el carnet (las más recientes primero)', 'prev', groups.prev, 'Sin dosis previas para revisar.');
+    sect('Próximas (12 meses)', 'next', groups.next, 'No hay vacunas programadas en los próximos 12 meses.');
+    out += '<p class="note" style="margin-top:12px">Los esquemas atrasados se completan sin reiniciar las dosis. En prematuros se usa la edad cronológica. Las dosis cero y las adicionales por brote o campaña no forman parte del esquema regular. Ante una duda sobre contraindicaciones, consulte al equipo de salud.</p>';
+    out += '<div class="actions noprint" style="margin-top:12px"><button class="btn primary" id="v-copy" type="button">Copiar resumen</button><button class="btn" id="v-print" type="button">Imprimir</button></div>';
+  }
+  $('v-out').innerHTML = out; window.__sum = (age ? age + '. ' : '') + 'Vacunas a revisar o aplicar: ' + (pend.length ? pend.join('; ') : 'ninguna pendiente registrada') + '. (' + VAC_VERSION + ')';
+}
+document.addEventListener('input', function (e) { if (e.target.tagName === 'INPUT') render(); });
+document.addEventListener('change', function (e) { var k = e.target.getAttribute && e.target.getAttribute('data-k'); if (k) { VS[k] = e.target.value; render(); } else render(); });
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'v-copy') { (navigator.clipboard ? navigator.clipboard.writeText(window.__sum) : Promise.reject()).then(function () { b.textContent = 'Copiado'; }, function () { var t = document.createElement('textarea'); t.value = window.__sum; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); b.textContent = 'Copiado'; } catch (x) { } document.body.removeChild(t); }); }
+  if (b.id === 'v-print') window.print();
+  if (b.id === 'v-cl') { ['v-dob', 'v-sem'].forEach(function (i) { $(i).value = ''; }); ['v-emb', 'v-pue', 'v-ps', 'v-zr', 'v-fr'].forEach(function (i) { $(i).checked = false; }); $('v-ctl').value = todayISO(); VS = {}; render(); }
+  if (b.id === 'v-ex') { var d = new Date(); d.setMonth(d.getMonth() - 13); $('v-dob').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); $('v-ctl').value = todayISO(); VS = {}; render(); }
+});
+$('v-ctl').value = todayISO(); render();
+</script><script>/*EMBED*/try{if(window.top!==window){var a=document.querySelector(".sw-tool");if(a)a.style.display="none"}}catch(e){}</script><script>/*CFGSYNC*/(function(){try{fetch("../config.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(c){if(!c||!c.url||!/^https:\/\/script\.google\.com\//.test(c.url))return;["cs61_pl","cs61_plcv","cs61_cons_api"].forEach(function(k){try{var o=JSON.parse(localStorage.getItem(k)||"null");if(o&&o.key&&o.url!==c.url){o.url=c.url;localStorage.setItem(k,JSON.stringify(o))}}catch(e){}})}).catch(function(){})}catch(e){}})();</script><script src="../egg.js"></script></body></html>

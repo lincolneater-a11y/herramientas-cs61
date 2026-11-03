@@ -188,9 +188,9 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
 <p class="priv">Datos de pacientes: la transcripción la realiza el servicio de voz del navegador (Google, en Chrome/Edge) y la nota la genera una IA a través de su script. No escriba nombre ni DNI. Nada se guarda en un servidor propio: sólo el borrador y su configuración quedan en este navegador. Pegue la nota final en la historia clínica del centro. Marco: Leyes 25.326 y 26.529.</p>
 </div>
 <aside class="tools" id="tools" hidden aria-label="Otras herramientas">
-  <div class="th"><div class="tabs"><button type="button" data-u="../nutricion/" class="on">Nutrición</button><button type="button" data-u="../registro/">Registro cardiovascular</button><button type="button" data-u="../calculadora/">Calculadora antropométrica</button><button type="button" data-u="../recursos/">Recursos</button></div><button type="button" id="tools-x">Cerrar ✕</button></div>
+  <div class="th"><div class="tabs"><button type="button" data-u="../nutricion/" class="on">Nutrición</button><button type="button" data-u="../registro/">Registro cardiovascular</button><button type="button" data-u="../calculadora/">Calculadora antropométrica</button><button type="button" data-u="../recursos/">Recursos</button><button type="button" data-u="../vacunas/">Vacunas</button><button type="button" data-u="../crecimiento/">Crecimiento y desarrollo</button><button type="button" data-u="../embarazo/">Embarazo</button></div><button type="button" id="tools-x">Cerrar ✕</button></div>
   <div class="note">La grabación sigue activa mientras usa estas herramientas.</div>
-  <iframe id="tf0" title="Herramientas de nutrición"></iframe><iframe id="tf1" title="Registro cardiovascular" hidden></iframe><iframe id="tf2" title="Calculadora antropométrica" hidden></iframe><iframe id="tf3" title="Recursos para la comunidad" hidden></iframe>
+  <iframe id="tf0" title="Herramientas de nutrición"></iframe><iframe id="tf1" title="Registro cardiovascular" hidden></iframe><iframe id="tf2" title="Calculadora antropométrica" hidden></iframe><iframe id="tf3" title="Recursos para la comunidad" hidden></iframe><iframe id="tf4" title="Calendario de vacunación" hidden></iframe><iframe id="tf5" title="Crecimiento y desarrollo" hidden></iframe><iframe id="tf6" title="Embarazo y control prenatal" hidden></iframe>
 </aside>
 <script>(function(){
 var $=function(i){return document.getElementById(i)};
@@ -592,7 +592,8 @@ window.addEventListener('beforeunload',function(e){if(st!=='idle'){e.preventDefa
 
 /* ---------- panel de otras herramientas (no corta la grabación) ---------- */
 var PERFIL='';try{PERFIL=localStorage.getItem('cs61_perfil')||''}catch(e){}
-var PERM={medicina:['calculadora','registro']};
+var PERM={nutricion:['nutricion','registro','calculadora','vacunas','recursos'],pediatria:['crecimiento','vacunas','registro'],clinica:['calculadora','registro'],gineco:['embarazo','calculadora'],medicina:['calculadora'],enfermeria:['registro','calculadora','vacunas','recursos'],otro:['recursos','vacunas','calculadora']};
+if(!PERM[PERFIL])PERM={x:['nutricion','registro','calculadora','recursos']},PERFIL='x';
 (function(){var ok=PERM[PERFIL];if(!ok)return;Array.prototype.forEach.call($('tools').querySelectorAll('.tabs button'),function(b){var u=b.getAttribute('data-u')||'';b.hidden=!ok.some(function(k){return u.indexOf('/'+k+'/')>-1})})})();
 function openTools(){
   $('tools').hidden=false;

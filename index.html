@@ -1,6 +1,6 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Herramientas CS 61</title>
 <link rel="icon" type="image/png" href="icon-192.png"><meta name="theme-color" content="#14304f"><link rel="apple-touch-icon" href="icon-192.png">
-<script>(function(){var P='';try{var q=/[?&]p=(nutricion|enfermeria|medicina|otro)(&|$)/.exec(location.search);if(q){P=q[1];localStorage.setItem('cs61_perfil',P)}else if(!/[?&]cambiar=1/.test(location.search)){P=localStorage.getItem('cs61_perfil')||''}}catch(e){}if(!/^(nutricion|enfermeria|medicina|otro)$/.test(P))P='';var l=document.createElement('link');l.rel='manifest';l.href=P?'manifest-'+P+'.webmanifest':'manifest.webmanifest';document.head.appendChild(l);window.CS61P=P})();</script>
+<script>(function(){var P='';try{var q=/[?&]p=(nutricion|enfermeria|pediatria|clinica|gineco|medicina|otro)(&|$)/.exec(location.search);if(q){P=q[1];localStorage.setItem('cs61_perfil',P)}else if(!/[?&]cambiar=1/.test(location.search)){P=localStorage.getItem('cs61_perfil')||''}}catch(e){}if(!/^(nutricion|enfermeria|pediatria|clinica|gineco|medicina|otro)$/.test(P))P='';var l=document.createElement('link');l.rel='manifest';l.href=P?'manifest-'+P+'.webmanifest':'manifest.webmanifest';document.head.appendChild(l);window.CS61P=P})();</script>
 <style>
 :root{--bg:#f1f5f8;--s:#fff;--ink:#14243a;--ink2:#4a5d73;--line:#d2dce5;--hdr:#14304f;--teal:#0d7a85;--gold:#a87615;--bord:#7a1f3a}
 @media (prefers-color-scheme:dark){:root{--bg:#0c1722;--s:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--hdr:#0a2038;--teal:#4fc1c9;--gold:#e0b25a;--bord:#d98aa3}}
@@ -23,8 +23,14 @@ button.c{border-top-color:var(--gold);display:flex;flex-direction:column;justify
 <section id="pick" hidden><h2>¿Cuál es su especialidad?</h2><p>Se prepara el menú con las herramientas que va a usar y se puede instalar en este equipo como aplicación. Después puede cambiarlo cuando quiera.</p>
 <div class="g"><button class="c" type="button" data-p="nutricion"><h3>Nutrición</h3><p>Todas las herramientas del centro.</p></button>
 <button class="c" type="button" data-p="enfermeria"><h3>Enfermería</h3><p>Registro cardiovascular y FINDRISC, calculadora antropométrica y recursos para la comunidad.</p></button>
-<button class="c" type="button" data-p="medicina"><h3>Medicina</h3><p>Consulta asistida, calculadora antropométrica y registro cardiovascular.</p></button>
+<button class="c" type="button" data-m="1"><h3>Medicina</h3><p>Pediatría, clínica, diabetología, nefrología, ginecología y otras especialidades.</p></button>
 <button class="c" type="button" data-p="otro"><h3>Otro perfil</h3><p>Agente sanitario, promotor, administración u otro: recursos para la comunidad. Puede ver todas las herramientas.</p></button></div></section>
+<section id="pickm" hidden><h2>¿Qué especialidad médica?</h2><p>Cada una ve las herramientas que más le sirven. La consulta asistida está en todas.</p>
+<div class="g"><button class="c" type="button" data-p="pediatria"><h3>Pediatría</h3><p>Consulta asistida, crecimiento y desarrollo (curvas, velocidad, Tanner y hitos), vacunas y registro cardiovascular.</p></button>
+<button class="c" type="button" data-p="clinica"><h3>Clínica, diabetología y nefrología</h3><p>Consulta asistida, registro cardiovascular con FINDRISC y calculadora antropométrica del adulto.</p></button>
+<button class="c" type="button" data-p="gineco"><h3>Ginecología y obstetricia</h3><p>Consulta asistida, embarazo y control prenatal (edad gestacional, ganancia de peso) y calculadora antropométrica.</p></button>
+<button class="c" type="button" data-p="medicina"><h3>Otra especialidad</h3><p>Consulta asistida y calculadora antropométrica, con la opción de ver todas las herramientas.</p></button></div>
+<p style="margin-top:14px"><button class="lk" type="button" id="bk">← Volver</button></p></section>
 <section id="home" hidden><h2>Elija una herramienta</h2>
 <div class="bar"><span class="pill" id="pf"></span><button class="lk inst" id="inst" type="button" hidden>Instalar en este equipo</button><button class="lk" id="all" type="button">Ver todas las herramientas</button><button class="lk" id="chg" type="button">Cambiar perfil</button></div>
 <p class="hint" id="ih" hidden>Para instalarla: en Chrome o Edge, menú ⋮ → «Guardar e instalar» → «Instalar página como aplicación» (o el icono de instalar de la barra de direcciones).</p>
@@ -32,21 +38,25 @@ button.c{border-top-color:var(--gold);display:flex;flex-direction:column;justify
 <a class="c" data-t="consulta" href="consulta/"><h3>Consulta asistida</h3><p>Grabación de la consulta con transcripción en vivo y anamnesis ordenada por IA, con el modelo de cada profesional.</p></a>
 <a class="c" data-t="nutricion" href="nutricion/"><h3>Herramientas de nutrición</h3><p>Valoración antropométrica de 0 a 19 años, embarazadas, requerimientos, alimentación y modelos de dieta.</p></a>
 <a class="c" data-t="calculadora" href="calculadora/"><h3>Calculadora antropométrica</h3><p>IMC, cintura e índice cintura-talla con gráficos, para consulta rápida o trabajo en terreno.</p></a>
+<a class="c" data-t="vacunas" href="vacunas/"><h3>Calendario de vacunación</h3><p>Qué vacunas corresponden según la edad, el embarazo o el trabajo en salud, con control del carnet.</p></a>
+<a class="c" data-t="crecimiento" href="crecimiento/"><h3>Crecimiento y desarrollo</h3><p>Curvas de peso, talla, IMC y perímetro cefálico, velocidad de crecimiento, Tanner e hitos del desarrollo.</p></a>
+<a class="c" data-t="embarazo" href="embarazo/"><h3>Embarazo y control prenatal</h3><p>Edad gestacional por FUM, ganancia de peso (Fescina, IOM), IMC gestacional y requerimientos.</p></a>
 <a class="c" data-t="recursos" href="recursos/"><h3>Recursos para la comunidad</h3><p>Juegos educativos para ferias y talleres: ruleta saludable y armado de plato, con registro anónimo opcional.</p></a></div>
 <p class="n">El perfil sólo ordena el menú: no limita el acceso. Los registros cardiovasculares quedan guardados en el navegador de cada computadora. Si se conecta la planilla compartida, el DNI y el nombre se guardan sólo en su hoja «Pacientes».</p></section></main>
 <script src="egg.js"></script>
 <script>(function(){
-var T={nutricion:['registro','consulta','nutricion','calculadora','recursos'],enfermeria:['registro','calculadora','recursos'],medicina:['consulta','calculadora','registro'],otro:['recursos']};
-var N={nutricion:'Nutrición',enfermeria:'Enfermería',medicina:'Medicina',otro:'Otro perfil'};
-var P=window.CS61P||'',all=false,ev=null,$=function(i){return document.getElementById(i)};
+var T={nutricion:['registro','consulta','nutricion','calculadora','vacunas','recursos'],enfermeria:['registro','calculadora','vacunas','recursos'],pediatria:['consulta','crecimiento','vacunas','registro'],clinica:['consulta','registro','calculadora'],gineco:['consulta','embarazo','calculadora'],medicina:['consulta','calculadora'],otro:['recursos']};
+var N={nutricion:'Nutrición',enfermeria:'Enfermería',pediatria:'Medicina · Pediatría',clinica:'Medicina · Clínica, diabetología y nefrología',gineco:'Medicina · Ginecología y obstetricia',medicina:'Medicina · Otra especialidad',otro:'Otro perfil'};
+var P=window.CS61P||'',all=false,ev=null,step=1,$=function(i){return document.getElementById(i)};
 function render(){
- $('pick').hidden=!!P;$('home').hidden=!P;if(!P)return;
+ $('pick').hidden=!!P||step===2;$('pickm').hidden=!!P||step!==2;$('home').hidden=!P;if(!P)return;
  $('pf').textContent='Perfil: '+N[P];
  var ok=T[P];document.querySelectorAll('[data-t]').forEach(function(a){var t=a.getAttribute('data-t');a.hidden=!(all||ok.indexOf(t)>-1);a.style.order=ok.indexOf(t)<0?99:ok.indexOf(t)});
  $('all').textContent=all?'Ver sólo las de mi perfil':'Ver todas las herramientas';$('all').hidden=P==='nutricion';
  document.title='Herramientas CS 61 · '+N[P];
  $('inst').hidden=!ev;$('ih').hidden=!!ev||matchMedia('(display-mode: standalone)').matches;
 }
+document.querySelectorAll('[data-m]').forEach(function(b){b.addEventListener('click',function(){step=2;render()})});$('bk').addEventListener('click',function(){step=1;render()});
 document.querySelectorAll('[data-p]').forEach(function(b){b.addEventListener('click',function(){var p=b.getAttribute('data-p');try{localStorage.setItem('cs61_perfil',p)}catch(e){}location.replace('./?p='+p)})});
 $('chg').addEventListener('click',function(){location.href='./?cambiar=1'});
 $('all').addEventListener('click',function(){all=!all;render()});
