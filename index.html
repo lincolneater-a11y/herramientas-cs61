@@ -27,7 +27,7 @@ button.c{border-top-color:var(--gold);display:flex;flex-direction:column;justify
 <button class="c" type="button" data-p="aps"><h3>Agente sanitario (APS)</h3><p>Desarrollo infantil en la visita (qué debería hacer el niño según su edad y qué hacer si no lo logra), calendario de vacunación y recursos para la comunidad.</p></button>
 <button class="c" type="button" data-p="otro"><h3>Otro perfil</h3><p>Promotor, administración u otro: recursos para la comunidad. Puede ver todas las herramientas.</p></button></div></section>
 <section id="pickm" hidden><h2>¿Qué especialidad médica?</h2><p>Cada una ve las herramientas que más le sirven. La consulta asistida está en todas.</p>
-<div class="g"><button class="c" type="button" data-p="pediatria"><h3>Pediatría</h3><p>Consulta asistida, crecimiento y desarrollo (curvas, velocidad, Tanner y hitos), vacunas y registro cardiovascular.</p></button>
+<div class="g"><button class="c" type="button" data-p="pediatria"><h3>Pediatría</h3><p>Consulta asistida, crecimiento y desarrollo (curvas, velocidad, Tanner y hitos), desarrollo infantil con IODI, vacunas y registro cardiovascular.</p></button>
 <button class="c" type="button" data-p="clinica"><h3>Clínica, diabetología y nefrología</h3><p>Consulta asistida, registro cardiovascular con FINDRISC y calculadora antropométrica del adulto.</p></button>
 <button class="c" type="button" data-p="gineco"><h3>Ginecología y obstetricia</h3><p>Consulta asistida, embarazo y control prenatal (edad gestacional, ganancia de peso) y calculadora antropométrica.</p></button>
 <button class="c" type="button" data-p="medicina"><h3>Otra especialidad</h3><p>Consulta asistida y calculadora antropométrica, con la opción de ver todas las herramientas.</p></button></div>
@@ -40,14 +40,14 @@ button.c{border-top-color:var(--gold);display:flex;flex-direction:column;justify
 <a class="c" data-t="nutricion" href="nutricion/"><h3>Herramientas de nutrición</h3><p>Valoración antropométrica de 0 a 19 años, embarazadas, requerimientos, alimentación y modelos de dieta.</p></a>
 <a class="c" data-t="calculadora" href="calculadora/"><h3>Calculadora antropométrica</h3><p>IMC, cintura e índice cintura-talla con gráficos, para consulta rápida o trabajo en terreno.</p></a>
 <a class="c" data-t="vacunas" href="vacunas/"><h3>Calendario de vacunación</h3><p>Qué vacunas corresponden según la edad, el embarazo o el trabajo en salud, con control del carnet.</p></a>
-<a class="c" data-t="desarrollo" href="desarrollo/"><h3>Desarrollo infantil en la visita</h3><p>Según la edad del niño, qué se espera que ya haga (IODI), y si todavía no lo logra, qué mirar y qué hacer. Para agentes sanitarios.</p></a>
+<a class="c" data-t="desarrollo" href="desarrollo/"><h3>Desarrollo infantil en la visita</h3><p>Edad por fecha de nacimiento, dibujo de cómo suele estar a esa edad, qué ya debería haber logrado y qué hacer si no lo logra. Incluye la evaluación completa con el IODI (opcional).</p></a>
 <a class="c" data-t="crecimiento" href="crecimiento/"><h3>Crecimiento y desarrollo</h3><p>Curvas de peso, talla, IMC y perímetro cefálico, velocidad de crecimiento, Tanner e hitos del desarrollo.</p></a>
 <a class="c" data-t="embarazo" href="embarazo/"><h3>Embarazo y control prenatal</h3><p>Edad gestacional por FUM, ganancia de peso (Fescina, IOM), IMC gestacional y requerimientos.</p></a>
 <a class="c" data-t="recursos" href="recursos/"><h3>Recursos para la comunidad</h3><p>Juegos educativos para ferias y talleres: ruleta saludable y armado de plato, con registro anónimo opcional.</p></a></div>
 <p class="n">El perfil sólo ordena el menú: no limita el acceso. Los registros cardiovasculares quedan guardados en el navegador de cada computadora. Si se conecta la planilla compartida, el DNI y el nombre se guardan sólo en su hoja «Pacientes».</p></section></main>
 <script src="egg.js"></script>
 <script>(function(){
-var T={nutricion:['registro','consulta','nutricion','calculadora','vacunas','recursos'],enfermeria:['registro','calculadora','vacunas','recursos'],aps:['desarrollo','vacunas','recursos'],pediatria:['consulta','crecimiento','vacunas','registro'],clinica:['consulta','registro','calculadora'],gineco:['consulta','embarazo','calculadora'],medicina:['consulta','calculadora'],otro:['recursos']};
+var T={nutricion:['registro','consulta','nutricion','calculadora','vacunas','recursos'],enfermeria:['registro','calculadora','vacunas','recursos'],aps:['desarrollo','vacunas','recursos'],pediatria:['consulta','crecimiento','desarrollo','vacunas','registro'],clinica:['consulta','registro','calculadora'],gineco:['consulta','embarazo','calculadora'],medicina:['consulta','calculadora'],otro:['recursos']};
 var N={nutricion:'Nutrición',enfermeria:'Enfermería',aps:'Agente sanitario (APS)',pediatria:'Medicina · Pediatría',clinica:'Medicina · Clínica, diabetología y nefrología',gineco:'Medicina · Ginecología y obstetricia',medicina:'Medicina · Otra especialidad',otro:'Otro perfil'};
 var P=window.CS61P||'',all=false,ev=null,step=1,$=function(i){return document.getElementById(i)};
 function render(){

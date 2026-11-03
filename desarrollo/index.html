@@ -14,7 +14,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-vis
 .btn{background:var(--s);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.btn.danger{color:var(--bord)}
 .actions{display:flex;gap:8px;flex-wrap:wrap}.note{font-size:.84rem;color:var(--ink2);background:var(--tealsoft);border-radius:8px;padding:8px 10px}
 .warnb{background:var(--goldsoft);border:1px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:.86rem;margin-top:12px}
-.age{font-size:1.2rem;font-weight:800;color:var(--teal)}.age small{display:block;font-size:.84rem;font-weight:500;color:var(--ink2)}
+.vis{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:16px;align-items:start}@media(max-width:600px){.vis{grid-template-columns:1fr}}.fig{background:var(--tealsoft);border-radius:14px;padding:6px}.fig svg{width:100%;height:auto;display:block}.lst{margin:4px 0 0;padding:0;list-style:none}.lst li{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.94rem}.lst li:last-child{border-bottom:0}.chip{flex:none;border:1px solid var(--line);background:var(--s);color:var(--ink2);border-radius:999px;padding:3px 10px;font:inherit;font-size:.76rem;font-weight:600;cursor:pointer}.chip[aria-pressed=true]{background:var(--bord);border-color:var(--bord);color:#fff}.vt{margin:12px 0 2px;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;font-weight:800;color:var(--teal)}.tipb{background:var(--goldsoft);border-radius:8px;padding:8px 10px;font-size:.88rem;margin-top:10px}.big{font-size:1.4rem;font-weight:800;margin:0}.age{font-size:1.2rem;font-weight:800;color:var(--teal)}.age small{display:block;font-size:.84rem;font-weight:500;color:var(--ink2)}
 .sec{margin:16px 0 6px;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;font-weight:800;display:flex;gap:8px;align-items:center}
 .sw{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.25)}.sw.g{background:var(--gr)}.sw.o{background:var(--or)}.sw.r{background:var(--rd)}
 .secd{font-size:.84rem;color:var(--ink2);margin:0 0 6px}
@@ -33,8 +33,8 @@ details{margin-top:10px}summary{cursor:pointer;font-weight:700}
 <header class="hdr"><div class="hdr-in"><div class="brand"><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Desarrollo infantil en la visita</h1><small>Centro de Salud N.º 61 · Agentes sanitarios · Basado en el IODI del Ministerio de Salud</small></div></div></div></header>
 <main>
 <h2>¿Qué debería estar haciendo este niño o niña?</h2>
-<p class="sub">Cargue la fecha de nacimiento y la de la visita: la herramienta calcula la edad y muestra qué se espera que ya haga. Si algo todavía no lo logra, indica qué mirar y qué hacer. No guarda datos: todo queda en este navegador.</p>
-<div class="warnb"><b>Es una ayuda para observar, no un diagnóstico.</b> Se usa en todas las visitas, observando al niño y preguntando a quien lo cuida. Ante cualquier duda o señal de alarma, avise al equipo de salud del centro. Rangos de edad según el Instrumento de Observación del Desarrollo Infantil (IODI), Ministerio de Salud de la Nación, hasta los 47 meses.</div>
+<p class="sub">Cargue la fecha de nacimiento: la herramienta calcula la edad, muestra un dibujo de cómo suele estar a esa edad y qué ya debería haber logrado. No guarda datos: todo queda en este navegador.</p>
+<div class="warnb"><b>Es una ayuda para observar, no un diagnóstico.</b> Cada niño tiene su ritmo. Ante cualquier duda o si algo que ya debería hacer todavía no lo hace, avise al equipo de salud del centro. Basado en el Instrumento de Observación del Desarrollo Infantil (IODI) del Ministerio de Salud, hasta los 47 meses.</div>
 <div class="split">
 <div>
  <div class="card">
@@ -57,7 +57,7 @@ details{margin-top:10px}summary{cursor:pointer;font-weight:700}
   <div class="actions" style="margin-top:10px"><button class="btn primary" id="d-copy" type="button">Copiar resumen</button><button class="btn" id="d-print" type="button">Imprimir</button></div>
  </div>
 </div>
-<div><div class="card" id="d-out"></div></div>
+<div><div class="card" id="d-vis"></div><details class="card" id="d-iodi"><summary>Evaluación completa con el IODI (opcional)</summary><div id="d-out" style="margin-top:8px"></div></details></div>
 </div>
 </main>
 <script>
@@ -113,9 +113,9 @@ function render() {
   else if (c.m === null) { $('d-age').textContent = ''; }
   else { $('d-age').innerHTML = 'Edad: ' + esc(ageTxt(c.m)) + (c.corr ? '<small>Edad corregida por prematurez: ' + esc(ageTxt(c.mc)) + ' (se usa para el IODI hasta los 2 años)</small>' : ''); }
   $('d-alert').hidden = c.m === null; $('d-sumcard').hidden = c.m === null;
-  if (c.m === null) { $('d-out').innerHTML = '<h3>Resultado</h3><p class="sub">Cargue la fecha de nacimiento y la de la visita.</p>'; $('d-sum').innerHTML = ''; window.__sum = ''; return; }
+  if (c.m === null) { $('d-vis').innerHTML = '<h3>Resultado</h3><p class="sub">Cargue la fecha de nacimiento para ver qué se espera a su edad.</p>'; $('d-out').innerHTML = ''; $('d-sum').innerHTML = ''; window.__sum = ''; return; }
   var col = colOf(c.mc);
-  if (col === null) { $('d-out').innerHTML = '<h3>Resultado</h3><p class="sub">Este instrumento llega hasta los 47 meses. Para niños mayores, consulte con el equipo de salud.</p>'; $('d-alert').hidden = true; $('d-sumcard').hidden = true; window.__sum = ''; return; }
+  if (col === null) { $('d-vis').innerHTML = '<h3>Resultado</h3><p class="sub">Este instrumento llega hasta los 47 meses.</p>'; $('d-out').innerHTML = '<h3>Resultado</h3><p class="sub">Este instrumento llega hasta los 47 meses. Para niños mayores, consulte con el equipo de salud.</p>'; $('d-alert').hidden = true; $('d-sumcard').hidden = true; window.__sum = ''; return; }
   var cur = { G: [], O: [], R: [] }, prev = [], next = [];
   ITEMS.forEach(function (it) {
     var g = it[3], ch = g[col];
@@ -123,7 +123,7 @@ function render() {
     else if (col > 0 && g[col - 1] !== '.') prev.push(it);
     else { var s = -1; for (var j = col + 1; j < 16; j++) if (g[j] !== '.') { s = j; break; } if (s > -1 && s <= col + 2) next.push(it); }
   });
-  var resp = { r: 0, o: 0, g: 0, prev: 0, care: 0 }, lines = [];
+  var tl = tally(col), resp = tl.r, lines = tl.lines; resp.care = 0;
   out += '<h3>Franja del IODI: ' + COLS[col] + ' meses</h3><p class="sub">Marque cada pauta. Si el niño aún no la hace, aparece qué hacer.</p>';
   out += '<div class="sec">Siempre, en todas las visitas</div><p class="secd">Observar cómo se relaciona quien lo cuida con el niño.</p>';
   CARE.forEach(function (it) {
@@ -149,7 +149,7 @@ function render() {
   if (next.length) {
     out += '<details><summary>Lo que viene en los próximos meses (' + next.length + ')</summary><p class="secd" style="margin-top:6px">Para conversar con la familia qué esperar.</p><ul style="margin:0 0 0 18px;padding:0">' + next.map(function (it) { return '<li>' + esc(it[2]) + '</li>'; }).join('') + '</ul></details>';
   }
-  $('d-out').innerHTML = out;
+  $('d-out').innerHTML = out; renderVis(c, col);
   var loss = $('d-loss').checked, bits = [];
   if (loss) { bits.push('La familia refiere pérdida de habilidades que ya tenía.'); }
   var sumLevel = (resp.r || resp.prev || loss) ? 'r' : (resp.o || resp.care) ? 'o' : 'g', sm = '';
@@ -164,12 +164,62 @@ function render() {
   window.__sum = 'IODI · Edad ' + ageTxt(c.m) + (c.corr ? ' (corregida ' + ageTxt(c.mc) + ')' : '') + ' · Franja ' + COLS[col] + ' meses · Visita ' + new Date(c.ctl + 'T00:00:00').toLocaleDateString('es-AR') + '. ' +
     (lines.length ? 'Pautas sin lograr: ' + lines.join('; ') + '.' : 'Sin pautas marcadas como no logradas.') + (loss ? ' Refiere pérdida de habilidades.' : '') + (obs ? ' Obs.: ' + obs : '') + ' (Instrumento de Observación del Desarrollo Infantil, Min. Salud de la Nación; ayuda de observación, no diagnóstico.)';
 }
+
+function C(cx, cy, r, f) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + f + '"/>'; }
+function Ln(x1, y1, x2, y2, w, c) { return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + c + '" stroke-width="' + w + '" stroke-linecap="round"/>'; }
+var SK = '#f2b78f', CL = '#0d7a85', CL2 = '#e8a33d', HR = '#6b3f26';
+function head(x, y, r, look) { look = look || 0; return C(x, y, r, SK) + '<path d="M' + (x - r * .8) + ' ' + (y - r * .45) + ' Q' + x + ' ' + (y - r * 1.5) + ' ' + (x + r * .8) + ' ' + (y - r * .45) + '" fill="' + HR + '"/>' + C(x - r * .35 + look, y - r * .05, 2.4, '#222') + C(x + r * .35 + look, y - r * .05, 2.4, '#222') + '<path d="M' + (x - r * .3 + look) + ' ' + (y + r * .35) + ' Q' + (x + look) + ' ' + (y + r * .65) + ' ' + (x + r * .3 + look) + ' ' + (y + r * .35) + '" stroke="#a5442f" stroke-width="2" fill="none" stroke-linecap="round"/>' + C(x - r * .6 + look, y + r * .3, 3.2, '#f08f7f') + C(x + r * .6 + look, y + r * .3, 3.2, '#f08f7f'); }
+var POSES = {
+ lying: function () { return Ln(86, 128, 138, 128, 38, CL) + Ln(138, 124, 172, 108, 14, SK) + Ln(138, 134, 174, 142, 14, SK) + C(176, 106, 8, SK) + C(178, 143, 8, SK) + Ln(92, 118, 78, 100, 12, SK) + Ln(92, 124, 76, 112, 12, SK) + C(76, 98, 7, SK) + C(74, 112, 7, SK) + head(62, 122, 28, 3); },
+ tummy: function () { return Ln(100, 138, 158, 144, 36, CL) + Ln(158, 146, 188, 154, 14, SK) + Ln(150, 150, 184, 162, 14, SK) + Ln(104, 148, 98, 164, 12, SK) + C(97, 166, 7, SK) + head(88, 96, 28, 3) + C(60, 160, 9, '#e8584a') + C(48, 160, 7, '#fcb74f'); },
+ rattle: function () { return Ln(86, 130, 138, 130, 38, CL2) + Ln(138, 126, 172, 112, 14, SK) + Ln(138, 136, 174, 144, 14, SK) + C(176, 110, 8, SK) + C(178, 145, 8, SK) + Ln(94, 118, 100, 82, 12, SK) + Ln(100, 82, 100, 62, 3, '#8a1f3d') + C(100, 56, 10, '#e8584a') + C(100, 56, 4, '#fcb74f') + Ln(92, 126, 78, 108, 12, SK) + head(62, 124, 28, 3); },
+ sit: function () { return Ln(100, 150, 156, 156, 14, SK) + Ln(104, 158, 152, 166, 14, SK) + C(160, 156, 8, SK) + C(156, 167, 8, SK) + Ln(100, 100, 100, 140, 40, CL) + Ln(90, 110, 72, 128, 12, SK) + Ln(110, 110, 138, 128, 12, SK) + C(146, 128, 11, '#fcb74f') + C(70, 130, 7, SK) + head(100, 70, 28); },
+ crawl: function () { return Ln(70, 128, 128, 128, 34, CL) + Ln(76, 128, 62, 158, 14, SK) + Ln(96, 130, 100, 160, 14, SK) + C(60, 162, 7, SK) + C(100, 164, 7, SK) + Ln(124, 130, 140, 160, 12, SK) + Ln(112, 130, 122, 160, 12, SK) + C(141, 163, 6, SK) + C(122, 163, 6, SK) + head(150, 108, 27, 5) + Ln(20, 168, 190, 168, 3, '#b8cadb'); },
+ stand: function () { return '<rect x="128" y="96" width="62" height="9" rx="3" fill="#a87615"/>' + Ln(138, 105, 138, 168, 8, '#a87615') + Ln(182, 105, 182, 168, 8, '#a87615') + Ln(84, 124, 80, 160, 14, SK) + Ln(98, 124, 102, 160, 14, SK) + Ln(86, 82, 88, 124, 38, CL) + Ln(100, 92, 134, 98, 12, SK) + C(136, 98, 7, SK) + Ln(76, 94, 66, 118, 12, SK) + head(88, 54, 27, 3); },
+ walk: function () { return Ln(94, 118, 80, 160, 14, SK) + Ln(106, 118, 124, 158, 14, SK) + C(78, 163, 8, SK) + C(128, 161, 8, SK) + Ln(100, 72, 100, 118, 38, CL2) + Ln(90, 82, 66, 62, 12, SK) + Ln(110, 82, 134, 62, 12, SK) + C(63, 59, 7, SK) + C(137, 59, 7, SK) + head(100, 46, 28); },
+ kick: function () { return Ln(94, 120, 90, 162, 14, SK) + C(88, 165, 8, SK) + Ln(106, 120, 142, 142, 14, SK) + C(146, 144, 8, SK) + C(168, 152, 13, '#fff') + '<circle cx="168" cy="152" r="13" fill="none" stroke="#14243a" stroke-width="2"/>' + Ln(100, 74, 100, 120, 38, CL) + Ln(90, 84, 66, 98, 12, SK) + Ln(110, 84, 128, 100, 12, SK) + C(63, 100, 7, SK) + C(131, 102, 7, SK) + head(100, 48, 28, 3); },
+ doll: function () { return Ln(94, 120, 90, 162, 14, SK) + Ln(106, 120, 110, 162, 14, SK) + C(88, 165, 8, SK) + C(112, 165, 8, SK) + Ln(100, 74, 100, 120, 38, CL2) + Ln(90, 86, 118, 108, 12, SK) + Ln(110, 86, 128, 106, 12, SK) + '<rect x="120" y="86" width="22" height="34" rx="9" fill="#e8584a" transform="rotate(12 131 103)"/>' + C(134, 76, 11, SK) + head(100, 48, 28); },
+ draw: function () { return '<rect x="30" y="118" width="150" height="9" rx="3" fill="#a87615"/>' + Ln(44, 127, 44, 168, 8, '#a87615') + Ln(166, 127, 166, 168, 8, '#a87615') + Ln(100, 76, 100, 120, 40, CL) + Ln(112, 90, 138, 114, 12, SK) + C(140, 116, 7, SK) + '<rect x="118" y="106" width="46" height="12" rx="2" fill="#fff" stroke="#b8cadb"/>' + '<circle cx="140" cy="112" r="4" fill="none" stroke="#e8584a" stroke-width="2"/>' + Ln(141, 116, 146, 104, 4, '#e8584a') + head(100, 50, 28); }
+};
+var POSE_BY_COL = ['lying', 'lying', 'tummy', 'tummy', 'rattle', 'rattle', 'sit', 'sit', 'sit', 'crawl', 'crawl', 'stand', 'walk', 'kick', 'doll', 'draw'];
+var TIPS = { lying: 'Hablarle y cantarle mirándolo a los ojos, alzarlo y mecerlo, y responder cuando llora.', tummy: 'Ponerlo un ratito boca abajo, despierto y acompañado, con un juguete adelante. Hablarle y sonreírle.', rattle: 'Darle sonajeros y objetos seguros para agarrar, hablarle y repetir los sonidos que hace.', sit: 'Sentarlo con almohadones, jugar a esconder y mostrar un juguete y nombrarle lo que ve.', crawl: 'Dejarlo en el piso, en un lugar seguro, con juguetes a distancia para que se desplace. Llamarlo por su nombre.', stand: 'Ofrecerle muebles estables para pararse. No usar andador. Ponerle música y bailar con él.', walk: 'Dejarlo caminar descalzo, jugar a poner y sacar objetos, nombrar las cosas y las partes del cuerpo.', kick: 'Jugar con una pelota, cantarle, leerle cuentos cortos y dejar que intente comer y vestirse solo.', doll: 'Jugar a dar de comer a un muñeco, hablarle en frases, invitarlo a jugar con otros niños.', draw: 'Leerle cuentos, escuchar sus relatos, dibujar con crayones, jugar con otros niños y esperar el turno.' };
+function tally(col) {
+  var r = { r: 0, o: 0, g: 0, prev: 0 }, lines = [];
+  ITEMS.forEach(function (it) {
+    if (S['i' + it[0]] !== 'n') return; var g = it[3], ch = g[col];
+    if (ch !== '.') { var L = lvl(ch); r[L]++; lines.push(it[2] + ' [' + LB[L] + ']'); }
+    if (ch === '.') { var f = g.search(/[GOR]/), last = Math.max(g.lastIndexOf('G'), g.lastIndexOf('O'), g.lastIndexOf('R')); if (col > last) { r.prev++; lines.push(it[2] + ' [ALARMA, ya pasó el rango]'); } }
+  });
+  return { r: r, lines: lines };
+}
+function simpleItem(it) {
+  var k = 'i' + it[0], on = S[k] === 'n', g = it[3], col = window.__col, ch = g[col], L = ch === '.' ? 'r' : lvl(ch);
+  return '<li><span>' + esc(it[2]) + '</span><button type="button" class="chip" data-k="' + k + '" data-v="n" aria-pressed="' + on + '">' + (on ? 'Aún no lo hace ✓' : 'Aún no lo hace') + '</button></li>' + (on ? '<li style="display:block;border:0">' + whyHtml(it, L) + '</li>' : '');
+}
+function renderVis(c, col) {
+  window.__col = col; var pose = POSE_BY_COL[col], learn = [], done = [];
+  ITEMS.forEach(function (it) {
+    var g = it[3], ch = g[col], f = g.search(/[OR]/), last = Math.max(g.lastIndexOf('G'), g.lastIndexOf('O'), g.lastIndexOf('R'));
+    if (ch === 'G' && (f === -1 || f > col)) learn.push(it);
+    else if ((f > -1 && f <= col) || col > last) done.push({ it: it, f: f > -1 ? f : last });
+  });
+  done.sort(function (a, b) { return b.f - a.f || a.it[0] - b.it[0]; });
+  var top = done.slice(0, 6), rest = done.slice(6), eage = c.corr ? c.mc : c.m;
+  var h = '<h3 class="big">' + esc(ageTxt(c.m)) + '</h3><p class="sub" style="margin-bottom:10px">' + (c.corr ? 'Edad corregida por prematurez: ' + esc(ageTxt(c.mc)) + '. ' : '') + 'Así suele estar a esta edad:</p>';
+  h += '<div class="vis"><div class="fig"><svg viewBox="0 0 200 180" role="img" aria-label="Dibujo de un niño a esta edad">' + C(100, 100, 82, 'rgba(255,255,255,.5)') + POSES[pose]() + '</svg></div><div>';
+  h += '<div class="vt" style="margin-top:0">Lo que está aprendiendo ahora</div>';
+  h += learn.length ? '<ul class="lst">' + learn.map(simpleItem).join('') + '</ul>' : '<p class="sub">Sin pautas nuevas en esta franja.</p>';
+  h += '</div></div>';
+  h += '<div class="vt">Lo que ya debería haber logrado</div>';
+  h += done.length ? '<ul class="lst">' + top.map(function (o) { return simpleItem(o.it); }).join('') + '</ul>' + (rest.length ? '<details><summary>Ver todo lo anterior (' + rest.length + ' más)</summary><ul class="lst">' + rest.map(function (o) { return simpleItem(o.it); }).join('') + '</ul></details>' : '') : '<p class="sub">A esta edad todavía no se espera ninguna pauta anterior.</p>';
+  h += '<div class="tipb"><b>Qué puede hacer la familia:</b> ' + esc(TIPS[pose]) + '</div>';
+  h += '<p class="sub" style="margin-top:10px;font-size:.82rem">Si algo que ya debería hacer todavía no lo hace, toque «Aún no lo hace»: aparece qué preguntar y qué hacer.</p>';
+  $('d-vis').innerHTML = h;
+}
 var LB = { r: 'ALARMA', o: 'RIESGO', g: 'habitual' };
 function itemHtml(it, L, resp, lines, isPrev) {
   var k = 'i' + it[0], v = S[k] || '', h = '<div class="it ' + L + '"><div class="q">' + esc(it[2]) + '</div>' + btns(k);
   if (v === 'n') {
-    if (isPrev) resp.prev++; else resp[L]++;
-    lines.push(it[2] + ' [' + (isPrev ? 'ALARMA, período anterior' : LB[L]) + ']');
     h += whyHtml(it, isPrev ? 'r' : L);
   }
   return h + '</div>';
