@@ -1,0 +1,18 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Armar enlace de configuración · CS 61</title><link rel="icon" href="../icon-192.png">
+<style>:root{--navy:#17324d;--teal:#1f7a86;--gold:#d9a93d;--ink:#1d2b36;--line:#d6dee4;--bg:#f6f9fb}@media(prefers-color-scheme:dark){:root{--ink:#e6eef3;--line:#33495a;--bg:#0f1b24}}
+body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}main{max-width:640px;margin:0 auto;padding:20px 16px 40px}h1{font-size:1.3rem;color:var(--teal)}label{display:block;font-weight:600;margin:14px 0 4px}input,textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:transparent;color:inherit}button{margin-top:14px;padding:10px 16px;border:0;border-radius:8px;background:var(--teal);color:#fff;font:inherit;font-weight:700;cursor:pointer}.w{border-left:4px solid var(--gold);padding:8px 12px;margin:14px 0;background:rgba(217,169,61,.12);border-radius:6px;font-size:.92rem}#o{word-break:break-all;font-size:.85rem}</style></head><body><main>
+<h1>Armar el enlace de configuración</h1>
+<p>Pega la dirección del script de Google y la clave de la planilla compartida. Se arma un enlace que, al abrirlo, deja todo configurado y lleva directo a elegir la profesión. Todo se hace en este equipo: nada se envía ni se guarda.</p>
+<label for="u">Dirección del script (termina en /exec)</label><input id="u" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+<label for="k">Clave de la planilla</label><input id="k" autocomplete="off">
+<button id="g" type="button">Armar enlace</button>
+<div id="r" hidden><label for="o">Enlace para compartir</label><textarea id="o" rows="5" readonly></textarea><button id="c" type="button">Copiar enlace</button></div>
+<div class="w"><b>Cuidado:</b> el enlace contiene la clave. Compártelo sólo por un medio privado (mensaje directo o grupo del equipo) y no lo publiques. Si se filtra, cambia la clave en la planilla y arma otro enlace.</div>
+<script>
+var $=function(i){return document.getElementById(i)};
+$('g').onclick=function(){var u=$('u').value.trim(),k=$('k').value.trim();
+if(!/^https:\/\/script\.google\.com\//.test(u)||!k){alert('Completa la dirección del script (https://script.google.com/...) y la clave.');return}
+var b=btoa(unescape(encodeURIComponent(JSON.stringify({u:u,k:k})))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+$('o').value=location.href.replace(/enlace\/.*$/,'')+'#cfg='+b;$('r').hidden=false};
+$('c').onclick=function(){$('o').select();try{navigator.clipboard.writeText($('o').value)}catch(e){document.execCommand('copy')}$('c').textContent='Copiado'};
+</script></main></body></html>
