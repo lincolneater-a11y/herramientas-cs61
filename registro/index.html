@@ -630,7 +630,7 @@ function frAcu(total, cat, items, bmi, ict) {
     items.map(function (i) { return '- ' + i.label + ': ' + i.ans + ' (' + ptsTxt(i.pts) + ')'; }).join('\n');
   var dx = 'Riesgo ' + cat.name.toLowerCase().replace(/^riesgo /, '') + ' de desarrollar diabetes tipo 2 a 10 años (FINDRISC ' + total + ' puntos).';
   if (bmi >= 30) dx += '\nObesidad (IMC ' + fmt(bmi, 1) + ' kg/m²).'; else if (bmi >= 25) dx += '\nSobrepeso (IMC ' + fmt(bmi, 1) + ' kg/m²).';
-  dx += '\nCódigos de la lista de Acuario a considerar: Z713 (consulta para instrucción y vigilancia de la dieta)' + (bmi >= 30 ? '; E660 (obesidad debida a exceso de calorías)' : '') + '.';
+  dx += '\nCódigos de la lista de Acuario a considerar: Z131 (pesquisa especial para diabetes mellitus)' + (bmi >= 30 ? '; E660 (obesidad debida a exceso de calorías)' : '') + '.';
   if (ict) { dat += '\nÍndice cintura/talla: ' + fmt(ict.r, 2) + ' (' + ict.txt + '; referencia: menor a 0,5, es decir, cintura menor a la mitad de la talla).'; if (ict.lv) dx += '\nRiesgo cardiometabólico ' + (ict.lv === 2 ? 'alto' : 'aumentado') + ' por índice cintura/talla ' + fmt(ict.r, 2) + '.'; }
   var tto = cat.act + '\nSeguimiento según el nivel de riesgo y la guía vigente.';
   return { dat: dat, dx: dx, tto: tto };

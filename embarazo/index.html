@@ -240,6 +240,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 
 #cc-printarea{display:none}
 .cc-in{max-width:110px}
+.acu{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface-2)}.acu h4{margin:0 0 2px;font-size:.95rem}.acu .sub{margin:0 0 8px;font-size:.8rem;color:var(--ink-2)}.acu .blk{margin-top:10px}.acu .blk .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;font-weight:700;font-size:.85rem}.acu textarea{min-height:84px;font-size:.86rem;line-height:1.4;width:100%;box-sizing:border-box}@media print{.acu{display:none!important}}
 @media print{body.pcc>*:not(#cc-printarea){display:none!important}body.pcc>#cc-printarea{display:block!important;padding:12px;color:#000;background:#fff}body.pcc #cc-printarea .tbl{width:100%;border-collapse:collapse;font-size:11px}body.pcc #cc-printarea .tbl th,body.pcc #cc-printarea .tbl td{border:1px solid #999;padding:3px 5px;text-align:left}}
 
 .dt-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}.dt-chips button{padding:7px 12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;font:inherit;font-size:.86rem;cursor:pointer}.dt-chips button[aria-pressed="true"]{background:var(--teal);color:var(--teal-ink);border-color:var(--teal);font-weight:700}
@@ -646,6 +647,12 @@ details.card[open] > summary { margin-bottom: 12px; }
     </div>
     <div style="margin-top:10px"><label class="check"><input type="checkbox" id="es-tgt" checked> Graficar la talla blanco familiar y la proyección en la curva de talla/edad (orientativo)</label></div>
     <div id="es-mat" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <h3>5 · Resumen para Acuario</h3>
+    <p class="sub">Se arma solo con los datos cargados (valoración, velocidad, Tanner y talla blanco familiar). Revíselo y edítelo antes de copiar.</p>
+    <div id="es-acu"></div>
   </div>
 
   <div class="card">
@@ -2841,7 +2848,8 @@ function esChart(P, k, pts) {
   var pp = []; pts.forEach(function (p) { var v = k === 'b' ? p.b : (k === 'h' ? p.h : p.w); if (v) pp.push([p.m / 12, v]); });
   return lineChart({ band: band, x0: 5, x1: x1, xs: k === 'w' ? 1 : 2, y0: cfg[0], y1: cfg[1], ys: cfg[2], xl: 'Edad (años)', yl: { b: 'IMC (kg/m²)', h: 'Talla (cm)', w: 'Peso (kg)' }[k], series: series, pts: pp, rpad: 32, aria: 'Curva OMS 2007 de ' + ES_META[k].n.toLowerCase() + ' con los puntos del paciente' });
 }
-function esRender() {
+function esRender() { esRender0(); try { esAcu(); } catch (e) { } }
+function esRender0() {
   var out = $('es-out'), P = esRead(), L = [], T = '', H = '';
   $('es-tan-l').textContent = P.sex === 'M' ? 'Estadio de Tanner: genitales' : (P.sex === 'F' ? 'Estadio de Tanner: mamas' : 'Estadio de Tanner: mama / genitales');
   var ch = []; if (P.m !== null) ch.push('Edad <b>' + Math.floor(P.m / 12) + ' años ' + Math.floor(P.m % 12) + ' m</b>'); if (P.dec !== null) ch.push('Edad decimal <b>' + fmt(P.dec, 2) + ' años</b>'); if (P.w && P.h) ch.push('IMC <b>' + fmt(P.w / Math.pow(P.h / 100, 2), 1) + ' kg/m²</b>');
@@ -2936,10 +2944,60 @@ function esMat(P) {
   out.innerHTML = H || '<p class="note">Cargue el estadio de Tanner y las tallas de los padres para ver la interpretación.</p>'; esMatCopy = L;
 }
 var esMatCopy = [];
+
+/* ---- Resumen en formato Acuario (Escolar y adolescente) ---- */
+function acuHTML(pref, d) {
+  var B = [['dat', 'Datos Comunidad Médica', d.dat], ['dx', 'Diagnóstico sugerido', d.dx], ['tto', 'Tratamiento', d.tto]];
+  return '<div class="acu" id="' + pref + '-acu"><h4>Para pegar en Acuario</h4><p class="sub">Revise y edite antes de copiar. El diagnóstico es una sugerencia orientativa: lo valida el profesional.</p>' +
+    B.map(function (b) { return '<div class="blk"><div class="hd"><label for="' + pref + '-' + b[0] + '">' + b[1] + '</label><button class="btn small" type="button" data-acu="' + pref + '-' + b[0] + '">Copiar</button></div><textarea id="' + pref + '-' + b[0] + '" rows="5">' + esc(b[2]) + '</textarea></div>'; }).join('') +
+    '<div class="actions" style="margin-top:10px"><button class="btn small primary" type="button" data-acu-all="' + pref + '">Copiar los tres bloques</button></div></div>';
+}
+function acuBind(pref) {
+  var root = $(pref + '-acu'); if (!root) return;
+  root.querySelectorAll('[data-acu]').forEach(function (b) { b.addEventListener('click', function () { copyText($(b.getAttribute('data-acu')).value, b); }); });
+  root.querySelectorAll('[data-acu-all]').forEach(function (b) { b.addEventListener('click', function () {
+    copyText('DATOS COMUNIDAD MÉDICA\n' + $(pref + '-dat').value + '\n\nDIAGNÓSTICO SUGERIDO\n' + $(pref + '-dx').value + '\n\nTRATAMIENTO\n' + $(pref + '-tto').value, b);
+  }); });
+}
+var ES_ACU_SIG = null;
+function esAcu() {
+  var box = $('es-acu'), P = esRead();
+  var ok = P.sex && P.m !== null && P.m >= 60 && P.m <= 228 && (P.h || P.w);
+  if (!ok) { ES_ACU_SIG = null; box.innerHTML = '<p class="note">Cargue sexo, edad (o fechas), peso y talla para armar el resumen.</p>'; return; }
+  var cl = {}, zt = {};
+  if (P.w && P.h) { zt.b = w07Z(P.sex, 'b', P.m, P.w / Math.pow(P.h / 100, 2)); }
+  if (P.h) { zt.h = w07Z(P.sex, 'h', P.m, P.h); }
+  if (P.w && P.m <= 120) { zt.w = w07Z(P.sex, 'w', P.m, P.w); }
+  ['b', 'h', 'w'].forEach(function (k) { if (zt[k] !== null && zt[k] !== undefined) cl[k] = esClass(k, zt[k])[1]; });
+  var dat = ['Control de crecimiento (escolar y adolescente), referencia OMS 2007.'].concat(ES_COPY.slice(1), esVelCopy, esMatCopy).join('\n');
+  var dxL = [], cod = ['Z001 (control de salud de rutina del niño)'];
+  var zs = function (k) { return ' (Z ' + (zt[k] >= 0 ? '+' : '−') + fmt(Math.abs(zt[k]), 2) + ')'; };
+  if (cl.b) {
+    if (cl.b === 'Normal') dxL.push('Estado nutricional normal: IMC/edad' + zs('b') + '.');
+    else { dxL.push(cl.b + ' según IMC/edad' + zs('b') + '.'); if (cl.b === 'Sobrepeso') cod.push('E663 (sobrepeso)'); else if (cl.b === 'Obesidad') cod.push('E669 (obesidad)'); }
+  }
+  if (cl.h) dxL.push(cl.h === 'Normal' ? 'Talla para la edad normal' + zs('h') + '.' : cl.h + ' según talla/edad' + zs('h') + '.');
+  if (cl.w && cl.w !== 'Normal') dxL.push(cl.w + ' según peso/edad' + zs('w') + '.');
+  if (P.wc) { var wr = wcRef(P.sex, P.m / 12); if (wr && P.wc >= wr[1]) dxL.push('Circunferencia de cintura elevada (≥ P90).'); }
+  var vl = esVelCopy.length ? esVelCopy[esVelCopy.length - 1] : '', vh = /centilo TW[^:]*: (Enlentecida|Baja|Acelerada)/.exec(vl.split(' · ')[0] || '');
+  if (vh) dxL.push('Velocidad de talla ' + (vh[1] === 'Acelerada' ? 'acelerada' : (vh[1] === 'Baja' ? 'baja' : 'enlentecida')) + ' en el último intervalo (interpretar con el estadio de Tanner).');
+  var dx = dxL.join('\n') + '\nCódigos de la lista de Acuario a considerar: ' + cod.join('; ') + '.';
+  var tt = [];
+  if (cl.b === 'Sobrepeso' || cl.b === 'Obesidad') tt.push('Intervención sobre alimentación y actividad física con participación de la familia. Control de peso y talla periódico.');
+  else if (cl.b === 'Delgadez' || cl.b === 'Delgadez severa') tt.push('Evaluar ingesta y plan de alimentación con aporte adecuado; descartar causas orgánicas y derivar según criterio clínico.');
+  else tt.push('Alimentación saludable y actividad física. Control periódico del crecimiento.');
+  if (cl.h && cl.h !== 'Normal' && cl.h !== 'Talla alta' || (vh && vh[1] !== 'Acelerada')) tt.push('Controlar la velocidad de crecimiento y derivar a pediatría o endocrinología según velocidad, estadio de Tanner y talla blanco familiar.');
+  else if (esVelCopy.length) tt.push('Interpretar la velocidad de crecimiento junto con el estadio de Tanner y la talla blanco familiar.');
+  tt.push('Seguimiento según el nivel de riesgo y el criterio clínico.');
+  var sig = JSON.stringify([dat, dx, tt]);
+  if (sig === ES_ACU_SIG && $('es-acu-dat')) return;
+  ES_ACU_SIG = sig;
+  box.innerHTML = acuHTML('es-acu', { dat: dat, dx: dx, tto: tt.join('\n') }); acuBind('es-acu');
+}
 (function () {
   var root = $('v-escolar');
   root.addEventListener('input', function (e) {
-    var t = e.target;
+    var t = e.target; if (t.closest && t.closest('#es-acu')) return;
     if (t.id === 'es-dob' || t.id === 'es-ctl') esSyncAge();
     var g = t.getAttribute('data-esh');
     if (g !== null) { var k = t.getAttribute('data-k'); if (k === 'd') ESH[+g].d = t.value; else { var v = t.value === '' ? null : parseFloat(String(t.value).replace(',', '.')); ESH[+g][k] = isFinite(v) ? v : null; } }
