@@ -374,6 +374,7 @@ details.card[open] > summary { margin-bottom: 12px; }
     <label><input type="radio" name="fr-sub" value="cargar" checked><span>Test</span></label>
     <label><input type="radio" name="fr-sub" value="registro"><span>Registro <b id="fr-n">(0)</b></span></label>
     <label><input type="radio" name="fr-sub" value="stats"><span>Estadísticas</span></label>
+    <label><input type="radio" name="fr-sub" value="consultar"><span>Consultar planilla</span></label>
   </div>
 
   <div id="fr-p-cargar" style="margin-top:14px">
@@ -424,6 +425,19 @@ details.card[open] > summary { margin-bottom: 12px; }
       <div class="src-h"><h3>Registro de tests</h3><div class="actions"><button class="btn small primary" data-xl="fr" type="button">Descargar Excel</button><button class="btn small" id="fr-tsv" type="button">Copiar para pegar en Excel</button><button class="btn small" data-print="Registro de tests FINDRISC" type="button">Imprimir / PDF</button></div></div>
       <div class="tw" style="margin-top:10px"><table class="tbl" id="fr-tbl"></table></div>
     </div>
+  </div>
+
+  <div id="fr-p-consultar" hidden style="margin-top:14px">
+    <div class="card">
+      <h3>Consultar un test ya cargado en la planilla</h3>
+      <p class="sub">Busca en la planilla compartida por DNI (o por código CS61-0001) y muestra el puntaje y los datos para cargarlos después en Acuario. No se guarda nada en este navegador: al salir o pulsar «Limpiar» desaparece.</p>
+      <div class="grid wide" style="margin-top:10px">
+        <label class="field"><span>Documento (DNI) o código</span><input type="text" id="frq-q" maxlength="14" autocomplete="off" inputmode="text" placeholder="DNI o CS61-0001"></label>
+      </div>
+      <div class="actions" style="margin-top:12px"><button class="btn primary" id="frq-go" type="button">Buscar en la planilla</button><button class="btn" id="frq-clear" type="button">Limpiar</button></div>
+      <div class="alert info" id="frq-msg" role="status" hidden style="margin-top:12px"></div>
+    </div>
+    <div id="frq-out" style="margin-top:14px"></div>
   </div>
 
   <div id="fr-p-stats" hidden style="margin-top:14px">
@@ -735,6 +749,61 @@ var FRR = lsGet(K_FR, []), ECR = lsGet(K_EC, []), CFG = lsGet(K_CFG, { centro: '
   var c1 = get(K) || get('cs61_pl'); if (c1) { $('cv-url').value = c1.url || ''; $('cv-key').value = c1.key || ''; $('cv-prof').value = c1.prof || ''; st('Planilla compartida configurada en este dispositivo.'); }
   if (cfg()) { var dt = document.querySelector('#fr-savebox details'); if (dt) dt.open = true; }
   refresh();
+
+  /* ---- consultar un FINDRISC ya cargado (lectura; no se guarda en el navegador) ---- */
+  (function () {
+    var FQ = { act: { '0': 'Sí', '2': 'No' }, veg: { '0': 'Sí', '1': 'No' }, med: { '0': 'No', '2': 'Sí' }, glu: { '0': 'No', '5': 'Sí' }, fam: { '0': 'No', '3': 'Abuelos, tíos o primos', '5': 'Padres, hermanos o hijos' } };
+    var inv = function (k, txt) { var m = FQ[k]; for (var p in m) if (m[p] === txt) return parseInt(p, 10); return null; };
+    var LAB = { act: 'Actividad física ≥ 30 min/día', veg: 'Verduras y frutas', med: 'Medicación antihipertensiva', glu: 'Glucemia alta previa', fam: 'Antecedentes familiares' };
+    var TESTS = [];
+    function render(j) {
+      var o = $('frq-out');
+      TESTS = j.tests || [];
+      if (!TESTS.length) { o.innerHTML = ''; return; }
+      var sel = '<label class="field"><span>Test (más reciente primero)</span><select id="frq-sel">' + TESTS.map(function (t, i) { return '<option value="' + i + '">' + esc(isoToEs(String(t.fecha).slice(0, 10))) + ' · ' + esc(String(t.puntaje === '' ? 's/d' : t.puntaje)) + ' puntos</option>'; }).join('') + '</select></label>';
+      o.innerHTML = '<div class="card"><p style="margin:0 0 8px"><b>Código:</b> ' + esc(j.codigo) + (j.nombre ? ' · <b>Persona:</b> ' + esc(j.nombre) : '') + '</p>' + (TESTS.length > 1 ? sel : '') + '<div id="frq-det"></div></div>';
+      if ($('frq-sel')) $('frq-sel').addEventListener('change', function () { show(+this.value); });
+      show(0);
+    }
+    function show(i) {
+      var t = TESTS[i], items = [], pend = [], total = 0, d = $('frq-det');
+      var bmi = (t.peso && t.talla) ? t.peso / Math.pow(t.talla / 100, 2) : null, age = Number(t.edad), waist = Number(t.cintura);
+      var add = function (label, ans, pts) { items.push({ label: label, ans: ans, pts: pts }); total += pts; };
+      if (isFinite(age) && t.edad !== '') add('Edad', age + ' años', age < 45 ? 0 : age < 55 ? 2 : age < 65 ? 3 : 4); else pend.push('edad');
+      if (bmi) add('IMC', fmt(bmi, 1) + ' kg/m²', bmi < 25 ? 0 : bmi <= 30 ? 1 : 3); else pend.push('peso y talla');
+      if (t.sexo && isFinite(waist) && t.cintura !== '') { var m = t.sexo === 'Varón'; add('Perímetro de cintura', waist + ' cm', m ? (waist < 94 ? 0 : waist <= 102 ? 3 : 4) : (waist < 80 ? 0 : waist <= 88 ? 3 : 4)); } else pend.push('sexo o cintura');
+      ['act', 'veg', 'med', 'glu', 'fam'].forEach(function (k) { var p = inv(k, t[k]); if (p === null) pend.push(LAB[k].toLowerCase()); else add(LAB[k], t[k], p); });
+      var head = '<p style="margin:8px 0"><b>Fecha del test:</b> ' + esc(isoToEs(String(t.fecha).slice(0, 10))) + (t.profesional ? ' · <b>Profesional:</b> ' + esc(t.profesional) : '') + '</p>';
+      if (pend.length) { d.innerHTML = head + '<div class="alert warn" role="status"><span>El test de la planilla está incompleto. Falta: ' + esc(pend.join(', ')) + '. Puntaje de la planilla: ' + esc(String(t.puntaje === '' ? 'sin calcular' : t.puntaje)) + '.</span></div>'; return; }
+      var cat = FR_CATS.filter(function (c) { return total <= c.max; })[0];
+      var rows = items.map(function (x) { return '<tr><td>' + esc(x.label) + '</td><td>' + esc(x.ans) + '</td><td class="num"><b>' + x.pts + '</b></td></tr>'; }).join('');
+      var warn = (t.puntaje !== '' && Number(t.puntaje) !== total) ? '<div class="alert warn" role="status" style="margin:8px 0"><span>El puntaje de la planilla (' + esc(String(t.puntaje)) + ') no coincide con el recalculado (' + total + '). Revise la fila en la planilla.</span></div>' : '';
+      var ict = ictInfo(waist, Number(t.talla));
+      var txt = 'FINDRISC: ' + total + ' puntos de 26 posibles · ' + cat.name + ' · riesgo a 10 años ' + cat.prob + ' (' + cat.one + ').\nFecha del test: ' + isoToEs(String(t.fecha).slice(0, 10)) + '.\n' + items.map(function (x) { return '- ' + x.label + ': ' + x.ans + ' (' + x.pts + (x.pts === 1 ? ' punto' : ' puntos') + ')'; }).join('\n') + (ict ? '\nÍndice cintura/talla: ' + fmt(ict.r, 2) + ' (' + ict.txt + '). No suma al puntaje.' : '');
+      d.innerHTML = head + '<div class="score"><span class="n">' + total + '</span><span class="of">de 26 puntos</span><span class="badge ' + cat.cls + '">' + cat.name + '</span></div>' +
+        '<p style="margin:10px 0 4px"><b>Riesgo a 10 años:</b> ' + cat.prob + ' (' + cat.one + ' personas con este puntaje).</p>' + warn +
+        '<div class="tw"><table><thead><tr><th>Pregunta</th><th>Respuesta</th><th class="num">Puntos</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<div class="actions" style="margin-top:12px"><button class="btn small" id="frq-copy" type="button">Copiar resumen</button></div>' + acuHTML('frq', frAcu(total, cat, items, bmi, ict));
+      $('frq-copy').addEventListener('click', function () { copyText(txt, this); });
+      acuBind('frq');
+    }
+    $('frq-go').addEventListener('click', function () {
+      var c = cfg(), q = $('frq-q').value.trim();
+      if (!c) { msg('frq-msg', 'Configure la planilla compartida en la pestaña «Excel y respaldo».', 'warn'); return; }
+      var dni = q.replace(/\D/g, ''), cod = /^CS61-\d+$/i.test(q) ? q.toUpperCase() : '';
+      if (!cod && dni.length < 6) { msg('frq-msg', 'Ingrese el DNI (sólo números) o el código, por ejemplo CS61-0001.', 'warn'); return; }
+      var b = this; b.disabled = true; msg('frq-msg', 'Buscando en la planilla…'); $('frq-out').innerHTML = '';
+      post(c, { frget: cod ? { codigo: cod } : { dni: dni } }).then(function (j) {
+        b.disabled = false;
+        if (!j || !j.ok) { msg('frq-msg', ERR[j && j.error] || (j && j.error === 'sin_dni' ? ERR.sin_dni : 'La planilla no pudo responder' + (j && j.error ? ': ' + j.error : '') + '. Si es la primera vez, actualice el script (ver guía).'), 'warn'); return; }
+        if (!j.codigo) { msg('frq-msg', 'No hay una persona con ese DNI o código en la planilla.', 'warn'); return; }
+        if (!(j.tests || []).length) { msg('frq-msg', 'La persona está en la planilla (' + j.codigo + ') pero no tiene tests FINDRISC cargados.', 'warn'); return; }
+        msg('frq-msg', (j.tests.length === 1 ? 'Se encontró 1 test.' : 'Se encontraron ' + j.tests.length + ' tests.') + ' Los datos se muestran sólo en pantalla.'); render(j);
+      }).catch(function () { b.disabled = false; msg('frq-msg', 'No se pudo conectar con la planilla. Revise la conexión a internet.', 'warn'); });
+    });
+    $('frq-q').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('frq-go').click(); });
+    $('frq-clear').addEventListener('click', function () { $('frq-q').value = ''; $('frq-out').innerHTML = ''; TESTS = []; $('frq-msg').hidden = true; });
+  })();
   $('cv-save').addEventListener('click', function () {
     var u = $('cv-url').value.trim(), k = $('cv-key').value.trim();
     if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(u)) { st('La dirección debe ser la URL de la aplicación web de Apps Script (termina en /exec).', 'warn'); return; }
@@ -786,7 +855,7 @@ function msg(id, text, cls) { var e = $(id); e.className = 'alert ' + (cls || 'i
 document.querySelectorAll('.sub-seg').forEach(function (g) {
   g.addEventListener('change', function (e) {
     var grp = g.getAttribute('data-grp'), v = e.target.value;
-    ['cargar', 'registro', 'stats'].forEach(function (p) { $(grp + '-p-' + p).hidden = (p !== v); });
+    ['cargar', 'registro', 'stats', 'consultar'].forEach(function (p) { var el = $(grp + '-p-' + p); if (el) el.hidden = (p !== v); });
     if (v === 'registro') (grp === 'ec' ? ecTable : frTable)();
     if (v === 'stats') (grp === 'ec' ? ecStatsRender : frStatsRender)();
   });
