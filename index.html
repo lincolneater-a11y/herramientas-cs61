@@ -47,7 +47,7 @@ button.c{border-top-color:var(--gold);display:flex;flex-direction:column;justify
 <p class="n">El perfil sólo ordena el menú: no limita el acceso. Los registros cardiovasculares quedan guardados en el navegador de cada computadora. Si se conecta la planilla compartida, el DNI y el nombre se guardan sólo en su hoja «Pacientes».</p></section></main>
 <script src="egg.js"></script>
 <script>(function(){
-var T={nutricion:['registro','consulta','nutricion','calculadora','vacunas','recursos'],enfermeria:['registro','calculadora','vacunas','recursos'],aps:['desarrollo','vacunas','recursos'],pediatria:['consulta','crecimiento','desarrollo','vacunas','registro'],clinica:['consulta','registro','calculadora'],gineco:['consulta','embarazo','calculadora'],medicina:['consulta','calculadora'],otro:['recursos']};
+var T={nutricion:['registro','consulta','nutricion','calculadora','vacunas','recursos'],enfermeria:['registro','calculadora','vacunas','recursos'],aps:['desarrollo','registro','vacunas','recursos'],pediatria:['consulta','crecimiento','desarrollo','vacunas','registro'],clinica:['consulta','registro','calculadora'],gineco:['consulta','embarazo','registro','calculadora'],medicina:['consulta','registro','calculadora'],otro:['recursos','registro']};
 var N={nutricion:'Nutrición',enfermeria:'Enfermería',aps:'Agente sanitario (APS)',pediatria:'Medicina · Pediatría',clinica:'Medicina · Clínica, diabetología y nefrología',gineco:'Medicina · Ginecología y obstetricia',medicina:'Medicina · Otra especialidad',otro:'Otro perfil'};
 var P=window.CS61P||'',all=false,ev=null,step=1,$=function(i){return document.getElementById(i)};
 function render(){
