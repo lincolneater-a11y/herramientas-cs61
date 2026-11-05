@@ -17,14 +17,18 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 .vs{margin-top:10px}.vs h4{margin:14px 0 6px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase}.vs h4.now{color:var(--bord)}.vs h4.next{color:var(--teal)}.vs h4.prev{color:var(--ink2)}
 .vr{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border:1px solid var(--line);border-left-width:5px;border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--s)}
 .vr.now{border-left-color:var(--bord);background:var(--bordsoft)}.vr.next{border-left-color:var(--teal)}.vr.prev{border-left-color:var(--line)}.vr.ok{border-left-color:var(--ok);background:var(--oksoft)}
-.vr b{display:block}.vr small{color:var(--ink2)}.vr select{width:120px}
+.vr b{display:block}.vr small{color:var(--ink2)}.vr select{width:158px}
 .age{font-size:1.25rem;font-weight:800;color:var(--teal)}
-@media print{.hdr,.actions,.noprint,.vr select{display:none!important}body{background:#fff;color:#000}.card{border:0;padding:0}}
+input[type=text]{width:100%;padding:8px 10px;background:var(--s);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit}
+.alert{border-radius:8px;padding:8px 10px;font-size:.86rem;margin-top:10px;background:var(--tealsoft)}.alert.warn{background:var(--goldsoft);border:1px solid var(--gold)}
+.hv{margin:8px 0 0;padding:0;list-style:none;font-size:.86rem}.hv li{padding:4px 0;border-top:1px solid var(--line)}
+#v-pa{display:none}
+@media print{body.pv>*:not(#v-pa){display:none!important}body.pv #v-pa{display:block!important;color:#000;background:#fff;font-size:12px}body.pv #v-pa h1{font-size:18px;margin:0}body.pv #v-pa h2{font-size:13px;margin:14px 0 4px;border-bottom:2px solid #a87615;padding-bottom:2px}body.pv #v-pa table{width:100%;border-collapse:collapse}body.pv #v-pa td,body.pv #v-pa th{border:1px solid #888;padding:4px 6px;text-align:left}body.pv #v-pa th{background:#e9eef3}body.pv #v-pa .ph{display:flex;gap:12px;align-items:center;border-bottom:3px solid #14304f;padding-bottom:8px}body.pv #v-pa .ph img{width:56px;height:56px}body.pv #v-pa small{color:#333}}
 </style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><style>.sw-tool{order:99;margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;font-family:inherit}.sw-tool:hover,.sw-tool:focus-visible{background:rgba(255,255,255,.14);outline:2px solid #e0b25a;outline-offset:2px}@media print{.sw-tool{display:none!important}}@media(max-width:520px){.sw-tool{padding:5px 9px;font-size:.74rem}}</style></head><body>
 <header class="hdr"><div class="hdr-in"><div class="brand"><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Calendario de vacunación</h1><small>Centro de Salud N.º 61 · Qué vacunas corresponden según la edad</small></div></div></div></header>
 <main>
 <h2>Qué le corresponde a la persona que consulta</h2>
-<p class="sub">Cargue la fecha de nacimiento y la de la consulta: la herramienta marca qué corresponde ahora, qué sigue y qué conviene revisar en el carnet. Todo se calcula en este navegador y no se guarda.</p>
+<p class="sub">Cargue la fecha de nacimiento y la de la consulta: la herramienta marca qué corresponde ahora, qué sigue y qué conviene revisar en el carnet. Todo se calcula en este navegador; sólo se guarda en la planilla compartida si usted pulsa «Guardar en la planilla» (paso 3).</p>
 <div class="warnb"><b>Verifique siempre con el Calendario Nacional vigente</b> (Ministerio de Salud de la Nación, argentina.gob.ar/salud/vacunas) y con las notas oficiales: los esquemas cambian. Esta lista es una ayuda para la consulta y no reemplaza la indicación del equipo de salud. Fuente cargada: <span id="v-ver"></span>.</div>
 <div class="split">
 <div>
@@ -46,10 +50,22 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
   <label class="check"><input type="checkbox" id="v-fr"> Factor de riesgo (enfermedad crónica, inmunosupresión, otro)</label>
   <div class="actions" style="margin-top:10px"><button class="btn" id="v-ex" type="button">Cargar ejemplo</button><button class="btn danger" id="v-cl" type="button">Limpiar</button></div>
  </div>
+ <div class="card noprint" id="v-reg">
+  <h3>3 · Historial y registro en la planilla</h3>
+  <p class="sub" style="font-size:.86rem">Busque a la persona por DNI para traer sus registros anteriores (vacunas aplicadas, fecha de nacimiento y condiciones), o guarde esta consulta para que quede en su historial. Necesita la planilla compartida configurada.</p>
+  <div class="grid" style="margin-top:10px">
+   <label class="field"><span>Documento (DNI) o código</span><input type="text" id="v-dni" maxlength="14" autocomplete="off" inputmode="text" placeholder="DNI o CS61-0001"></label>
+   <label class="field"><span>Nombre y apellido</span><input type="text" id="v-nom" maxlength="80" autocomplete="off"><small style="font-weight:400">Se guarda sólo en la hoja «Pacientes». Se imprime únicamente si lo escribe.</small></label>
+  </div>
+  <div class="actions" style="margin-top:10px"><button class="btn primary" id="v-find" type="button">Buscar historial</button><button class="btn" id="v-save" type="button">Guardar en la planilla</button></div>
+  <div class="alert" id="v-rmsg" role="status" hidden></div>
+  <div id="v-hist"></div>
+ </div>
 </div>
 <div><div class="card" id="v-out"></div></div>
 </div>
 </main>
+<div id="v-pa"></div>
 <script>
 var VAC_VERSION = 'Calendario Nacional de Vacunación 2026 (Ministerio de Salud de la Nación, versión de marzo de 2026)';
 var $ = function (i) { return document.getElementById(i); };
@@ -99,7 +115,8 @@ var V = [
   { g: 'Personal de salud', v: 'Triple viral', d: 'Completar 2 dosis si no las tiene', a: 216, b: null, w: function (c) { return c.ps; } }
 ];
 V.forEach(function (it) { if (it.a >= 2 && it.a <= 18 && it.b !== null && !it.lim && it.b - it.a < 3) it.b = it.a + 3; });
-var VS = {};
+var VS = {}, VD = {};
+function vk(i) { var it = V[i]; return it.v + '|' + it.d + '|' + it.g; }
 function ctx() {
   var dob = $('v-dob').value, ctl = $('v-ctl').value, d = dob && ctl ? (new Date(ctl + 'T00:00:00') - new Date(dob + 'T00:00:00')) / 864e5 : null, m = d !== null && d >= 0 ? d / 30.4375 : null;
   return { dob: dob, ctl: ctl, m: m, emb: $('v-emb').checked, sem: parseFloat($('v-sem').value), pue: $('v-pue').checked, ps: $('v-ps').checked, zr: $('v-zr').checked, fr: $('v-fr').checked };
@@ -120,12 +137,12 @@ function render() {
     var s = stOf(it, c); if (!s) return; var key = s.replace('?', ''); groups[key].push({ it: it, i: i, s: s });
   });
   var row = function (o, cls) {
-    var it = o.it, k = 'v' + o.i, v = VS[k] || '', due = (cls === 'next' && !it.ps && c.dob) ? ' · desde el ' + addM(c.dob, it.a) : '';
-    var c2 = v === 'si' ? 'ok' : cls;
-    return '<div class="vr ' + c2 + '"><div><b>' + esc(it.v) + ' · ' + esc(it.d) + '</b><small>' + esc(it.g) + due + (it.n ? ' · ' + esc(it.n) : '') + (o.s === 'now?' ? ' · Indique las semanas de gestación para precisar.' : '') + '</small></div><select data-k="' + k + '" aria-label="Carnet: ' + esc(it.v) + '"><option value="">Carnet…</option><option value="si"' + (v === 'si' ? ' selected' : '') + '>Aplicada</option><option value="no"' + (v === 'no' ? ' selected' : '') + '>No consta</option></select></div>';
+    var it = o.it, k = o.i, v = VS[vk(o.i)] || '', due = (cls === 'next' && !it.ps && c.dob) ? ' · desde el ' + addM(c.dob, it.a) : '';
+    var c2 = (v === 'si' || v === 'hoy') ? 'ok' : cls; var fa = (v === 'si' && VD[vk(o.i)]) ? ' · aplicada el ' + new Date(VD[vk(o.i)] + 'T00:00:00').toLocaleDateString('es-AR') : '';
+    return '<div class="vr ' + c2 + '"><div><b>' + esc(it.v) + ' · ' + esc(it.d) + '</b><small>' + esc(it.g) + due + (it.n ? ' · ' + esc(it.n) : '') + (o.s === 'now?' ? ' · Indique las semanas de gestación para precisar.' : '') + fa + '</small></div><select data-k="' + k + '" aria-label="Carnet: ' + esc(it.v) + '"><option value="">Carnet…</option><option value="si"' + (v === 'si' ? ' selected' : '') + '>Aplicada (carnet)</option><option value="hoy"' + (v === 'hoy' ? ' selected' : '') + '>Aplicada hoy</option><option value="no"' + (v === 'no' ? ' selected' : '') + '>No consta</option></select></div>';
   };
   var pend = [];
-  var sect = function (t, cls, arr, empty) { out += '<h4 class="' + cls + '">' + t + '</h4>'; if (!arr.length) out += '<p class="sub">' + empty + '</p>'; arr.forEach(function (o) { out += row(o, cls); if ((cls === 'now' || cls === 'prev') && VS['v' + o.i] !== 'si') pend.push((VS['v' + o.i] === 'no' ? '[No consta] ' : '') + o.it.v + ' (' + o.it.d + ')'); }); };
+  var sect = function (t, cls, arr, empty) { out += '<h4 class="' + cls + '">' + t + '</h4>'; if (!arr.length) out += '<p class="sub">' + empty + '</p>'; arr.forEach(function (o) { out += row(o, cls); if ((cls === 'now' || cls === 'prev') && VS[vk(o.i)] !== 'si' && VS[vk(o.i)] !== 'hoy') pend.push((VS[vk(o.i)] === 'no' ? '[No consta] ' : '') + o.it.v + ' (' + o.it.d + ')'); }); };
   if (c.m === null && !c.emb && !c.pue) out = '<h3>Resultado</h3><p class="sub">Cargue la fecha de nacimiento y la de la consulta, o marque una situación especial.</p>';
   else {
     out = '<h3>Resultado</h3>';
@@ -136,16 +153,89 @@ function render() {
     out += '<p class="note" style="margin-top:12px">Los esquemas atrasados se completan sin reiniciar las dosis. En prematuros se usa la edad cronológica. Las dosis cero y las adicionales por brote o campaña no forman parte del esquema regular. Ante una duda sobre contraindicaciones, consulte al equipo de salud.</p>';
     out += '<div class="actions noprint" style="margin-top:12px"><button class="btn primary" id="v-copy" type="button">Copiar resumen</button><button class="btn" id="v-print" type="button">Imprimir</button></div>';
   }
+  window.__vg = groups; window.__vc = c;
   $('v-out').innerHTML = out; window.__sum = (age ? age + '. ' : '') + 'Vacunas a revisar o aplicar: ' + (pend.length ? pend.join('; ') : 'ninguna pendiente registrada') + '. (' + VAC_VERSION + ')';
 }
 document.addEventListener('input', function (e) { if (e.target.tagName === 'INPUT') render(); });
-document.addEventListener('change', function (e) { var k = e.target.getAttribute && e.target.getAttribute('data-k'); if (k) { VS[k] = e.target.value; render(); } else render(); });
+document.addEventListener('change', function (e) { var k = e.target.getAttribute && e.target.getAttribute('data-k'); if (k) { VS[vk(+k)] = e.target.value; if (e.target.value !== 'si') delete VD[vk(+k)]; render(); } else render(); });
 document.addEventListener('click', function (e) {
   var b = e.target.closest('button'); if (!b) return;
   if (b.id === 'v-copy') { (navigator.clipboard ? navigator.clipboard.writeText(window.__sum) : Promise.reject()).then(function () { b.textContent = 'Copiado'; }, function () { var t = document.createElement('textarea'); t.value = window.__sum; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); b.textContent = 'Copiado'; } catch (x) { } document.body.removeChild(t); }); }
-  if (b.id === 'v-print') window.print();
-  if (b.id === 'v-cl') { ['v-dob', 'v-sem'].forEach(function (i) { $(i).value = ''; }); ['v-emb', 'v-pue', 'v-ps', 'v-zr', 'v-fr'].forEach(function (i) { $(i).checked = false; }); $('v-ctl').value = todayISO(); VS = {}; render(); }
-  if (b.id === 'v-ex') { var d = new Date(); d.setMonth(d.getMonth() - 13); $('v-dob').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); $('v-ctl').value = todayISO(); VS = {}; render(); }
+  if (b.id === 'v-print') vPrint();
+  if (b.id === 'v-cl') { ['v-dob', 'v-sem'].forEach(function (i) { $(i).value = ''; }); ['v-emb', 'v-pue', 'v-ps', 'v-zr', 'v-fr'].forEach(function (i) { $(i).checked = false; }); $('v-ctl').value = todayISO(); VS = {}; VD = {}; ['v-dni', 'v-nom'].forEach(function (i) { $(i).value = ''; }); $('v-hist').innerHTML = ''; $('v-rmsg').hidden = true; render(); }
+  if (b.id === 'v-ex') { var d = new Date(); d.setMonth(d.getMonth() - 13); $('v-dob').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); $('v-ctl').value = todayISO(); VS = {}; VD = {}; render(); }
 });
+
+/* ---- Hoja para entregar a la persona ---- */
+function vPrint() {
+  var G = window.__vg || { now: [], next: [], prev: [] }, c = window.__vc || ctx(), nm = $('v-nom').value.trim(), ap = [], pe = [], nx = [];
+  var fmtD = function (iso) { return iso ? new Date(iso + 'T00:00:00').toLocaleDateString('es-AR') : ''; };
+  ['now', 'prev', 'next'].forEach(function (k) { G[k].forEach(function (o) {
+    var st = VS[vk(o.i)], it = o.it;
+    if (st === 'si' || st === 'hoy') ap.push([it.v, it.d, st === 'hoy' ? fmtD(c.ctl) : (VD[vk(o.i)] ? fmtD(VD[vk(o.i)]) : 'Según carnet')]);
+    else if (k === 'next') nx.push([it.v, it.d, it.ps ? 'Semanas ' + it.ps[0] + ' a ' + it.ps[1] : (c.dob ? 'Desde el ' + addM(c.dob, it.a) : '')]);
+    else pe.push([it.v, it.d, st === 'no' ? 'No consta en el carnet' : (k === 'now' ? 'Corresponde ahora' : 'Verificar en el carnet')]);
+  }); });
+  var T = function (rows, h) { return rows.length ? '<table><thead><tr><th>Vacuna</th><th>Dosis</th><th>' + h + '</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p><small>Ninguna.</small></p>'; };
+  var age = $('v-age').textContent;
+  $('v-pa').innerHTML = '<div class="ph"><img src="../icon-192.png" alt=""><div><h1>Control de vacunación</h1><small>Centro de Salud N.º 61 · Solidaridad · Fecha: ' + esc(fmtD(c.ctl || todayISO())) + '</small></div></div>' +
+    '<p style="margin:10px 0 0">' + (nm ? '<b>Nombre:</b> ' + esc(nm) + ' · ' : '') + (c.dob ? '<b>Fecha de nacimiento:</b> ' + esc(fmtD(c.dob)) + ' · ' : '') + esc(age) + '</p>' +
+    '<h2>Vacunas aplicadas</h2>' + T(ap, 'Fecha') + '<h2>Vacunas que le corresponden o hay que revisar</h2>' + T(pe, 'Estado') + '<h2>Próximas vacunas</h2>' + T(nx, 'Cuándo') +
+    '<p style="margin-top:14px"><small>Esta hoja es un resumen de control y no reemplaza el carnet oficial de vacunación. Traiga siempre su carnet a cada consulta. Referencia: ' + esc(VAC_VERSION) + '.</small></p>' +
+    '<p style="margin-top:26px"><small>Profesional / firma: ______________________________</small></p>';
+  document.body.classList.add('pv'); window.print(); setTimeout(function () { document.body.classList.remove('pv'); }, 500);
+}
+/* ---- Historial y planilla compartida ---- */
+(function () {
+  var get = function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  var cfg = function () { var c = get('cs61_plcv'); if (!(c && c.url && c.key)) c = get('cs61_pl'); if (!(c && c.url && c.key)) c = get('cs61_cons_api'); return (c && c.url && c.key) ? c : null; };
+  var post = function (c, body) { return fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ k: c.key }, body)) }).then(function (r) { return r.json(); }); };
+  var msg = function (t, warn) { var e = $('v-rmsg'); e.className = 'alert' + (warn ? ' warn' : ''); e.textContent = t; e.hidden = !t; };
+  var ERR = { clave: 'La planilla rechazó la clave. Revise la configuración en Registro cardiovascular → Excel y respaldo.', faltan_hojas: 'La planilla no tiene la hoja «Pacientes». Use la planilla «Registro compartido CS61».', sin_dni: 'Falta el DNI (o un código existente).', sin_consentimiento: 'Falta el consentimiento de la persona.' };
+  var fD = function (iso) { return iso ? new Date(iso + 'T00:00:00').toLocaleDateString('es-AR') : ''; };
+  var OK = {};
+  function idq() { var q = $('v-dni').value.trim(), cod = /^CS61-\d+$/i.test(q) ? q.toUpperCase() : '', dni = q.replace(/\D/g, ''); return { cod: cod, dni: dni, ok: !!cod || dni.length >= 6 }; }
+  function fill(vs) {
+    var last = vs[0]; $('v-dob').value = last.fnac || ''; $('v-emb').checked = !!last.emb; $('v-sem').value = last.sem || ''; $('v-pue').checked = !!last.pue; $('v-ps').checked = !!last.ps; $('v-zr').checked = !!last.zr; $('v-fr').checked = !!last.fr;
+    VS = {}; VD = {};
+    var chron = vs.slice().reverse(), keys = {}; V.forEach(function (it, i) { keys[vk(i)] = 1; });
+    chron.forEach(function (v) { Object.keys(v.marcas || {}).forEach(function (k) {
+      if (!keys[k]) return; var m = v.marcas[k], s = m.s === 'hoy' ? 'si' : m.s, f = m.s === 'hoy' ? v.fecha : (m.f || '');
+      if (s === 'si') { VS[k] = 'si'; if (f) VD[k] = f; else if (!VD[k]) VD[k] = ''; } else if (s === 'no' && VS[k] !== 'si') VS[k] = 'no';
+    }); });
+    $('v-ctl').value = todayISO(); render();
+  }
+  $('v-find').addEventListener('click', function () {
+    var c = cfg(), q = idq(); if (!c) { msg('Configure la planilla compartida en Registro cardiovascular → Excel y respaldo (o abra el enlace de configuración).', true); return; }
+    if (!q.ok) { msg('Ingrese el DNI (sólo números) o el código, por ejemplo CS61-0001.', true); return; }
+    var b = this; b.disabled = true; msg('Buscando…'); $('v-hist').innerHTML = '';
+    post(c, { vacget: q.cod ? { codigo: q.cod } : { dni: q.dni } }).then(function (j) {
+      b.disabled = false;
+      if (!j || !j.ok) { msg(ERR[j && j.error] || 'La planilla no pudo responder' + (j && j.error ? ': ' + j.error : '') + '. Si es la primera vez, actualice el script (ver guía).', true); return; }
+      if (!j.codigo) { msg('No hay una persona con ese DNI o código en la planilla. Complete los datos y use «Guardar en la planilla».', true); return; }
+      if (j.nombre && !$('v-nom').value) $('v-nom').value = j.nombre;
+      if (!(j.visitas || []).length) { msg('La persona está en la planilla (' + j.codigo + ') pero no tiene vacunas registradas todavía.'); return; }
+      fill(j.visitas);
+      msg('Se encontraron ' + j.visitas.length + ' registro(s) anterior(es). Se cargaron la fecha de nacimiento, las condiciones y las vacunas ya aplicadas; revise y actualice con la consulta de hoy.');
+      $('v-hist').innerHTML = '<ul class="hv">' + j.visitas.map(function (v) { var ap = Object.keys(v.marcas || {}).filter(function (k) { return v.marcas[k].s === 'hoy'; }).map(function (k) { return k.split('|')[0] + ' (' + k.split('|')[1] + ')'; }); return '<li><b>' + esc(fD(v.fecha)) + '</b>' + (v.prof ? ' · ' + esc(v.prof) : '') + (ap.length ? ' · aplicadas: ' + esc(ap.join(', ')) : ' · sin aplicaciones ese día') + '</li>'; }).join('') + '</ul>';
+    }).catch(function () { b.disabled = false; msg('No se pudo conectar con la planilla. Revise la conexión a internet.', true); });
+  });
+  $('v-save').addEventListener('click', function () {
+    var c = cfg(), q = idq(), x = ctx(), nom = $('v-nom').value.trim();
+    if (!c) { msg('Configure la planilla compartida en Registro cardiovascular → Excel y respaldo.', true); return; }
+    if (!x.dob || !x.ctl) { msg('Cargue la fecha de nacimiento y la fecha de la consulta.', true); return; }
+    if (!q.ok) { msg('Ingrese el DNI (sólo números) o el código.', true); return; }
+    if (q.dni && !nom && !q.cod) { msg('Ingrese también el nombre y apellido para registrar a una persona nueva.', true); }
+    var key = q.cod || q.dni;
+    if (q.dni && !OK[key]) { var ok = false; try { ok = window.confirm('¿La persona dio su consentimiento para registrar sus datos en la planilla compartida del centro?\n\nEl DNI y el nombre se guardan sólo en la hoja «Pacientes».'); } catch (e) { } if (!ok) { msg('No se guardó: falta el consentimiento de la persona.', true); return; } OK[key] = 1; }
+    var marcas = {}, hoy = [], pend = [];
+    V.forEach(function (it, i) { var k = vk(i), s = VS[k]; if (!s) return; marcas[k] = { s: s, f: s === 'hoy' ? x.ctl : (s === 'si' ? (VD[k] || '') : '') }; if (s === 'hoy') hoy.push(it.v + ' (' + it.d + ')'); });
+    var sm = window.__sum || ''; var pm = /Vacunas a revisar o aplicar: (.*)\. \(/.exec(sm); pend = pm ? pm[1] : '';
+    var rec = { id: 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), tipo: 'vac', dni: q.dni, nombre: nom, codigo: q.cod, fecha: x.ctl, fnac: x.dob, emb: x.emb, sem: isNaN(x.sem) ? '' : x.sem, pue: x.pue, ps: x.ps, zr: x.zr, fr: x.fr, marcas: marcas, aplicadas: hoy.join('; '), pend: pend, consent: true, fecha_consent: todayISO(), profesional: c.prof || '' };
+    var b = this; b.disabled = true; msg('Guardando…');
+    post(c, { rec: rec }).then(function (j) { b.disabled = false; if (j && j.ok) msg((j.dup ? 'Ese registro ya estaba en la planilla.' : 'Guardado en la planilla.') + (j.codigo ? ' Código: ' + j.codigo + (j.nuevo ? ' (persona nueva).' : '.') : '')); else msg(ERR[j && j.error] || ('La planilla no pudo guardarlo' + (j && j.error ? ': ' + j.error : '') + '.'), true); }).catch(function () { b.disabled = false; msg('No se pudo conectar con la planilla. Revise la conexión a internet y reintente.', true); });
+  });
+  $('v-dni').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('v-find').click(); });
+})();
 $('v-ctl').value = todayISO(); render();
 </script><script>/*EMBED*/try{if(window.top!==window){var a=document.querySelector(".sw-tool");if(a)a.style.display="none"}}catch(e){}</script><script>/*CFGSYNC*/(function(){try{fetch("../config.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(c){if(!c||!c.url||!/^https:\/\/script\.google\.com\//.test(c.url))return;["cs61_pl","cs61_plcv","cs61_cons_api"].forEach(function(k){try{var o=JSON.parse(localStorage.getItem(k)||"null");if(o&&o.key&&o.url!==c.url){o.url=c.url;localStorage.setItem(k,JSON.stringify(o))}}catch(e){}})}).catch(function(){})}catch(e){}})();</script><script src="../egg.js"></script></body></html>
