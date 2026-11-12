@@ -1,0 +1,124 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rosco de la diabetes · CS 61</title>
+<meta name="description" content="Rosco de palabras sobre diabetes para el Día Mundial de la Diabetes (14 de noviembre). Centro de Salud N.º 61, Salta.">
+<link rel="icon" type="image/png" href="../../icon-192.png"><link rel="apple-touch-icon" href="../../icon-192.png"><meta name="theme-color" content="#14304f">
+<style>
+:root{--bg:#eef3f8;--s:#fff;--ink:#14243a;--ink2:#4a5d73;--line:#d2dce5;--hdr:#14304f;--blue:#1d5fa8;--gold:#e0a82e;--ok:#1f7a3d;--bad:#b0283f;--pend:#1d5fa8;--pass:#d99a16}
+@media (prefers-color-scheme:dark){:root{--bg:#0c1722;--s:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--hdr:#0a2038;--blue:#5aa2ee;--pend:#2f6fb8}}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:var(--hdr);color:#fff;padding:10px 16px}.in{max-width:1100px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}header img{width:44px;height:44px;border-radius:50%;background:#fff}header h1{margin:0;font-size:1.15rem}header small{color:#b8cadb}
+.bk{margin-left:auto;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.85rem;font-weight:700;text-decoration:none}
+main{max-width:1100px;margin:0 auto;padding:16px 14px 40px}
+.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:14px}.card h2{margin:0 0 6px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}label.f{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.9rem}
+select,input[type=text]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.btn{font:inherit;font-weight:800;border-radius:12px;border:2px solid var(--hdr);background:var(--s);color:var(--hdr);padding:11px 18px;cursor:pointer}.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}.btn.big{font-size:1.2rem;padding:14px 26px}.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}.btn.no{background:var(--bad);border-color:var(--bad);color:#fff}.btn.pa{background:var(--pass);border-color:var(--pass);color:#1b1200}
+@media (prefers-color-scheme:dark){.btn{border-color:var(--blue);color:var(--blue)}.btn.p{color:#08202a}}
+:focus-visible{outline:4px solid var(--gold);outline-offset:2px}.hint{font-size:.88rem;color:var(--ink2)}
+.play{display:grid;gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}@media(max-width:860px){.play{grid-template-columns:1fr}}
+.ro{position:relative;width:min(94vw,520px);aspect-ratio:1;margin:0 auto}.ro i{position:absolute;width:9.2%;aspect-ratio:1;border-radius:50%;background:var(--pend);color:#fff;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:clamp(.8rem,2.4vw,1.25rem);transform:translate(-50%,-50%);border:3px solid transparent;transition:background .2s}
+.ro i.ok{background:var(--ok)}.ro i.bad{background:var(--bad)}.ro i.pass{background:var(--pass);color:#1b1200}.ro i.cur{border-color:#fff;box-shadow:0 0 0 4px var(--gold),0 0 14px 4px var(--gold);z-index:2;transform:translate(-50%,-50%) scale(1.22)}
+.ctr{position:absolute;inset:20%;display:grid;place-items:center;text-align:center;color:var(--ink2);font-weight:700;font-size:.95rem}
+.hud{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:8px}.tm{font:800 2.4rem/1 ui-monospace,Consolas,monospace;color:var(--blue)}.tm.lo{color:var(--bad)}
+.chip{font-weight:800;padding:4px 12px;border-radius:999px;background:var(--bg);border:2px solid var(--line)}.chip.ok{color:var(--ok)}.chip.no{color:var(--bad)}
+.def{background:var(--hdr);color:#fff;border-radius:16px;padding:16px 20px}.def .l{font-size:.95rem;font-weight:800;color:#f5d27a;letter-spacing:.03em}.def p{margin:6px 0 0;font-size:clamp(1.2rem,3vw,1.7rem);line-height:1.3}
+.ans{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.ans input{flex:1 1 200px;font-size:1.3rem;padding:13px 14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.fb{margin-top:10px;padding:10px 14px;border-radius:12px;font-weight:700}.fb.ok{background:#dff2e6;color:#0e4a25}.fb.bad{background:#fbe1e6;color:#6e1428}.fb.rv{background:#fff3d1;color:#4a3500}
+@media (prefers-color-scheme:dark){.fb.ok{background:#143325;color:#cdf3da}.fb.bad{background:#3a1a25;color:#fbd5dd}.fb.rv{background:#3a2f12;color:#f3dc9a}}
+.res{text-align:center}.res h2{font-size:2rem}.tbl{max-width:560px;margin:12px auto;text-align:left}.tbl div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:6px 0}
+.lst{columns:2;font-size:.92rem;text-align:left;margin-top:10px}.lst li{break-inside:avoid;margin:2px 0}
+</style></head><body>
+<header><div class="in"><img src="../../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Rosco de la diabetes</h1><small>Centro de Salud N.º 61 · Día Mundial de la Diabetes · 14 de noviembre</small></div><a class="bk" href="../">⇄ Volver a Recursos</a></div></header>
+<main>
+<section id="s1" class="card"><h2>Completá el rosco</h2>
+<p class="hint">Hay una palabra por cada letra del abecedario. Leé la definición y respondé: si acertás, la letra se pone verde; si fallás, roja; con «Pasapalabra» la dejás para la próxima vuelta. Gana quien más letras acierte antes de que se acabe el tiempo. Se puede escribir la respuesta o jugar con un moderador que lee y marca.</p>
+<div class="grid" style="margin-top:10px">
+<label class="f">Nivel<select id="lv"><option value="n">Chicos y familias (palabras fáciles)</option><option value="a" selected>Todo público</option><option value="m">Mezcla de ambos</option></select></label>
+<label class="f">Jugadores o equipos<select id="np"><option value="1">1 (un rosco)</option><option value="2" selected>2 (se turnan)</option></select></label>
+<label class="f">Tiempo por jugador<select id="tt"><option value="120">2 minutos</option><option value="180" selected>3 minutos</option><option value="300">5 minutos</option><option value="0">Sin límite</option></select></label>
+<label class="f">Cómo se responde<select id="md"><option value="t">Escribiendo la respuesta</option><option value="m">Con moderador (dice la respuesta en voz alta)</option></select></label></div>
+<div class="grid" id="names" style="margin-top:10px"></div>
+<p style="margin-top:14px"><button class="btn p big" id="go" type="button">¡Empezar!</button></p>
+<p class="hint">Contenido educativo general. No reemplaza la consulta con el equipo de salud.</p></section>
+<section id="s2" hidden>
+<div class="hud"><span class="chip" id="who"></span><span class="tm" id="tm" role="timer" aria-live="off">3:00</span><span><span class="chip ok" id="cok">0 ✓</span> <span class="chip no" id="cno">0 ✗</span></span></div>
+<div class="play"><div class="ro" id="ro" role="img" aria-label="Rosco de letras"><div class="ctr" id="ctr"></div></div>
+<div><div class="def"><div class="l" id="dl"></div><p id="dt"></p></div>
+<div class="ans" id="ansr"><input type="text" id="in" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribí tu respuesta" placeholder="Escribí la respuesta"><button class="btn p" id="rs" type="button">Responder</button></div>
+<div class="row"><button class="btn pa" id="ps" type="button">Pasapalabra ⏭</button><button class="btn" id="rv" type="button">Ver respuesta (moderador)</button><button class="btn" id="pz" type="button">⏸ Pausa</button></div>
+<div class="row" id="mod" hidden><button class="btn ok" id="mok" type="button">✓ Acertó</button><button class="btn no" id="mno" type="button">✗ Falló</button></div>
+<div id="fb" role="status" aria-live="polite"></div></div></div>
+<p style="margin-top:12px"><button class="btn" id="fin" type="button">Terminar turno</button></p></section>
+<section id="s3" class="card res" hidden><h2 id="rt"></h2><div class="tbl" id="rk"></div><div id="rl"></div><p><button class="btn p big" id="nx" type="button" hidden>Turno del equipo 2 ▶</button> <button class="btn p big" id="again" type="button" hidden>Jugar de nuevo</button></p><p class="hint">14 de noviembre: Día Mundial de la Diabetes. Informarse, controlarse y cuidarse en familia.</p></section>
+</main>
+<script>
+(function(){
+/* [letra, [tipo, definición, respuestas...] chicos, [tipo, definición, respuestas...] todo público]. Tipo: E = empieza con, C = contiene la */
+var W=[
+['A',['E','Lo que tienen el mate dulce, las gaseosas y las golosinas; conviene tomar menos.','azúcar','azucar'],['E','Medirse uno mismo la glucemia en casa se llama ___ de la glucemia.','autocontrol']],
+['B',['E','Actividad divertida con música que también cuenta como ejercicio.','bailar','baile'],['E','Apellido del médico canadiense, uno de los descubridores de la insulina, cuyo cumpleaños (14 de noviembre) dio origen al Día Mundial de la Diabetes.','Banting']],
+['C',['E','Se mide alrededor de la panza con una cinta métrica para saber si hay riesgo.','cintura'],['E','Complicación aguda grave de la diabetes por falta de insulina, con aliento a frutas: ___acidosis.','cetoacidosis']],
+['D',['E','Enfermedad crónica en la que el azúcar en la sangre está más alta de lo normal; el 14 de noviembre es su día mundial.','diabetes'],['E','Tratamiento que filtra la sangre cuando los riñones dejaron de funcionar, posible consecuencia de la diabetes mal controlada.','diálisis','dialisis']],
+['E',['E','Plato frío de verduras crudas o cocidas que debe ocupar la mitad del plato.','ensalada'],['E','Sustancia que da sabor dulce con muy pocas calorías, como la stevia o la sucralosa.','edulcorante']],
+['F',['E','Parte de las verduras, legumbres y cereales integrales que no se digiere y ayuda a controlar el azúcar.','fibra'],['E','Examen de los ojos que se hace al menos una vez al año para detectar retinopatía: ___ de ojo.','fondo de ojo','fondo','fondo ocular']],
+['G',['E','Tipo de azúcar que circula en la sangre y es el combustible de nuestras células.','glucosa'],['E','Medición del azúcar en la sangre.','glucemia']],
+['H',['E','Nutrientes del pan, el arroz, los fideos y la papa; también se llaman carbohidratos.','hidratos','hidratos de carbono','carbohidratos'],['E','Análisis que muestra el promedio del azúcar de los últimos dos o tres meses: ___ glicosilada.','hemoglobina glicosilada','hemoglobina glicada','hemoglobina','hba1c','a1c']],
+['I',['E','Hormona del páncreas que ayuda a que el azúcar entre a las células.','insulina'],['E','Medida que relaciona el peso con la talla: ___ de masa corporal.','índice de masa corporal','indice de masa corporal','imc','índice','indice']],
+['J',['E','Bebida de fruta exprimida; es mejor comer la fruta entera.','jugo','zumo'],['E','Instrumento con aguja para aplicar insulina (hoy también hay lapiceras).','jeringa']],
+['K',['E','Unidad con la que se mide el peso; perder unos pocos de estos ayuda a prevenir la diabetes tipo 2.','kilo','kilos','kilogramo','kilogramos','kg'],['E','Unidad de energía de los alimentos, abreviada kcal: ___calorías.','kilocalorías','kilocalorias','kcal']],
+['L',['E','Legumbre con mucha fibra y hierro, base de muchos guisos.','lentejas','lenteja'],['E','Pequeño pinchador para sacar la gota de sangre al medir la glucemia.','lanceta','lancetas']],
+['M',['E','Fruta de cáscara roja o verde; «una por día aleja al médico».','manzana'],['E','Medicamento por boca más usado como primera opción en la diabetes tipo 2.','metformina']],
+['N',['E','Persona de pocos años; la diabetes tipo 1 es la más frecuente en esta etapa de la vida.','niño','niña','niños','niñas'],['E','Daño de los nervios que puede dar hormigueo, ardor o falta de sensibilidad en los pies: ___patía.','neuropatía','neuropatia']],
+['O',['E','Con diabetes se los controla una vez al año con el oftalmólogo.','ojos','ojo'],['E','Exceso de grasa corporal; factor de riesgo de diabetes tipo 2.','obesidad']],
+['P',['E','Órgano del abdomen que fabrica la insulina.','páncreas','pancreas'],['E','Estado en que la glucemia es más alta de lo normal pero no llega a ser diabetes: ___diabetes.','prediabetes']],
+['Q',['E','Alimento lácteo; conviene elegirlo fresco o descremado.','queso'],['E','Seudocereal andino sin gluten, rico en fibra y proteínas, típico del norte argentino.','quinoa','quinua']],
+['R',['E','Verdura de raíz de color morado oscuro que se come en ensaladas.','remolacha'],['E','Daño de la retina por diabetes mal controlada: ___patía.','retinopatía','retinopatia']],
+['S',['E','Ganas de tomar mucha agua: uno de los síntomas de la glucemia alta.','sed'],['E','Cuando el IMC está entre 25 y 29,9 se habla de ___.','sobrepeso']],
+['T',['E','Infusión caliente que se puede tomar sin azúcar.','té','te'],['E','Tipo de grasa de la sangre que aumenta con el exceso de azúcares, harinas y alcohol.','triglicéridos','trigliceridos']],
+['U',['E','Fruta pequeña que crece en racimos; seca se convierte en pasa.','uva','uvas'],['E','La insulina se dosifica en ___ internacionales.','unidades','unidad']],
+['V',['E','Hortalizas que deben ocupar la mitad del plato.','verduras','verdura','vegetales'],['E','Síntoma de glucemia alta: ___ borrosa.','visión','vision','vista']],
+['W',['C','Fruta de pulpa verde y piel marrón peluda, con mucha vitamina C y fibra.','kiwi'],['C','Comida rápida entre dos panes; mejor con pan integral y verduras.','sándwich','sandwich']],
+['X',['C','Brazos y piernas; los pies, que están en sus puntas, se revisan todos los días cuando hay diabetes.','extremidades','extremidad'],['C','Cantidad que sobrepasa lo recomendado; el ___ de peso aumenta el riesgo de diabetes tipo 2.','exceso']],
+['Y',['E','Lácteo fermentado que se puede comer natural, sin azúcar agregada.','yogur','yogurt','yoghurt'],['C','Tiempo sin comer, generalmente unas 8 horas, antes de una glucemia: ___.','ayuno']],
+['Z',['E','Verdura naranja que se come cruda en ensalada o cocida.','zanahoria'],['E','Hortaliza de pulpa naranja típica del NOA, usada en locro y guisos.','zapallo']]];
+var $=function(i){return document.getElementById(i)};
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim()}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var N=26,tm=null,T=0,left=0,paused=false,P=[],cp=0,G=[],st=[],cur=0,set={},rv=false,over=false;
+function names(){var n=+$('np').value,h='';for(var i=0;i<n;i++)h+='<label class="f">Nombre del jugador o equipo '+(i+1)+'<input type="text" maxlength="24" data-n="'+i+'" placeholder="Jugador '+(i+1)+'"></label>';$('names').innerHTML=h}
+$('np').onchange=names;names();
+(function(){var h='';for(var i=0;i<N;i++){var a=(i/N)*2*Math.PI-Math.PI/2;h+='<i data-i="'+i+'" style="left:'+(50+43*Math.cos(a))+'%;top:'+(50+43*Math.sin(a))+'%">'+W[i][0]+'</i>'}$('ro').insertAdjacentHTML('afterbegin',h)})();
+function mk(){return W.map(function(w){var l=set.lv==='n'?1:set.lv==='a'?2:(Math.random()<.5?1:2),d=w[l];return{L:w[0],k:d[0],d:d[1],r:d.slice(2)}})}
+function fmt(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
+function start(){var n=+$('np').value;P=[];for(var i=0;i<n;i++){var v=document.querySelector('[data-n="'+i+'"]').value.trim();P.push({name:v||('Jugador '+(i+1)),ok:0,no:0,pen:0,res:null})}
+ set={lv:$('lv').value,tt:+$('tt').value,md:$('md').value};cp=0;$('s1').hidden=true;$('s3').hidden=true;turn()}
+function turn(){G=mk();st=G.map(function(){return'p'});cur=-1;over=false;paused=false;left=set.tt;$('s2').hidden=false;$('who').textContent='Turno de '+P[cp].name;
+ $('ansr').hidden=set.md==='m';$('rs').hidden=set.md==='m';$('in').hidden=set.md==='m';$('tm').hidden=!set.tt;$('pz').hidden=!set.tt;
+ clearInterval(tm);if(set.tt){tm=setInterval(function(){if(paused||over)return;left--;paint();if(left<=0)finish()},1000)}
+ next(-1);paint()}
+function counts(){var o=0,n=0;st.forEach(function(s){if(s==='o')o++;if(s==='n')n++});return{o:o,n:n}}
+function paint(){document.querySelectorAll('#ro i').forEach(function(e,i){e.className=(st[i]==='o'?'ok':st[i]==='n'?'bad':st[i]==='s'?'pass':'')+(i===cur&&!over?' cur':'')});
+ var c=counts();$('cok').textContent=c.o+' ✓';$('cno').textContent=c.n+' ✗';$('tm').textContent=fmt(Math.max(left,0));$('tm').className='tm'+(set.tt&&left<=15?' lo':'');
+ $('ctr').textContent=over?'Fin del turno':(G.length?'Quedan '+st.filter(function(s){return s==='p'||s==='s'}).length+' letras':'')}
+function next(from){var i,k;
+ var pend=-1;for(k=1;k<=N;k++){i=(from+k+N)%N;if(st[i]==='p'){pend=i;break}}
+ if(pend<0){for(k=1;k<=N;k++){i=(from+k+N)%N;if(st[i]==='s'){pend=i;break}}}
+ if(pend<0){finish();return}
+ if(st[pend]==='s')st[pend]='p';cur=pend;show()}
+function show(){var g=G[cur];$('dl').textContent=(g.k==='E'?'Empieza con ':'Contiene la ')+g.L;$('dt').textContent=g.d;$('fb').innerHTML='';$('mod').hidden=true;rv=false;$('in').value='';paint();if(set.md==='t'){$('in').focus()}}
+function resolve(ok,txt){var g=G[cur];st[cur]=ok?'o':'n';$('fb').innerHTML='<div class="fb '+(ok?'ok':'bad')+'">'+(ok?'¡Correcto! ':'Era: ')+esc(g.r[0])+'</div>';paint();setTimeout(function(){if(!over)next(cur)},ok?600:1400)}
+function answer(){if(over||rv)return;var v=nz($('in').value);if(!v){return}var g=G[cur],ok=g.r.some(function(r){return nz(r)===v});resolve(ok)}
+$('rs').onclick=answer;$('in').onkeydown=function(e){if(e.key==='Enter')answer()};
+$('ps').onclick=function(){if(over)return;st[cur]='s';paint();next(cur)};
+$('rv').onclick=function(){if(over)return;rv=true;$('fb').innerHTML='<div class="fb rv">Respuesta: <b>'+esc(G[cur].r[0])+'</b></div>';$('mod').hidden=false};
+$('mok').onclick=function(){if(over)return;resolve(true)};$('mno').onclick=function(){if(over)return;resolve(false)};
+$('pz').onclick=function(){paused=!paused;$('pz').textContent=paused?'▶ Seguir':'⏸ Pausa'};
+function finish(){if(over)return;over=true;clearInterval(tm);var c=counts(),p=P[cp];p.ok=c.o;p.no=c.n;p.res=G.map(function(g,i){return{L:g.L,r:g.r[0],s:st[i]}});paint();setTimeout(show3,800)}
+function show3(){$('s2').hidden=true;$('s3').hidden=false;var p=P[cp],last=cp===P.length-1;
+ $('rt').textContent=last?(P.length>1?(P[0].ok===P[1].ok?'🤝 ¡Empate!':'🏆 Ganó '+(P[0].ok>P[1].ok?P[0].name:P[1].name)):'🏁 ¡Rosco terminado!'):'Fin del turno de '+p.name;
+ $('rk').innerHTML=P.filter(function(x){return x.res}).map(function(x){return '<div><b>'+esc(x.name)+'</b><span>'+x.ok+' aciertos · '+x.no+' errores · '+(N-x.ok-x.no)+' sin responder</span></div>'}).join('');
+ $('rl').innerHTML='<p class="hint" style="margin-top:12px">Palabras del último turno</p><ul class="lst">'+p.res.map(function(r){return '<li>'+(r.s==='o'?'✅':r.s==='n'?'❌':'⬜')+' <b>'+r.L+'</b> · '+esc(r.r)+'</li>'}).join('')+'</ul>';
+ $('nx').hidden=last;$('again').hidden=!last;$('nx').textContent='Turno de '+(P[cp+1]?P[cp+1].name:'')+' ▶'}
+$('nx').onclick=function(){cp++;$('s3').hidden=true;turn()};
+$('go').onclick=start;$('fin').onclick=function(){if(confirm('¿Terminar el turno ahora?'))finish()};$('again').onclick=function(){$('s3').hidden=true;$('s1').hidden=false;window.scrollTo(0,0)};
+})();
+</script><script src="../../egg.js"></script></body></html>
