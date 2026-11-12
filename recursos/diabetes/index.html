@@ -6,7 +6,7 @@
 @media (prefers-color-scheme:dark){:root{--bg:#0c1722;--s:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--hdr:#0a2038;--blue:#5aa2ee}}
 *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
 header{background:var(--hdr);color:#fff;padding:10px 16px}.in{max-width:1000px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}header img{width:44px;height:44px;border-radius:50%;background:#fff}header h1{margin:0;font-size:1.15rem}header small{color:#b8cadb}
-.bk{margin-left:auto;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.85rem;font-weight:700;text-decoration:none}
+.snd{margin-left:auto;display:flex;gap:6px}.snd button{font:inherit;font-size:.82rem;font-weight:700;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:6px 10px;cursor:pointer}.snd button[aria-pressed=false]{opacity:.55;text-decoration:line-through}.bk{color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.85rem;font-weight:700;text-decoration:none}
 main{max-width:1000px;margin:0 auto;padding:16px 14px 40px}
 .card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:14px}.card h2{margin:0 0 6px}
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}label.f{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.9rem}
@@ -17,7 +17,7 @@ select,input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line
 .hint{font-size:.88rem;color:var(--ink2)}
 .score{display:flex;gap:10px;flex-wrap:wrap}.pl{flex:1 1 200px;border:3px solid var(--line);border-radius:14px;background:var(--s);padding:8px 10px}.pl.on{border-color:var(--gold);box-shadow:0 0 0 3px rgba(224,168,46,.35)}
 .pl b{display:block;font-size:1rem}.cr{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}.cr span{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:1.05rem;background:var(--bg);border:2px dashed var(--line);filter:grayscale(1);opacity:.55}.cr span.h{opacity:1;filter:none;border-style:solid;position:relative}.cr span.h::after{content:"½";position:absolute;right:-4px;bottom:-6px;font-size:.62rem;font-weight:800;background:var(--gold);color:#000;border-radius:8px;padding:0 3px}.cr span.f{opacity:1;filter:none;border:3px solid var(--gold);background:var(--s)}
-.stage{display:grid;place-items:center;padding:8px 0}.wheelbox{position:relative;width:min(86vw,420px);aspect-ratio:1}.wheelbox svg{width:100%;height:100%}#wh{transition:transform 4.2s cubic-bezier(.12,.7,.1,1);transform-origin:50% 50%}.ptr{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:30px solid var(--hdr);filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));z-index:2}
+.stage{display:grid;place-items:center;padding:8px 0}.wheelbox{position:relative;width:min(86vw,420px);aspect-ratio:1}.wrot{position:absolute;inset:0;border-radius:50%;overflow:hidden;pointer-events:none;transition:transform 4.2s cubic-bezier(.12,.7,.1,1);will-change:transform}.wrot svg{width:100%;height:100%;display:block}.hub{position:absolute;left:50%;top:50%;width:13%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:#14304f;border:4px solid #fff;z-index:1}.ptr{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:30px solid var(--hdr);filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));z-index:2}
 .turn{text-align:center;font-size:1.25rem;font-weight:800;margin:6px 0}
 .q{border-radius:16px;color:#fff;padding:18px 20px}.q .cat{font-weight:800;opacity:.95;letter-spacing:.03em;text-transform:uppercase;font-size:.9rem}.q h3{margin:8px 0 0;font-size:clamp(1.25rem,3.4vw,1.9rem);line-height:1.25}
 .tm{height:10px;border-radius:6px;background:rgba(255,255,255,.3);margin-top:12px;overflow:hidden}.tm i{display:block;height:100%;background:#fff;width:100%}
@@ -29,14 +29,14 @@ select,input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line
 .win{text-align:center}.win h2{font-size:2rem}.rank{max-width:520px;margin:12px auto;text-align:left}.rank div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:6px 0}
 .cat-leg{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}.cat-leg span{font-size:.82rem;font-weight:700;padding:3px 10px;border-radius:999px;color:#fff}
 </style></head><body>
-<header><div class="in"><img src="../../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Preguntados de la diabetes</h1><small>Centro de Salud N.º 61 · Día Mundial de la Diabetes · 14 de noviembre</small></div><a class="bk" href="../">⇄ Volver a Recursos</a></div></header>
+<header><div class="in"><img src="../../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Preguntados de la diabetes</h1><small>Centro de Salud N.º 61 · Día Mundial de la Diabetes · 14 de noviembre</small></div><div class="snd"><button type="button" id="tm" aria-pressed="true">🎵 Música</button><button type="button" id="tf" aria-pressed="true">🔔 Sonidos</button></div><a class="bk" href="../">⇄ Volver a Recursos</a></div></header>
 <main>
 <section id="s1" class="card"><h2>Jugá y aprendé sobre la diabetes</h2>
 <p class="hint">Girá la ruleta, respondé la pregunta de la categoría y juntá coronas: cada categoría da su corona con 2 respuestas correctas. Si acertás, seguís jugando; si fallás, pasa el turno. Sirve para proyectar en una pantalla o jugar en un celular o tablet.</p>
 <div class="grid" style="margin-top:10px">
 <label class="f">Para quién<select id="aud"><option value="n">Chicos y familias</option><option value="x" selected>Todo público</option><option value="a">Adultos y pacientes</option></select></label>
 <label class="f">Jugadores o equipos<select id="np"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
-<label class="f">Para ganar<select id="goal"><option value="3">Partida corta: 3 coronas</option><option value="6">Partida completa: 6 coronas</option></select></label>
+<label class="f">Para ganar<select id="goal"><option value="1" selected>Partida corta: gana quien logre la primera corona</option><option value="3">Partida media: 3 coronas</option><option value="6">Partida completa: las 6 coronas</option></select></label>
 <label class="f">Tiempo por pregunta<select id="tmr"><option value="0">Sin límite</option><option value="20">20 segundos</option><option value="30" selected>30 segundos</option><option value="45">45 segundos</option></select></label></div>
 <div class="grid" id="names" style="margin-top:10px"></div>
 <div class="cat-leg" id="leg"></div>
@@ -44,7 +44,7 @@ select,input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line
 <p class="hint">Contenido educativo general, basado en guías de la OMS, la Federación Internacional de Diabetes y el Ministerio de Salud de la Nación. No reemplaza la consulta con el equipo de salud.</p></section>
 <section id="s2" hidden>
 <div class="score" id="sc" aria-label="Puntajes"></div>
-<div class="card" id="wheelCard"><div class="turn" id="turn"></div><div class="stage"><div class="wheelbox"><div class="ptr" aria-hidden="true"></div><svg viewBox="-110 -110 220 220" role="img" aria-label="Ruleta de categorías"><g id="wh"></g><circle r="14" fill="#14304f" stroke="#fff" stroke-width="3"/></svg></div><p><button class="btn p big" id="spin" type="button">🎡 Girar la ruleta</button></p></div></div>
+<div class="card" id="wheelCard"><div class="turn" id="turn"></div><div class="stage"><div class="wheelbox"><div class="ptr" aria-hidden="true"></div><div class="wrot" id="wrot"><svg id="whs" viewBox="-110 -110 220 220" role="img" aria-label="Ruleta de categorías"></svg></div><div class="hub" aria-hidden="true"></div></div><p><button class="btn p big" id="spin" type="button">🎡 Girar la ruleta</button></p></div></div>
 <div class="card" id="qCard" hidden><div class="q" id="q"><div class="cat" id="qc"></div><h3 id="qt"></h3><div class="tm" id="tmw"><i id="tmb"></i></div></div><div class="opts" id="opts" role="group" aria-label="Respuestas"></div><div id="fb" role="status" aria-live="polite"></div><p class="top"><span class="hint">Tecla 1 a 4 (o A a D) para responder · Enter para seguir</span><button class="btn p" id="nx" type="button" hidden>Seguir ▶</button></p></div>
 <p style="margin-top:12px"><button class="btn" id="fin" type="button">Terminar partida</button></p>
 </section>
@@ -116,6 +116,13 @@ var Q=[
 {c:5,a:'n',q:'¿Qué ayuda a prevenir la diabetes tipo 2?',o:['Alimentarse bien, moverse y mantener un peso saludable','Comer solo dulces','No hacer nada','Dormir todo el día'],e:'Son hábitos que conviene tener toda la familia, desde chicos.'},
 {c:5,a:'x',q:'Si en tu familia hay personas con diabetes, ¿qué conviene hacer?',o:['Controlarse la glucemia periódicamente','Esperar a tener síntomas','Dejar de comer','No hacer nada'],e:'Tener familiares con diabetes aumenta el riesgo: el control periódico permite detectarla a tiempo.'}
 ];
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+var ACT=null,music=new Audio('../ruleta/assets/audio/musica-fondo.mp3'),snd={m:ls('cs61_pq_m')!=='0',f:ls('cs61_pq_f')!=='0'};music.loop=true;music.volume=.2;music.preload='auto';
+function ac(){try{if(!ACT)ACT=new (window.AudioContext||window.webkitAudioContext)();if(ACT.state==='suspended')ACT.resume()}catch(e){}return ACT}
+function tone(f,t0,d,ty,v){var a=ac();if(!a)return;var o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.type=ty||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v||.18,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.05)}
+function sfx(k){if(!snd.f)return;if(k==='ok'){tone(659,0,.18);tone(880,.12,.35)}else if(k==='bad'){tone(220,0,.25,'sawtooth',.1);tone(165,.2,.4,'sawtooth',.1)}else if(k==='crown'){[523,659,784,1047,1319].forEach(function(f,i){tone(f,i*.13,.35,'triangle',.2)})}else if(k==='spin'){for(var i=0;i<18;i++)tone(380+(i%2)*60,4*Math.pow(i/17,1.8),.05,'square',.05)}else if(k==='tick')tone(880,0,.07,'square',.07)}
+function playMusic(on){if(on&&snd.m){var p=music.play();if(p&&p.catch)p.catch(function(){})}else music.pause()}
+function paintSnd(){$('tm').setAttribute('aria-pressed',snd.m);$('tf').setAttribute('aria-pressed',snd.f)}
 var $=function(i){return document.getElementById(i)},P=[],cur=0,S={},queues={},qs=null,tim=null,rot=0,busy=false;
 function sh(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -125,17 +132,17 @@ $('np').onchange=names;names();
 $('leg').innerHTML=CATS.map(function(c,i){return '<span style="background:'+COL[i]+'">'+c[1]+' '+c[0]+'</span>'}).join('');
 function wheel(){var g='',R=104,r=0;for(var i=0;i<6;i++){var a0=(i*60-90)*Math.PI/180,a1=((i+1)*60-90)*Math.PI/180,x0=R*Math.cos(a0),y0=R*Math.sin(a0),x1=R*Math.cos(a1),y1=R*Math.sin(a1),am=((i*60+30)-90)*Math.PI/180;
  g+='<path d="M0 0 L'+x0+' '+y0+' A'+R+' '+R+' 0 0 1 '+x1+' '+y1+' Z" fill="'+COL[i]+'" stroke="#fff" stroke-width="2"/><text x="'+(66*Math.cos(am))+'" y="'+(66*Math.sin(am)+8)+'" font-size="26" text-anchor="middle">'+CATS[i][1]+'</text>'}
- $('wh').innerHTML=g}
-wheel();
+ $('whs').innerHTML=g}
+wheel();paintSnd();$('tm').onclick=function(){snd.m=!snd.m;ls('cs61_pq_m',snd.m?'1':'0');paintSnd();playMusic(!$('s2').hidden)};$('tf').onclick=function(){snd.f=!snd.f;ls('cs61_pq_f',snd.f?'1':'0');paintSnd();if(snd.f)sfx('tick')};
 function start(){var n=+$('np').value;P=[];for(var i=0;i<n;i++){var v=document.querySelector('[data-n="'+i+'"]').value.trim();P.push({name:v||('Jugador '+(i+1)),hits:[0,0,0,0,0,0],ok:0,tot:0})}
- S={aud:$('aud').value,goal:+$('goal').value,tmr:+$('tmr').value};cur=0;queues={};rot=0;$('wh').style.transition='none';$('wh').style.transform='rotate(0deg)';
- $('s1').hidden=true;$('s3').hidden=true;$('s2').hidden=false;turn()}
+ S={aud:$('aud').value,goal:+$('goal').value,tmr:+$('tmr').value};cur=0;queues={};rot=0;$('wrot').style.transition='none';$('wrot').style.transform='rotate(0deg)';
+ $('s1').hidden=true;$('s3').hidden=true;$('s2').hidden=false;ac();playMusic(true);turn()}
 function crowns(p){return p.hits.filter(function(h){return h>=2}).length}
 function score(){$('sc').innerHTML=P.map(function(p,i){return '<div class="pl'+(i===cur?' on':'')+'"><b>'+esc(p.name)+' · '+crowns(p)+' 👑</b><div class="cr">'+CATS.map(function(c,k){return '<span class="'+(p.hits[k]>=2?'f':p.hits[k]===1?'h':'')+'" title="'+esc(c[0])+'">'+c[1]+'</span>'}).join('')+'</div></div>'}).join('')}
 function turn(){score();$('qCard').hidden=true;$('wheelCard').hidden=false;$('turn').textContent='Turno de '+P[cur].name;$('spin').disabled=false;busy=false;$('spin').focus()}
 function pick(c){if(!queues[c]||!queues[c].length){queues[c]=sh(Q.filter(function(q){return q.c===c&&(S.aud==='x'||q.a==='x'||q.a===S.aud)}))}return queues[c].pop()}
 $('spin').onclick=function(){if(busy)return;busy=true;$('spin').disabled=true;var c=Math.floor(Math.random()*6),jit=Math.random()*40-20,base=360-(c*60+30)+jit,cur360=((rot%360)+360)%360,d=((base-cur360)%360+360)%360;rot+=360*5+d;
- $('wh').style.transition='transform 4.2s cubic-bezier(.12,.7,.1,1)';$('wh').style.transform='rotate('+rot+'deg)';setTimeout(function(){ask(c)},4500)};
+ sfx('spin');$('wrot').style.transition='transform 4.2s cubic-bezier(.12,.7,.1,1)';$('wrot').style.transform='rotate('+rot+'deg)';setTimeout(function(){ask(c)},4500)};
 function ask(c){var q=pick(c);if(!q){alert('No hay preguntas para esta categoría con ese público.');turn();return}
  var o=sh(q.o.map(function(t,i){return{t:t,ok:i===0}}));qs={q:q,o:o,done:false};
  $('wheelCard').hidden=true;$('qCard').hidden=false;$('q').style.background=COL[c];$('qc').textContent=CATS[c][1]+' '+CATS[c][0]+' · '+P[cur].name;$('qt').textContent=q.q;$('fb').innerHTML='';$('nx').hidden=true;
@@ -144,11 +151,11 @@ function ask(c){var q=pick(c);if(!q){alert('No hay preguntas para esta categorí
  clearInterval(tim);$('tmw').hidden=!S.tmr;if(S.tmr){var t0=Date.now(),T=S.tmr*1000;$('tmb').style.width='100%';tim=setInterval(function(){var f=1-(Date.now()-t0)/T;$('tmb').style.width=Math.max(f,0)*100+'%';if(f<=0){clearInterval(tim);answer(-1)}},100)}}
 function answer(i){if(!qs||qs.done)return;qs.done=true;clearInterval(tim);var p=P[cur],q=qs.q,good=i>=0&&qs.o[i].ok,c=q.c;p.tot++;
  document.querySelectorAll('.o').forEach(function(b,k){b.disabled=true;if(qs.o[k].ok)b.classList.add('ok');else if(k===i)b.classList.add('bad')});
- var msg='';if(good){p.ok++;p.hits[c]++;if(p.hits[c]===2)msg=' ¡Ganaste la corona de '+CATS[c][0]+'! 👑';else if(p.hits[c]<2)msg=' Te falta 1 acierto más para la corona de esta categoría.'}
+ var msg='';if(good)sfx(p.hits[c]===1?'crown':'ok');else sfx('bad');if(good){p.ok++;p.hits[c]++;if(p.hits[c]===2)msg=' ¡Ganaste la corona de '+CATS[c][0]+'! 👑';else if(p.hits[c]<2)msg=' Te falta 1 acierto más para la corona de esta categoría.'}
  $('fb').innerHTML='<div class="fb '+(good?'ok':'bad')+'"><b>'+(good?'¡Correcto!':i<0?'Se acabó el tiempo.':'Casi…')+'</b>'+esc(msg)+'<br>'+esc(q.e)+'</div>';
- score();var win=crowns(p)>=S.goal&&good;$('nx').hidden=false;$('nx').textContent=win?'Ver resultado ▶':good?'Seguís jugando ▶':'Pasa el turno ▶';$('nx').dataset.k=win?'w':good?'s':'p';$('nx').focus()}
+ score();var win=crowns(p)>=S.goal&&good;if(win){setTimeout(function(){if(!$('s2').hidden)end(cur)},4500)}$('nx').hidden=false;$('nx').textContent=win?'Ver resultado ▶':good?'Seguís jugando ▶':'Pasa el turno ▶';$('nx').dataset.k=win?'w':good?'s':'p';$('nx').focus()}
 $('nx').onclick=function(){var k=$('nx').dataset.k;if(k==='w'){end(cur);return}if(k==='p')cur=(cur+1)%P.length;turn()};
-function end(w){clearInterval(tim);var r=P.map(function(p,i){return{p:p,i:i}}).sort(function(a,b){return crowns(b.p)-crowns(a.p)||b.p.ok-a.p.ok});
+function end(w){clearInterval(tim);playMusic(false);var r=P.map(function(p,i){return{p:p,i:i}}).sort(function(a,b){return crowns(b.p)-crowns(a.p)||b.p.ok-a.p.ok});
  $('s2').hidden=true;$('s3').hidden=false;var win=(w!=null)?P[w]:r[0].p;$('wt').textContent=(w!=null?'🏆 ¡Ganó '+win.name+'!':'🏁 Fin de la partida');
  $('rk').innerHTML=r.map(function(x){return '<div><span>'+esc(x.p.name)+'</span><span>'+crowns(x.p)+' 👑 · '+x.p.ok+' de '+x.p.tot+' correctas</span></div>'}).join('')}
 $('go').onclick=start;$('fin').onclick=function(){if(confirm('¿Terminar la partida y ver los resultados?'))end(null)};$('again').onclick=function(){$('s3').hidden=true;$('s1').hidden=false;window.scrollTo(0,0)};
