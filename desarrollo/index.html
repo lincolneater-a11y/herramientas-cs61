@@ -82,7 +82,7 @@ var S = {}, CARE = [
  { k: 'c3', t: 'Hay intercambio de miradas entre el niño y su cuidador', n: 3 }
 ];
 function colOf(m) { if (m < 12) return Math.floor(m); if (m < 18) return 12; if (m < 24) return 13; if (m < 36) return 14; if (m < 48) return 15; return null; }
-function ageTxt(m) { var y = Math.floor(m / 12), mm = Math.floor(m % 12), d = Math.floor((m - Math.floor(m)) * 30.4375); var s = (y ? y + ' año' + (y > 1 ? 's' : '') + (mm ? ' y ' : '') : '') + (mm || !y ? mm + ' mes' + (mm === 1 ? '' : 'es') : ''); if (!y && mm === 0) s = d + ' día' + (d === 1 ? '' : 's'); return s; }
+function ageTxt(m) { var y = Math.floor(m / 12), mm = Math.floor(m % 12), d = Math.round((m - Math.floor(m)) * 30.4375), pl = function (n, u) { return n + ' ' + u + (n === 1 ? '' : 's'); }; if (y) return pl(y, 'año') + ', ' + pl(mm, 'mes').replace('mess', 'meses') + ' y ' + pl(d, 'día'); if (mm === 0) return pl(d, 'día'); return pl(mm, 'mes').replace('mess', 'meses') + ' y ' + pl(d, 'día'); }
 function ctx() {
   var dob = $('d-dob').value, ctl = $('d-ctl').value, eg = parseFloat($('d-eg').value), pre = $('d-pre').checked;
   var days = dob && ctl ? (new Date(ctl + 'T00:00:00') - new Date(dob + 'T00:00:00')) / 864e5 : null, m = days !== null && days >= 0 ? days / 30.4375 : null;

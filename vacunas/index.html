@@ -129,7 +129,7 @@ function stOf(it, c) {
 function render() {
   var c = ctx(), out = '', age = '';
   $('v-embw').hidden = !c.emb;
-  if (c.m !== null) { var y = Math.floor(c.m / 12), mm = Math.floor(c.m % 12); age = 'Edad: ' + (y ? y + ' año' + (y > 1 ? 's' : '') + ' ' : '') + mm + ' mes' + (mm === 1 ? '' : 'es'); } else if (c.dob && c.ctl) age = 'La fecha de consulta es anterior al nacimiento.';
+  if (c.m !== null) { var y = Math.floor(c.m / 12), mm = Math.floor(c.m % 12); var dd0 = Math.round((c.m - Math.floor(c.m)) * 30.4375); age = 'Edad: ' + (y ? y + ' año' + (y > 1 ? 's' : '') + ', ' : '') + mm + ' mes' + (mm === 1 ? '' : 'es') + ' y ' + dd0 + ' día' + (dd0 === 1 ? '' : 's'); } else if (c.dob && c.ctl) age = 'La fecha de consulta es anterior al nacimiento.';
   $('v-age').textContent = age;
   var groups = { now: [], next: [], prev: [] }, ids = [], summ = [];
   V.forEach(function (it, i) {

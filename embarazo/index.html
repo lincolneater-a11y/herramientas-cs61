@@ -364,8 +364,9 @@ details.card[open] > summary { margin-bottom: 12px; }
       <label class="field"><span>Sexo</span><select id="lc-sex"><option value="">Seleccionar</option><option value="M">Varón</option><option value="F">Mujer</option></select></label>
       <label class="field"><span>Fecha de nacimiento</span><input type="date" id="lc-dob"></label>
       <label class="field"><span>Fecha de control</span><input type="date" id="lc-ctl"></label>
-      <label class="field"><span>Edad (meses)</span><input type="number" id="lc-ageM" min="0" max="36" inputmode="numeric"><small>Se completa sola con las fechas.</small></label>
-      <label class="field"><span>Edad (días)</span><input type="number" id="lc-ageD" min="0" max="31" inputmode="numeric"></label>
+      <label class="field"><span>Edad (años)</span><input type="number" id="lc-ageY" min="0" max="5" inputmode="numeric"><small>Se completa sola con las fechas; desde los 12 meses se registra en años, meses y días.</small></label>
+      <label class="field"><span>Meses</span><input type="number" id="lc-ageM" min="0" max="11" inputmode="numeric"></label>
+      <label class="field"><span>Días</span><input type="number" id="lc-ageD" min="0" max="31" inputmode="numeric"></label>
       <label class="field"><span>Peso actual (g)</span><input type="number" id="lc-w" min="300" max="20000" inputmode="numeric"><small>Peso de hoy: es el que se grafica.</small></label>
       <label class="field"><span>Longitud / talla actual (cm)</span><input type="number" id="gr-len" min="30" max="130" step="0.1" inputmode="decimal"><small>Se grafica en longitud/edad.</small></label>
       <label class="field" id="gr-pc-w"><span>Perímetro cefálico actual (cm)</span><input type="number" id="gr-pc" min="20" max="60" step="0.1" inputmode="decimal"><small>Se grafica en PC/edad.</small></label>
@@ -615,8 +616,9 @@ details.card[open] > summary { margin-bottom: 12px; }
       <label class="field"><span>Sexo</span><select id="es-sex"><option value="">Seleccionar</option><option value="M">Varón</option><option value="F">Mujer</option></select></label>
       <label class="field"><span>Fecha de nacimiento</span><input type="date" id="es-dob"></label>
       <label class="field"><span>Fecha de control</span><input type="date" id="es-ctl"></label>
-      <label class="field"><span>Edad (años)</span><input type="number" id="es-ageY" min="0" max="25" inputmode="numeric"><small>Se completa sola con las fechas.</small></label>
+      <label class="field"><span>Edad (años)</span><input type="number" id="es-ageY" min="0" max="25" inputmode="numeric"><small>Se completa sola con las fechas (años, meses y días).</small></label>
       <label class="field"><span>Meses</span><input type="number" id="es-ageM" min="0" max="11" inputmode="numeric"></label>
+      <label class="field"><span>Días</span><input type="number" id="es-ageD" min="0" max="31" inputmode="numeric"></label>
       <label class="field"><span>Peso (kg)</span><input type="number" id="es-w" min="10" max="200" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Talla (cm)</span><input type="number" id="es-h" min="80" max="230" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Circunferencia de cintura (cm)</span><input type="number" id="es-wc" min="30" max="160" step="0.1" inputmode="decimal"><small>Opcional · de 10 a 18 años. Se mide en el borde superior de la cresta ilíaca.</small></label>
@@ -911,9 +913,9 @@ function totalMl(s) { return (s.tomas || 0) * (s.ml || 0); }
 function readPatient() {
   var P = {};
   P.sex = $('lc-sex').value; P.w = val('lc-w'); P.pn = val('lc-pn'); P.ln = val('lc-ln'); P.pcn = val('lc-pcn'); P.egt = val('lc-egt');
-  var M = val('lc-ageM'), Dd = val('lc-ageD');
-  P.hasAge = (M !== null || Dd !== null);
-  P.chron = (M || 0) * MD + (Dd || 0);
+  var Yy = val('lc-ageY'), M = val('lc-ageM'), Dd = val('lc-ageD');
+  P.hasAge = (Yy !== null || M !== null || Dd !== null);
+  P.chron = ((Yy || 0) * 12 + (M || 0)) * MD + (Dd || 0);
   P.pre = $('lc-pre').checked; P.first = $('lc-first').checked; P.pa = +$('lc-pa').value; P.len = val('gr-len');
   P.egd = P.pre ? ((val('lc-egw') || 0) * 7 + (val('lc-egd') || 0)) : 0;
   P.egOk = P.pre && val('lc-egw') !== null;
@@ -1208,7 +1210,7 @@ function syncAge() {
   var b = $('lc-dob').value, c = $('lc-ctl').value; if (!b || !c) return;
   var d1 = new Date(b + 'T00:00:00'), d2 = new Date(c + 'T00:00:00'); var days = Math.round((d2 - d1) / 86400000);
   if (!(days >= 0)) return;
-  var m = Math.floor(days / MD); $('lc-ageM').value = m; $('lc-ageD').value = Math.round(days - m * MD);
+  var m = Math.floor(days / MD); $('lc-ageY').value = Math.floor(m / 12); $('lc-ageM').value = m % 12; $('lc-ageD').value = Math.round(days - m * MD);
 }
 var lcRoot = $('v-lactantes');
 lcRoot.addEventListener('input', function (e) {
@@ -1286,7 +1288,7 @@ function cfInit() {
 }
 
 function lcClear() {
-  ['lc-id', 'lc-dob', 'lc-ageM', 'lc-ageD', 'lc-w', 'lc-pn', 'lc-ln', 'lc-pcn', 'lc-egt', 'lc-wprev', 'lc-dprev', 'lc-egw', 'lc-egd'].forEach(function (i) { $(i).value = ''; });
+  ['lc-id', 'lc-dob', 'lc-ageY', 'lc-ageM', 'lc-ageD', 'lc-w', 'lc-pn', 'lc-ln', 'lc-pcn', 'lc-egt', 'lc-wprev', 'lc-dprev', 'lc-egw', 'lc-egd'].forEach(function (i) { $(i).value = ''; });
   $('lc-ctl').value = todayISO(); $('lc-sex').value = ''; $('lc-pre').checked = false; $('lc-first').checked = false; $('lc-preflds').hidden = true; $('lc-ref').value = 'auto'; $('lc-stage').value = 'grow'; $('lc-prekcal').value = 120; $('lc-method').value = 'fao';
   S = []; CF = []; renderSrcs(); cfRender(); renderLact();
 }
@@ -2795,8 +2797,8 @@ function hitAge() {
   var dob = $('hi-dob').value, ctl = $('hi-ctl').value, d = hitDiff(dob, ctl), pre = val('hi-ega'), corr = false, mm = null, txt = '';
   if (d !== null && d >= 0) {
     var dd = d; if (pre !== null && pre < 37 && d / 30.4375 < 24) { dd = d - (40 - pre) * 7; corr = true; if (dd < 0) dd = 0; }
-    mm = dd / 30.4375; var m = Math.floor(dd / 30.4375), rest = Math.floor(dd - m * 30.4375);
-    txt = (corr ? 'Edad corregida: ' : 'Edad: ') + m + ' meses y ' + rest + ' días' + (corr ? ' (cronológica ' + Math.floor(d / 30.4375) + ' meses)' : '');
+    mm = dd / 30.4375; var m = Math.floor(dd / 30.4375), rest = Math.round(dd - m * 30.4375);
+    var yy = Math.floor(m / 12), mo2 = m % 12; txt = (corr ? 'Edad corregida: ' : 'Edad: ') + (m >= 12 ? yy + (yy === 1 ? ' año, ' : ' años, ') + mo2 + (mo2 === 1 ? ' mes y ' : ' meses y ') + rest + (rest === 1 ? ' día' : ' días') : m + ' meses y ' + rest + ' días') + (corr ? ' (cronológica ' + Math.floor(d / 30.4375) + ' meses)' : '');
   } else { var mn = val('hi-mes'); if (mn !== null) { mm = mn; txt = 'Edad: ' + mn + ' meses'; } }
   return { m: mm, txt: txt, corr: corr };
 }
@@ -2927,6 +2929,8 @@ var GH = [], PLH = { lc: [], es: [], em: [] }, PLR = { lc: [], es: [], em: [] },
 function plMerge(p) { var seen = {}, out = []; PLL[p].concat(PLR[p]).forEach(function (r) { if (!r.fecha || seen[r.fecha]) return; seen[r.fecha] = 1; out.push(r); }); PLH[p] = out; }
 var ZS = [['−3', -3], ['−2', -2], ['−1', -1], ['0', 0], ['+1', 1], ['+2', 2], ['+3', 3]];
 function zsty(z) { var a = Math.abs(z[1]); return { col: z[1] === 0 ? 'var(--teal)' : 'var(--ink-2)', w: z[1] === 0 ? 2.4 : (a === 2 ? 1.7 : 1.1), dash: a === 3 ? '5 4' : undefined, label: z[0] }; }
+var ZMODE = MODO !== 'crec', SER = ZMODE ? ZS : null;
+function psty(pc) { return { col: pc[0] === 'P50' ? 'var(--teal)' : 'var(--ink-2)', w: pc[0] === 'P50' ? 2.4 : (pc[0] === 'P3' || pc[0] === 'P97' ? 1.5 : 1), label: pc[0] }; }
 var PCTS = [['P3', -1.8808], ['P10', -1.2816], ['P25', -0.6745], ['P50', 0], ['P75', 0.6745], ['P90', 1.2816], ['P97', 1.8808]];
 function zOf(x, l, m, s) { return l !== 0 ? (Math.pow(x / m, l) - 1) / (l * s) : Math.log(x / m) / s; }
 function vOf(z, l, m, s) { return l !== 0 ? m * Math.pow(1 + l * s * z, 1 / l) : m * Math.exp(s * z); }
@@ -3016,9 +3020,10 @@ function grPoints(P) { /* [{age: días corregidos, pma: semanas, w (kg), l, pc, 
 }
 function grHistHTML() {
   if (!GH.length) return '<p class="note">Agregue controles previos para ver la trayectoria sobre la curva.</p>';
-  return '<div class="tw"><table class="tbl"><thead><tr><th>Edad (m)</th><th>+ días</th><th>Peso (g)</th><th>Long. (cm)</th><th>PC (cm)</th><th></th></tr></thead><tbody>' + GH.map(function (h, i) {
+  return '<div class="tw"><table class="tbl"><thead><tr><th>Años</th><th>Meses</th><th>Días</th><th>Peso (g)</th><th>Long. (cm)</th><th>PC (cm)</th><th></th></tr></thead><tbody>' + GH.map(function (h, i) {
     var inp = function (k, mx, st) { return '<td><input type="number" data-g="' + i + '" data-k="' + k + '" min="0" max="' + mx + '" step="' + st + '" inputmode="decimal" value="' + (h[k] === null ? '' : h[k]) + '" style="width:76px;padding:5px 7px" aria-label="' + k + ' control ' + (i + 1) + '"></td>'; };
-    return '<tr>' + inp('m', 60, 1) + inp('d', 31, 1) + inp('w', 30000, 1) + inp('l', 130, 0.1) + inp('pc', 60, 0.1) + '<td><button type="button" class="btn small danger" data-grrm="' + i + '">Quitar</button></td></tr>';
+    var iy = function (k, mx, v) { return '<td><input type="number" data-g="' + i + '" data-k="' + k + '" min="0" max="' + mx + '" step="1" inputmode="numeric" value="' + v + '" style="width:64px;padding:5px 7px" aria-label="' + (k === 'y' ? 'años' : 'meses') + ' control ' + (i + 1) + '"></td>'; };
+    return '<tr>' + iy('y', 5, h.m === null ? '' : Math.floor(h.m / 12)) + iy('mo', 11, h.m === null ? '' : h.m % 12) + inp('d', 31, 1) + inp('w', 30000, 1) + inp('l', 130, 0.1) + inp('pc', 60, 0.1) + '<td><button type="button" class="btn small danger" data-grrm="' + i + '">Quitar</button></td></tr>';
   }).join('') + '</tbody></table></div>';
 }
 var GR_SEL = 'wfa', GR_COPY = [], GR_OLD = false;
@@ -3073,7 +3078,7 @@ function grRender() {
       T += '<tr><td>' + (key === 'wfl' && older ? 'Peso para la talla' : meta[key]) + '</td><td>' + fmt(r[1], key === 'lfa' || key === 'hca' || key === 'bfa' ? 1 : 2) + ' ' + unit[key] + '</td><td>' + (z >= 0 ? '+' : '−') + fmt(Math.abs(z), 2) + '</td><td>' + pctTxt(pc) + '</td><td><span class="badge ' + c[0] + '">' + c[1] + '</span></td></tr>';
       L.push(meta[key] + ': ' + fmt(r[1], 2) + ' ' + unit[key] + ' · z ' + fmt(z, 2) + ' · P' + fmt(pc, 0) + ' · ' + c[1]);
     });
-    H = al + '<div class="chips" style="margin:0 0 10px"><span class="chip">Edad usada: <b>' + (P.pre && P.egOk ? 'corregida ' : '') + Math.floor(cur.age / MD) + ' m ' + Math.round(cur.age - Math.floor(cur.age / MD) * MD) + ' d</b></span><span class="chip">Referencia: <b>OMS 2006</b></span></div>';
+    H = al + '<div class="chips" style="margin:0 0 10px"><span class="chip">Edad usada: <b>' + (P.pre && P.egOk ? 'corregida ' : '') + ageTxt(cur.age) + '</b></span><span class="chip">Referencia: <b>OMS 2006</b></span></div>';
   if (T) H += '<div class="tw"><table class="tbl"><thead><tr><th>Indicador</th><th>Valor</th><th>Z</th><th>Percentil</th><th>Clasificación OMS</th></tr></thead><tbody>' + T + '</tbody></table></div><p class="note" style="margin-top:8px">Referencia SAP: se consideran dentro de lo esperado los valores entre los percentilos 3 y 97. La clasificación de la OMS usa puntaje Z (DE). Para peso/longitud se marca riesgo de sobrepeso desde +1 DE, sobrepeso desde +2 y obesidad desde +3.</p>';
     else H += '<div class="alert info">' + ICON_INFO + '<span>' + (older ? 'Ingrese talla y peso actuales para calcular IMC/edad, talla/edad y peso/talla.' : 'Ingrese longitud y perímetro cefálico (además del peso) para evaluarlos.') + '</span></div>';
     opts = older ? [['bfa', 'IMC/edad'], ['lfa', 'Talla/edad'], ['wfl', 'Peso/talla']] : [['wfa', 'Peso/edad'], ['lfa', 'Longitud/edad'], ['hca', 'PC/edad'], ['wfl', 'Peso/longitud']];
@@ -3083,7 +3088,7 @@ function grRender() {
   opts.forEach(function (o) { GR_SEL = o[0]; CH += '<div class="lbl" style="margin:18px 0 2px">' + o[1] + '</div><div class="gr-chart">' + (mode === 'ig' ? grChartIG(pts, P) : grChart(pts, P, long, maxM, meta)) + '</div>'; });
   GR_SEL = 'wfa';
   H += CH;
-  H += '<div class="legend" style="margin-top:4px"><span><i style="background:var(--teal)"></i>' + (mode === 'ig' ? 'P50' : 'Z 0 (mediana)') + '</span><span><i style="background:var(--ink-2)"></i>' + (mode === 'ig' ? 'P3 · P10 · P90 · P97' : 'Z −3 · −2 · −1 · +1 · +2 · +3 (puntaje Z)') + '</span><span><i style="background:var(--bordeaux);border-radius:50%"></i>Paciente</span></div>';
+  H += '<div class="legend" style="margin-top:4px"><span><i style="background:var(--teal)"></i>' + (mode === 'ig' || !ZMODE ? 'P50' : 'Z 0 (mediana)') + '</span><span><i style="background:var(--ink-2)"></i>' + (mode === 'ig' ? 'P3 · P10 · P90 · P97' : (ZMODE ? 'Z −3 · −2 · −1 · +1 · +2 · +3 (puntaje Z)' : 'P3 · P10 · P25 · P75 · P90 · P97')) + '</span><span><i style="background:var(--bordeaux);border-radius:50%"></i>Paciente</span></div>';
   H += '<div class="actions" style="margin-top:12px"><button class="btn" id="gr-copy" type="button">Copiar edad y crecimiento</button><button class="btn primary" id="gr-save" type="button">Guardar en la planilla</button></div>';
   out.innerHTML = H; GR_COPY = [(mode === 'ig' ? 'Curvas INTERGROWTH-21st (prematuros)' : 'Curvas de crecimiento OMS 2006') + ' · ' + todayISO()].concat(L);
 }
@@ -3101,29 +3106,29 @@ function grChartIG(pts, P) {
 }
 function grChart(pts, P, long, maxM, meta) {
   var sel = GR_SEL, sx = P.sex, pp = [], series = [], cfg, base = pts.filter(function (p) { return p.age >= 0; });
-  var sty = zsty;
+  var sty = ZMODE ? zsty : psty, SS = ZMODE ? ZS : PCTS;
   if (sel === 'wfl') {
     var key = maxM > 24 ? 'wfh' : 'wfl', a = key === 'wfl' ? 45 : 65, b = key === 'wfl' ? 110 : 120, N = Math.round((b - a) / 0.5);
-    ZS.forEach(function (pc) { var s = []; for (var i = 0; i <= N; i += 2) { var x = a + i * 0.5, p = grLMS(sx, key, x); s.push([x, vOf(pc[1], p[0], p[1], p[2])]); } var st = sty(pc); st.pts = s; series.push(st); });
+    SS.forEach(function (pc) { var s = []; for (var i = 0; i <= N; i += 2) { var x = a + i * 0.5, p = grLMS(sx, key, x); s.push([x, vOf(pc[1], p[0], p[1], p[2])]); } var st = sty(pc); st.pts = s; series.push(st); });
     base.forEach(function (p) { if (p.w && p.l) pp.push([p.l, p.w]); });
-    cfg = { x0: a, x1: b, xs: 10, y0: GR_OLD ? 6 : 2, y1: key === 'wfl' ? 26 : 30, ys: 2, xl: key === 'wfl' ? 'Longitud (cm)' : 'Talla (cm)', yl: 'Peso (kg)' };
+    cfg = { x0: a, x1: b, xs: 10, y0: GR_OLD ? 6 : 2, y1: ZMODE ? (key === 'wfl' ? 26 : 30) : (key === 'wfl' ? 22 : 26), ys: 2, xl: key === 'wfl' ? 'Longitud (cm)' : 'Talla (cm)', yl: 'Peso (kg)' };
   } else {
     var step = maxM > 24 ? 2 : 1;
-    ZS.forEach(function (pc) { var s = []; for (var m = 0; m <= maxM; m += step) { var p = grLMS(sx, sel, m * MD); s.push([m, vOf(pc[1], p[0], p[1], p[2])]); } var st = sty(pc); st.pts = s; series.push(st); });
+    SS.forEach(function (pc) { var s = []; for (var m = 0; m <= maxM; m += step) { var p = grLMS(sx, sel, m * MD); s.push([m, vOf(pc[1], p[0], p[1], p[2])]); } var st = sty(pc); st.pts = s; series.push(st); });
     base.forEach(function (p) {
       var v = sel === 'wfa' ? p.w : (sel === 'lfa' ? p.l : (sel === 'hca' ? p.pc : (sel === 'bfa' ? (p.w && p.l ? p.w / Math.pow(p.l / 100, 2) : null) : null)));
       if (v) pp.push([p.age / MD, v]);
     });
-    var C = { wfa: [2, maxM > 24 ? 32 : 18, maxM > 24 ? 4 : 2, 'Peso (kg)'], lfa: [44, maxM > 24 ? 130 : 104, maxM > 24 ? 10 : 8, 'Longitud / talla (cm)'], hca: [30, 56, 4, 'Perímetro cefálico (cm)'], bfa: [10, 26, 2, 'IMC (kg/m²)'] }[sel];
+    var C = { wfa: [2, maxM > 24 ? (ZMODE ? 32 : 28) : (ZMODE ? 18 : 16), maxM > 24 ? 4 : 2, 'Peso (kg)'], lfa: [44, maxM > 24 ? (ZMODE ? 130 : 124) : (ZMODE ? 104 : 100), maxM > 24 ? 10 : 8, 'Longitud / talla (cm)'], hca: [30, 56, 4, 'Perímetro cefálico (cm)'], bfa: [10, ZMODE ? 26 : 24, 2, 'IMC (kg/m²)'] }[sel];
     cfg = { x0: 0, x1: maxM, xs: maxM > 24 ? 6 : 3, y0: C[0], y1: C[1], ys: C[2], xl: 'Edad (meses' + (P.pre && P.egOk ? ', corregida' : '') + ')', yl: C[3] };
   }
   pp.sort(function (a, b) { return a[0] - b[0]; });
-  cfg.series = series; cfg.pts = pp; cfg.rpad = 32; cfg.aria = 'Curva OMS en puntaje Z de ' + meta[sel].toLowerCase() + ' con los puntos del paciente';
+  cfg.series = series; cfg.pts = pp; cfg.rpad = 32; cfg.aria = 'Curva OMS ' + (ZMODE ? 'en puntaje Z ' : '') + 'de ' + meta[sel].toLowerCase() + ' con los puntos del paciente';
   return lineChart(cfg);
 }
 
 /* ---- Edad corregida, tamaño al nacer, Rohrer ---- */
-function ageTxt(days) { var m = Math.floor(days / MD); return m + ' m ' + Math.round(days - m * MD) + ' d'; }
+function ageTxt(days) { var m = Math.floor(days / MD), d = Math.round(days - m * MD); if (m >= 12) return Math.floor(m / 12) + ' a ' + (m % 12) + ' m ' + d + ' d'; return m + ' m ' + d + ' d'; }
 function fmtDate(d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); }
 var AGES_COPY = [];
 function sizeClass(pc) { return pc < 10 ? ['mid', 'Pequeño para la edad gestacional (< P10)'] : (pc > 90 ? ['mid', 'Grande para la edad gestacional (> P90)'] : ['ok', 'Adecuado para la edad gestacional (P10–P90)']); }
@@ -3257,7 +3262,13 @@ function capRender() { var Pc = readPatient(); $('lc-cap').innerHTML = (Pc.hasAg
   root.addEventListener('input', function (e) {
     var t = e.target, g = t.getAttribute('data-g');
     if (t.name === 'gr-sel') { GR_SEL = t.value; }
-    if (g !== null) { var v = t.value === '' ? null : parseFloat(String(t.value).replace(',', '.')); GH[+g][t.getAttribute('data-k')] = isFinite(v) ? v : null; }
+    if (g !== null) {
+      var k0 = t.getAttribute('data-k'), v = t.value === '' ? null : parseFloat(String(t.value).replace(',', '.'));
+      if (k0 === 'y' || k0 === 'mo') {
+        var ry = root.querySelector('[data-g="' + g + '"][data-k="y"]'), rm = root.querySelector('[data-g="' + g + '"][data-k="mo"]'), yv = parseFloat(ry.value), mv = parseFloat(rm.value);
+        GH[+g].m = (isFinite(yv) || isFinite(mv)) ? (isFinite(yv) ? yv : 0) * 12 + (isFinite(mv) ? mv : 0) : null;
+      } else GH[+g][k0] = isFinite(v) ? v : null;
+    }
     rerender();
   });
   root.addEventListener('change', function (e) { if (e.target.name === 'gr-sel') { GR_SEL = e.target.value; rerender(); } });
@@ -3342,15 +3353,15 @@ var ESH = [], ES_COPY = [];
 function esDays(a, b) { if (!a || !b) return null; var d = (new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5; return isFinite(d) ? d : null; }
 function esRead() {
   var P = { sex: $('es-sex').value, dob: $('es-dob').value, ctl: $('es-ctl').value, w: val('es-w'), h: val('es-h'), wc: val('es-wc') };
-  var dd = esDays(P.dob, P.ctl), Y = val('es-ageY'), Mo = val('es-ageM');
-  if (dd !== null && dd >= 0) P.m = dd / MD; else if (Y !== null || Mo !== null) P.m = (Y || 0) * 12 + (Mo || 0); else P.m = null;
+  var dd = esDays(P.dob, P.ctl), Y = val('es-ageY'), Mo = val('es-ageM'), Dy = val('es-ageD');
+  if (dd !== null && dd >= 0) P.m = dd / MD; else if (Y !== null || Mo !== null || Dy !== null) P.m = (Y || 0) * 12 + (Mo || 0) + (Dy || 0) / MD; else P.m = null;
   P.dec = null; if (dd !== null && dd >= 0) { var d1 = decYear(P.dob), d2 = decYear(P.ctl); if (d1 && d2) P.dec = d2 - d1; } else if (P.m !== null) P.dec = P.m / 12;
   P.fh = val('es-fh'); P.mh = val('es-mh'); P.tgt = $('es-tgt').checked; P.tan = $('es-tan').value; P.vp = $('es-vp').value;
   return P;
 }
 function esSyncAge() {
   var dd = esDays($('es-dob').value, $('es-ctl').value); if (dd === null || dd < 0) return;
-  var m = Math.floor(dd / MD); $('es-ageY').value = Math.floor(m / 12); $('es-ageM').value = m % 12;
+  var m = Math.floor(dd / MD); $('es-ageY').value = Math.floor(m / 12); $('es-ageM').value = m % 12; $('es-ageD').value = Math.round(dd - m * MD);
 }
 function esPts(P) {
   var pts = [];
@@ -3377,10 +3388,10 @@ function esTarget(P) {
   return o;
 }
 function esChart(P, k, pts) {
-  var series = [], band = null, cfg = { b: [10, 42, 4], h: [100, 200, 10], w: [10, 60, 5] }[k], tgt = (k === 'h' && P.tgt && P.fh && P.mh) ? esTarget(P) : null, last = k === 'w' ? 120 : 228, x1 = last / 12;
-  ZS.forEach(function (pc) {
+  var series = [], band = null, cfg = (ZMODE ? { b: [10, 42, 4], h: [100, 200, 10], w: [10, 60, 5] } : { b: [10, 34, 4], h: [100, 190, 10], w: [10, 50, 5] })[k], tgt = (k === 'h' && P.tgt && P.fh && P.mh) ? esTarget(P) : null, last = k === 'w' ? 120 : 228, x1 = last / 12;
+  (ZMODE ? ZS : PCTS).forEach(function (pc) {
     var s = []; for (var m = 60; m <= last; m += 2) { var p = w07LMS(P.sex, k, m); s.push([m / 12, vOf(pc[1], p[0], p[1], p[2])]); }
-    var st = zsty(pc); st.pts = s; series.push(st);
+    var st = (ZMODE ? zsty : psty)(pc); st.pts = s; series.push(st);
   });
   if (tgt) {
     if (tgt.hi > cfg[1]) cfg[1] = Math.ceil(tgt.hi / 10) * 10; if (tgt.lo < cfg[0]) cfg[0] = Math.floor(tgt.lo / 10) * 10;
@@ -3389,13 +3400,13 @@ function esChart(P, k, pts) {
     if (tgt.proj) series.push({ pts: tgt.proj, col: 'var(--bordeaux)', w: 1.6, dash: '5 4' });
   }
   var pp = []; pts.forEach(function (p) { var v = k === 'b' ? p.b : (k === 'h' ? p.h : p.w); if (v) pp.push([p.m / 12, v]); });
-  return lineChart({ band: band, x0: 5, x1: x1, xs: k === 'w' ? 1 : 2, y0: cfg[0], y1: cfg[1], ys: cfg[2], xl: 'Edad (años)', yl: { b: 'IMC (kg/m²)', h: 'Talla (cm)', w: 'Peso (kg)' }[k], series: series, pts: pp, rpad: 32, aria: 'Curva OMS 2007 en puntaje Z de ' + ES_META[k].n.toLowerCase() + ' con los puntos del paciente' });
+  return lineChart({ band: band, x0: 5, x1: x1, xs: k === 'w' ? 1 : 2, y0: cfg[0], y1: cfg[1], ys: cfg[2], xl: 'Edad (años)', yl: { b: 'IMC (kg/m²)', h: 'Talla (cm)', w: 'Peso (kg)' }[k], series: series, pts: pp, rpad: 32, aria: 'Curva OMS 2007 ' + (ZMODE ? 'en puntaje Z ' : '') + 'de ' + ES_META[k].n.toLowerCase() + ' con los puntos del paciente' });
 }
 function esRender() { esRender0(); try { esAcu(); } catch (e) { } }
 function esRender0() {
   var out = $('es-out'), P = esRead(), L = [], T = '', H = '';
   $('es-tan-l').textContent = P.sex === 'M' ? 'Estadio de Tanner: genitales' : (P.sex === 'F' ? 'Estadio de Tanner: mamas' : 'Estadio de Tanner: mama / genitales');
-  var ch = []; if (P.m !== null) ch.push('Edad <b>' + Math.floor(P.m / 12) + ' años ' + Math.floor(P.m % 12) + ' m</b>'); if (P.dec !== null) ch.push('Edad decimal <b>' + fmt(P.dec, 2) + ' años</b>'); if (P.w && P.h) ch.push('IMC <b>' + fmt(P.w / Math.pow(P.h / 100, 2), 1) + ' kg/m²</b>');
+  var ch = []; if (P.m !== null) ch.push('Edad <b>' + Math.floor(P.m / 12) + ' años ' + Math.floor(P.m % 12) + ' m ' + Math.round((P.m - Math.floor(P.m)) * MD) + ' d</b>'); if (P.dec !== null) ch.push('Edad decimal <b>' + fmt(P.dec, 2) + ' años</b>'); if (P.w && P.h) ch.push('IMC <b>' + fmt(P.w / Math.pow(P.h / 100, 2), 1) + ' kg/m²</b>');
   $('es-chips').innerHTML = ch.map(function (c) { return '<span class="chip">' + c + '</span>'; }).join('');
   if (!P.sex) { out.innerHTML = '<div class="alert info">' + ICON_INFO + '<span>Seleccione el sexo para aplicar las curvas.</span></div>'; esVel(P); esMat(P); return; }
   if (P.m === null) { out.innerHTML = '<div class="alert info">' + ICON_INFO + '<span>Ingrese la edad (o las fechas de nacimiento y de control).</span></div>'; esVel(P); esMat(P); return; }
@@ -3423,7 +3434,7 @@ function esRender0() {
   else H += '<div class="alert info">' + ICON_INFO + '<span>Ingrese peso y talla para evaluar.</span></div>';
   var pts = esPts(P);
   ['b', 'h'].concat(P.m <= 120 ? ['w'] : []).forEach(function (k) { H += '<div class="lbl" style="margin:18px 0 2px">' + ES_META[k].n + '</div><div class="gr-chart">' + esChart(P, k, pts) + '</div>'; });
-  H += '<div class="legend" style="margin-top:4px"><span><i style="background:var(--teal)"></i>Z 0 (mediana)</span><span><i style="background:var(--ink-2)"></i>Z −3 · −2 · −1 · +1 · +2 · +3 (puntaje Z)</span><span><i style="background:var(--bordeaux);border-radius:50%"></i>Paciente</span>' + ((P.tgt && P.fh && P.mh) ? '<span><i style="background:var(--gold)"></i>Talla blanco ± 8,5 cm (a los 19 años)</span><span><i style="background:var(--bordeaux);height:0;border-top:2px dashed var(--bordeaux);background:none"></i>Proyección por el canal actual</span>' : '') + '</div>';
+  H += '<div class="legend" style="margin-top:4px"><span><i style="background:var(--teal)"></i>' + (ZMODE ? 'Z 0 (mediana)' : 'P50') + '</span><span><i style="background:var(--ink-2)"></i>' + (ZMODE ? 'Z −3 · −2 · −1 · +1 · +2 · +3 (puntaje Z)' : 'P3 · P10 · P25 · P75 · P90 · P97') + '</span><span><i style="background:var(--bordeaux);border-radius:50%"></i>Paciente</span>' + ((P.tgt && P.fh && P.mh) ? '<span><i style="background:var(--gold)"></i>Talla blanco ± 8,5 cm (a los 19 años)</span><span><i style="background:var(--bordeaux);height:0;border-top:2px dashed var(--bordeaux);background:none"></i>Proyección por el canal actual</span>' : '') + '</div>';
   H += '<div class="actions" style="margin-top:12px"><button class="btn" id="es-copy" type="button">Copiar valoración</button><button class="btn primary" id="es-save" type="button">Guardar en la planilla</button></div>';
   out.innerHTML = H; ES_COPY = ['Valoración antropométrica OMS 2007 · ' + todayISO() + ($('es-id').value.trim() ? ' · ' + $('es-id').value.trim() : ''), 'Edad: ' + Math.floor(P.m / 12) + ' años ' + Math.floor(P.m % 12) + ' m · ' + (P.sex === 'M' ? 'varón' : 'mujer') + (P.w ? ' · peso ' + fmt(P.w, 1) + ' kg' : '') + (P.h ? ' · talla ' + fmt(P.h, 1) + ' cm' : '')].concat(L);
   esVel(P); esMat(P);
@@ -3553,7 +3564,7 @@ function esAcu() {
     if (b.hasAttribute('data-eshrm')) { ESH.splice(+b.getAttribute('data-eshrm'), 1); $('es-hist').innerHTML = esHistHTML(); esRender(); }
     if (b.id === 'es-copy') copyText(ES_COPY.concat(esVelCopy, esMatCopy).join('\n'), b);
     if (b.id === 'es-save') plSave(plRecEs(), b);
-    if (b.id === 'es-clear') { ['es-id', 'es-dob', 'es-ageY', 'es-ageM', 'es-w', 'es-h', 'es-wc', 'es-fh', 'es-mh'].forEach(function (i) { $(i).value = ''; }); $('es-ctl').value = todayISO(); $('es-sex').value = ''; $('es-tan').value = ''; $('es-vp').value = ''; ESH = []; $('es-hist').innerHTML = esHistHTML(); esRender(); }
+    if (b.id === 'es-clear') { ['es-id', 'es-dob', 'es-ageY', 'es-ageM', 'es-ageD', 'es-w', 'es-h', 'es-wc', 'es-fh', 'es-mh'].forEach(function (i) { $(i).value = ''; }); $('es-ctl').value = todayISO(); $('es-sex').value = ''; $('es-tan').value = ''; $('es-vp').value = ''; ESH = []; $('es-hist').innerHTML = esHistHTML(); esRender(); }
   });
   $('es-ctl').value = todayISO(); $('es-hist').innerHTML = esHistHTML(); esRender();
 })();
