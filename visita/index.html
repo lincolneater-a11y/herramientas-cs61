@@ -51,7 +51,7 @@ svg.gb{width:100%;height:auto;display:block;margin-top:6px;background:var(--s);b
 <div class="actions noprint" style="margin:8px 0 0"><button class="btn primary" id="b-load" type="button">Cargar datos de una persona o familia</button></div>
 <div id="form"></div>
 <div id="alerta"></div><div id="tips"></div>
-<div class="actions noprint"><button class="btn primary" id="b-save" type="button">Guardar ficha</button><button class="btn" id="b-print" type="button">Imprimir / PDF</button><button class="btn" id="b-copy" type="button">Copiar resumen</button><button class="btn danger" id="b-new" type="button">Nueva ficha</button></div>
+<div class="actions noprint"><button class="btn primary" id="b-save" type="button">Guardar ficha</button><button class="btn" id="b-pl" type="button">Guardar en la planilla</button><button class="btn" id="b-print" type="button">Imprimir / PDF</button><button class="btn" id="b-copy" type="button">Copiar resumen</button><button class="btn danger" id="b-new" type="button">Nueva ficha</button></div>
 <p class="hint noprint" id="msg" role="status"></p>
 <details class="card noprint" id="saved"><summary>Fichas guardadas en este dispositivo <span class="cnt" id="nsv"></span></summary><div class="body"><div id="svl"></div><div class="actions"><button class="btn" id="b-csv" type="button">CSV de visitas</button><button class="btn" id="b-csvn" type="button">CSV nutricional (una fila por persona)</button></div></div></details>
 </main>
@@ -306,11 +306,12 @@ function calc(d){var pts=0,tips=[],seen={},alarm=[];
  var lv=alarm.length?'u':pts>=10?'a':pts>=5?'m':'b';return{pts:pts,tips:tips,alarm:alarm,hac:hac,lv:lv}}
 var LV={b:['Baja','Control en 2 a 3 meses o según programa'],m:['Media','Próxima visita sugerida: entre 15 y 30 días'],a:['Alta','Próxima visita sugerida: dentro de los 7 días'],u:['Urgente','Avisar al equipo hoy; revisitar dentro de 24 a 48 horas']};
 function same(a,b){return !!((a.dni&&a.dni===b.dni)||(a.fn&&b.fn&&a.fn===b.fn&&a.n&&b.n&&a.n.trim().toLowerCase()===b.n.trim().toLowerCase()))}
-function hist(m,fv){var out=[],seen={};if(!(m.dni||(m.fn&&m.n)))return out;all().forEach(function(x){if(x.id===cur)return;var f=x.d.f.fecha;if(!f||f>=fv||seen[f])return;x.d.m.forEach(function(q){if(seen[f]||!same(m,q))return;if(!(nv(q.p)||nv(q.h)||nv(q.pc)||nv(q.cc)))return;seen[f]=1;out.push({f:f,p:nv(q.p),h:q.mt==='e'?null:nv(q.h),pc:nv(q.pc),cc:nv(q.cc)})})});out.sort(function(a,b){return a.f<b.f?-1:1});return out}
+function hist(m,fv){var out=[],seen={};if(!(m.dni||(m.fn&&m.n)))return out;all().forEach(function(x){if(x.id===cur)return;var f=x.d.f.fecha;if(!f||f>=fv||seen[f])return;x.d.m.forEach(function(q){if(seen[f]||!same(m,q))return;if(!(nv(q.p)||nv(q.h)||nv(q.pc)||nv(q.cc)))return;seen[f]=1;out.push({f:f,p:nv(q.p),h:q.mt==='e'?null:nv(q.h),pc:nv(q.pc),cc:nv(q.cc)})})});var pr=m.dni&&PLC[m.dni]&&PLC[m.dni].filas||[];pr.forEach(function(r){var f=r.fecha;if(!f||f>=fv||seen[f])return;var p=nv(r.peso_kg),h=nv(r.talla_cm),pc=nv(r.pc_cm),cc=nv(r.cintura_cm);if(!(p||h||pc||cc))return;seen[f]=1;out.push({f:f,p:p,h:h,pc:pc,cc:cc,pl:1})});
+ out.sort(function(a,b){return a.f<b.f?-1:1});return out}
 function fd(i){return String(i||'').split('-').reverse().join('/')}
 function renderMem(el,fv){var m=mdata(el),r=evalM(m,fv),box=el.querySelector('.res'),g=r.g,sh=function(c,v){el.querySelector(c).hidden=!v};
  var hs=hist(m,fv),pv=[],fo=el.querySelector('.mfound');hs.forEach(function(q){var a2=m.fn?ageYMD(m.fn,q.f):null;if(a2)pv.push({mo:a2.days/MD,p:q.p,h:q.h,pc:q.pc,cc:q.cc})});
- if(hs.length){fo.hidden=false;fo.innerHTML='<b>'+hs.length+' control'+(hs.length>1?'es':'')+' anterior'+(hs.length>1?'es':'')+'</b> guardado'+(hs.length>1?'s':'')+' (se grafican como puntos pequeños): '+hs.slice(-6).map(function(q){var t=[];if(q.p)t.push(fm(q.p,2)+' kg');if(q.h)t.push(fm(q.h,1)+' cm');if(q.pc)t.push('PC '+fm(q.pc,1));if(q.cc)t.push('cintura '+fm(q.cc,1));return fd(q.f)+' ('+t.join(' · ')+')'}).join('; ')+(hs.length>6?' · …':'')+'.'}else{fo.hidden=true;fo.innerHTML=''}
+ if(hs.length){fo.hidden=false;fo.innerHTML='<b>'+hs.length+' control'+(hs.length>1?'es':'')+' anterior'+(hs.length>1?'es':'')+'</b> guardado'+(hs.length>1?'s':'')+(hs.some(function(q){return q.pl})?' (en este dispositivo y en la planilla)':'')+' (se grafican como puntos pequeños): '+hs.slice(-6).map(function(q){var t=[];if(q.p)t.push(fm(q.p,2)+' kg');if(q.h)t.push(fm(q.h,1)+' cm');if(q.pc)t.push('PC '+fm(q.pc,1));if(q.cc)t.push('cintura '+fm(q.cc,1));return fd(q.f)+' ('+t.join(' · ')+')'}).join('; ')+(hs.length>6?' · …':'')+'.'}else{fo.hidden=true;fo.innerHTML=''}
  el.querySelector('.ma').textContent=r.err&&!r.a?'—':r.a?ageTxt(r.a)+' ('+r.a.days+' días)':'—';
  sh('.fpc',g==='i');sh('.fcc',g==='n'||g==='a');sh('.fcd',g==='a');sh('.fmt',g==='n'||g==='a');
  if(el.dataset.g!==g){el.dataset.g=g;var t=el.querySelector('.mt'),keep=t.value;t.innerHTML='<option value="m">Medida con tallímetro</option>'+(g==='a'?'<option value="e">Estimada por semienvergadura</option>':g==='n'?'<option value="e">Estimada por longitud de tibia</option>':'');if(keep&&t.querySelector('option[value="'+keep+'"]'))t.value=keep}
@@ -365,11 +366,36 @@ document.addEventListener('click',function(e){var t=e.target;if(t.id==='b-addm')
  if(t.classList.contains('tab')){var mm=t.closest('.mem');mm.dataset.ch=t.dataset.k;refresh();return}
  if(t.dataset.o){var r=all().filter(function(x){return x.id===t.dataset.o})[0];if(r){clear(r);window.scrollTo(0,0);msg('Ficha abierta.')}}
  if(t.dataset.x&&confirm('¿Borrar esta ficha guardada? No se puede deshacer.')){ls(KEY,JSON.stringify(all().filter(function(x){return x.id!==t.dataset.x})));list()}});
-$('b-save').onclick=save;$('b-print').onclick=function(){refresh();document.querySelectorAll('details.card').forEach(function(d){d.open=true});window.print()};
+$('b-save').onclick=save;$('b-pl').onclick=savePl;$('b-print').onclick=function(){refresh();document.querySelectorAll('details.card').forEach(function(d){d.open=true});window.print()};
 $('b-copy').onclick=function(){var t=resumen();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){msg('Resumen copiado.')},function(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');msg('Resumen copiado.')}catch(x){msg('No se pudo copiar.')}a.remove()})};
 $('b-new').onclick=function(){if(confirm('¿Empezar una ficha nueva? Se borra lo que no haya guardado.')){clear(null);window.scrollTo(0,0)}};
 $('b-csv').onclick=function(){if(!all().length){msg('No hay fichas guardadas.');return}csvV()};
 $('b-csvn').onclick=function(){if(!all().length){msg('No hay fichas guardadas.');return}csvN()};
+/* ===== Planilla compartida (opcional): traer datos por DNI y guardar la visita ===== */
+var PLC={},PLT=null;
+function pcfg(){try{var c=JSON.parse(ls('cs61_pl')||ls('cs61_plcv')||'null');return c&&c.url&&c.key?c:null}catch(e){return null}}
+function ppost(c,b){return fetch(c.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({k:c.key},b))}).then(function(r){return r.json()})}
+function psx(v){v=String(v||'');return /var[oó]n|mascul/i.test(v)?'m':/mujer|femen/i.test(v)?'f':''}
+function plLookup(dni,cb){var c=pcfg();if(!c){cb&&cb(null);return}if(PLC[dni]){cb&&cb(PLC[dni]);return}
+ ppost(c,{hist:{dni:dni,codigo:''}}).then(function(j){PLC[dni]=(j&&j.ok)?j:{codigo:'',filas:[]};cb&&cb(PLC[dni])}).catch(function(){cb&&cb(null)})}
+function savePl(){var c=pcfg();if(!c){msg('Falta configurar la planilla: abra la herramienta de Nutrición, pestaña Inicio.');return}
+ var r=refresh(),d=r.d,fv=vdate(d),mm=d.m.filter(function(m){return m.dni&&m.n}),sinN=d.m.filter(function(m){return m.dni&&!m.n}).length;
+ if(!d.f.fecha){msg('Falta la fecha de la visita.');return}
+ if(mm.length&&!confirm('¿Las personas con DNI dieron su consentimiento para registrar sus datos en la planilla compartida del centro?\n\nEl DNI y el nombre se guardan sólo en la hoja «Pacientes»; la visita se guarda sin domicilio ni apellido de la familia, y la valoración de cada persona queda con su código.'))return;
+ var vid='vis-'+(cur||('n'+Date.now()).slice(-9)),hall=[],ac=[],ob=[];
+ S.forEach(function(s){(s.g||[]).forEach(function(g){var v=d.g[g[0]]||[];if(!v.length)return;if(['ed','en','ge'].indexOf(g[0])>-1)ac.push(v.join('; '));else if(['tipo','res','pr'].indexOf(g[0])<0)hall.push(v.join('; '))});if(d.o[s.id])ob.push(s.t.replace(/^\d+\.\s*/,'')+': '+d.o[s.id])});
+ var vrec={tipo:'visita',id:vid,registrado:new Date().toISOString(),fecha:d.f.fecha,hora:d.f.hora,agente:d.f.agente,zona:d.f.zona,tipo_v:(d.g.tipo||[]).join('; '),res:(d.g.res||[]).join('; '),prio:LV[r.c.lv][0],pts:r.c.pts,npers:d.m.length,ndni:mm.length,hall:hall.join(' | '),acc:ac.join(' | '),prox:d.f.prox,prio_eq:(d.g.pr||[]).join('; '),obs:ob.join(' | ')};
+ var recs=[vrec];
+ mm.forEach(function(m,k){var e=evalM(m,fv),v=e.v,a=e.a,mo=a?a.days/MD:null,
+  det=e.it.filter(function(x){return x.c!=='na'}).map(function(x){return x.n.replace(/: [\d,]+$/,'')+': '+x.l}),z=function(x){return x==null?'':Math.round(x*100)/100};
+  recs.push({id:vid+'-'+m.dni,modulo:'Visita domiciliaria',registrado:new Date().toISOString(),fecha_control:fv,profesional:d.f.agente||'',sexo:m.sx==='m'?'Varón':m.sx==='f'?'Mujer':'',
+   edad_anios:a?Math.round(a.days/365.25*100)/100:'',edad_meses:mo!=null?Math.round(mo*10)/10:'',peso_kg:nv(m.p)||'',talla_cm:(m.mt==='e'?'':nv(m.h))||'',pc_cm:nv(m.pc)||'',imc:v.imc?Math.round(v.imc*10)/10:'',cintura_cm:nv(m.cc)||'',
+   z_peso_edad:z(v.zwfa),z_talla_edad:z(v.zlfa),z_pc_edad:z(v.zhca),z_peso_talla:z(v.zwfl),z_imc_edad:z(v.zbfa!=null?v.zbfa:v.zimc),clasificacion:det.join(' | '),detalle:det.join('\n')+(m.mt==='e'?'\nTalla estimada.':''),
+   dni:m.dni,nombre:m.n,fnac:m.fn||'',consent:true,fecha_consent:new Date().toISOString().slice(0,10)})});
+ var ok=0,bad=[],i=0;msg('Guardando en la planilla…');
+ (function next(){if(i>=recs.length){msg(bad.length?'Se guardó parte ('+ok+' de '+recs.length+'). Falló: '+bad.join('; ')+'. Intente de nuevo.':'Guardado en la planilla: visita'+(mm.length?' y '+mm.length+' persona'+(mm.length>1?'s':''):'')+(sinN?'. '+sinN+' persona(s) con DNI sin nombre no se enviaron':'')+'.');return}
+  var rc=recs[i++];ppost(c,{rec:rc}).then(function(j){if(j&&j.ok)ok++;else bad.push((rc.tipo==='visita'?'visita':'persona')+' ('+((j&&j.error)||'error')+')');next()}).catch(function(){bad.push('sin conexión');next()})})()}
+
 /* ===== Cargar datos (personas y familias de fichas guardadas) ===== */
 function people(){var map={},out=[];all().forEach(function(x){x.d.m.forEach(function(q){var k=q.dni?'d'+q.dni:(q.n&&q.fn?'n'+q.n.trim().toLowerCase()+'|'+q.fn:'');if(!k)return;var e=map[k];if(!e){e=map[k]={m:q,vid:x.id,fam:x.d.f.refe||'',dom:x.d.f.dom||'',last:x.d.f.fecha||'',n:0};out.push(e)}else if(!e.m.dni&&q.dni)e.m=q;e.n++})});return out}
 function addPerson(q){var m={n:q.n,sx:q.sx,fn:q.fn,dni:q.dni,c:q.c||[]},cards=document.querySelectorAll('.mem'),empty=null;cards.forEach(function(c){var d=mdata(c);if(!empty&&!d.n&&!d.fn&&!d.p&&!d.h&&!d.dni&&!d.c.length)empty=c});
@@ -379,22 +405,28 @@ function loadFamily(e){var rec=all().filter(function(x){return x.id===e.vid})[0]
  clear(null);['dom','refe','zona','ref'].forEach(function(k){if($('f_'+k)&&rec.d.f[k])$('f_'+k).value=rec.d.f[k]});
  $('mems').innerHTML='';rec.d.m.forEach(function(q){addMem({n:q.n,sx:q.sx,fn:q.fn,dni:q.dni,c:q.c||[]})});if(!rec.d.m.length)addMem();refresh();return true}
 (function(){var m=document.createElement('div');m.className='lv-ov noprint';m.hidden=true;
- m.innerHTML='<div class="lv-box" role="dialog" aria-modal="true" aria-labelledby="lv-t"><div class="lv-h"><h3 id="lv-t">Cargar datos</h3><button class="btn" id="lv-x" type="button">Cerrar</button></div><label class="field">Buscar por DNI, nombre, familia o domicilio<input type="text" id="lv-q" autocomplete="off" placeholder="Ej.: 40123456, Pérez"></label><div id="lv-list" aria-live="polite"></div><p class="hint" style="margin-top:10px">Se muestran las personas de las fichas guardadas en este dispositivo. «Agregar a la ficha» copia nombre, sexo, fecha de nacimiento, DNI y condiciones; las medidas de hoy se cargan aparte, y los controles anteriores se grafican solos.</p></div>';
+ m.innerHTML='<div class="lv-box" role="dialog" aria-modal="true" aria-labelledby="lv-t"><div class="lv-h"><h3 id="lv-t">Cargar datos</h3><button class="btn" id="lv-x" type="button">Cerrar</button></div><label class="field">Buscar por DNI, nombre, familia o domicilio<input type="text" id="lv-q" autocomplete="off" placeholder="Ej.: 40123456, Pérez"></label><div id="lv-list" aria-live="polite"></div><div id="lv-pl" hidden style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line)"><b>Planilla compartida del centro</b><p class="hint">Trae nombre, sexo, fecha de nacimiento y controles anteriores de la persona. Escriba el DNI arriba.</p><button class="btn" id="lv-plb" type="button">Buscar este DNI en la planilla</button><div id="lv-plr" aria-live="polite" style="margin-top:8px"></div></div><p class="hint" style="margin-top:10px">Se muestran las personas de las fichas guardadas en este dispositivo. «Agregar a la ficha» copia nombre, sexo, fecha de nacimiento, DNI y condiciones; las medidas de hoy se cargan aparte, y los controles anteriores se grafican solos.</p></div>';
  document.body.appendChild(m);var list=m.querySelector('#lv-list'),q=m.querySelector('#lv-q'),rows=[];
  function render(){var t=q.value.trim().toLowerCase(),td=q.value.replace(/\D/g,'');rows=people().filter(function(e){if(!t)return true;return(td&&e.m.dni&&e.m.dni.indexOf(td)>-1)||(e.m.n||'').toLowerCase().indexOf(t)>-1||e.fam.toLowerCase().indexOf(t)>-1||e.dom.toLowerCase().indexOf(t)>-1});
   if(!all().length){list.innerHTML='<p class="hint">Todavía no hay fichas guardadas. Guarde una ficha con personas (nombre y fecha de nacimiento, o DNI) y después podrá buscarlas acá.</p>';return}
   if(!rows.length){list.innerHTML='<p class="hint">No se encontró a nadie con ese dato.</p>';return}
   list.innerHTML=rows.slice(0,40).map(function(e,i){var a=e.m.fn?ageYMD(e.m.fn,new Date().toISOString().slice(0,10)):null;return '<div class="lv-it"><b>'+esc(e.m.n||'Sin nombre')+'</b><div class="lv-m">'+(e.m.dni?'DNI '+esc(e.m.dni)+' · ':'')+(a?esc(ageShort(a))+' · ':'')+(e.fam||e.dom?esc(e.fam||e.dom)+' · ':'')+e.n+' ficha'+(e.n>1?'s':'')+' (última: '+esc(fd(e.last))+')</div><div class="lv-ac"><button class="btn primary" type="button" data-a="'+i+'">Agregar a la ficha</button>'+((e.fam||e.dom)?'<button class="btn" type="button" data-f="'+i+'">Cargar la familia</button>':'')+'</div></div>'}).join('')+(rows.length>40?'<p class="hint">Se muestran 40: afine la búsqueda.</p>':'')}
- function open(){q.value='';m.hidden=false;render();setTimeout(function(){q.focus()},30)}
+ var PJ=null;function open(){q.value='';m.hidden=false;PJ=null;m.querySelector('#lv-plr').innerHTML='';m.querySelector('#lv-pl').hidden=!pcfg();render();setTimeout(function(){q.focus()},30)}
  function close(){m.hidden=true}
  $('b-load').onclick=open;q.oninput=render;
  m.addEventListener('click',function(ev){var b=ev.target.closest('button');if(ev.target===m||(b&&b.id==='lv-x')){close();return}if(!b)return;
+  if(b.id==='lv-plb'){var dn=q.value.replace(/\D/g,''),bx=m.querySelector('#lv-plr');if(dn.length<6){bx.textContent='Escriba el DNI completo en el buscador de arriba.';return}bx.textContent='Buscando en la planilla…';
+   plLookup(dn,function(j){if(!j){bx.textContent='No se pudo consultar la planilla (sin conexión o clave rechazada).';return}if(!j.codigo){bx.textContent='Ese DNI no figura en la planilla.';return}
+    PJ={j:j,dni:dn};var rs=(j.filas||[]).filter(function(r){return r.peso_kg||r.talla_cm||r.pc_cm});
+    bx.innerHTML='<div class="lv-it"><b>'+esc(j.nombre||'Persona encontrada')+'</b><div class="lv-m">DNI '+esc(dn)+' · código '+esc(j.codigo)+(j.fnac?' · nació el '+esc(fd(j.fnac)):'')+'</div><div class="lv-m">'+rs.length+' control'+(rs.length===1?'':'es')+' con medidas en la planilla</div>'+(j.nombre?'':'<div class="lv-m">La planilla no devolvió el nombre (falta actualizar el script).</div>')+'<div class="lv-ac"><button class="btn primary" type="button" id="lv-plc">Agregar a la ficha</button></div></div>'});return}
+  if(b.id==='lv-plc'&&PJ){var jj=PJ.j,sl=(jj.filas||[]).filter(function(r){return r.sexo}).pop();addPerson({n:jj.nombre||'',sx:psx(jj.sexo||(sl&&sl.sexo)),fn:jj.fnac||'',dni:PJ.dni,c:[]});close();msg('Persona agregada desde la planilla.'+(jj.fnac?'':' Falta la fecha de nacimiento.'));return}
   if(b.dataset.a!==undefined){var e=rows[+b.dataset.a];if(e){addPerson(e.m);close();msg('Persona agregada. Cargue las medidas de hoy: abajo se grafican los controles anteriores.')}}
   if(b.dataset.f!==undefined){var e2=rows[+b.dataset.f];if(e2&&loadFamily(e2)){close();window.scrollTo(0,0);msg('Familia cargada. Complete la fecha, las medidas de hoy y lo observado.')}}});
  document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&!m.hidden)close()})})();
 document.addEventListener('input',function(e){var t=e.target;if(!t.classList||!t.classList.contains('md'))return;var d=t.value.replace(/\D/g,'');if(d.length<6)return;var el=t.closest('.mem'),c=mdata(el),hit=null;
  all().forEach(function(x){if(hit||x.id===cur)return;x.d.m.forEach(function(q){if(!hit&&q.dni===d)hit=q})});
- if(hit){if(!c.n&&hit.n)el.querySelector('.mn').value=hit.n;if(!c.sx&&hit.sx)el.querySelector('.ms').value=hit.sx;if(!c.fn&&hit.fn)el.querySelector('.mf').value=hit.fn;refresh()}});
+ if(hit){if(!c.n&&hit.n)el.querySelector('.mn').value=hit.n;if(!c.sx&&hit.sx)el.querySelector('.ms').value=hit.sx;if(!c.fn&&hit.fn)el.querySelector('.mf').value=hit.fn;refresh();return}
+ if(d.length>=7&&pcfg()){clearTimeout(PLT);PLT=setTimeout(function(){plLookup(d,function(j){if(!j||!j.codigo)return;var c2=mdata(el);if(c2.dni!==d)return;if(!c2.n&&j.nombre)el.querySelector('.mn').value=j.nombre;if(!c2.sx&&psx(j.sexo||(j.filas.filter(function(r){return r.sexo}).pop()||{}).sexo))el.querySelector('.ms').value=psx(j.sexo||(j.filas.filter(function(r){return r.sexo}).pop()||{}).sexo);if(!c2.fn&&j.fnac)el.querySelector('.mf').value=j.fnac;refresh()})},500)}});
 
 build();clear(null);list();
 window.__visita={resumen:resumen,collect:collect,calc:calc,evalM:evalM,ageYMD:ageYMD};

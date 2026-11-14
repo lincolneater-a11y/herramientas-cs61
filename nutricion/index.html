@@ -3593,7 +3593,7 @@ function plIndicators(r, lines) {
   r.clasificacion = cls.join(' | ');
 }
 function plRecLc() {
-  var P = readPatient(), r = plBase('Recién nacido y niño', $('lc-id').value.trim(), $('lc-ctl') ? $('lc-ctl').value : '', P.sex); r.dni = $('lc-dni').value.replace(/\D/g, ''); r.nombre = $('lc-nom').value.trim();
+  var P = readPatient(), r = plBase('Recién nacido y niño', $('lc-id').value.trim(), $('lc-ctl') ? $('lc-ctl').value : '', P.sex); r.dni = $('lc-dni').value.replace(/\D/g, ''); r.nombre = $('lc-nom').value.trim(); r.fnac = $('lc-dob').value;
   r.edad_meses = Math.round(P.chron / MD * 10) / 10; r.edad_anios = Math.round(P.chron / MD / 12 * 100) / 100; r.peso_kg = P.w ? P.w / 1000 : '';
   plIndicators(r, GR_COPY);
   var ctlL = $('lc-ctl') ? $('lc-ctl').value : '';
@@ -3605,7 +3605,7 @@ function plRecLc() {
   r.detalle = AGES_COPY.concat([''], GR_COPY, [''], ex).join('\n'); return r;
 }
 function plRecEs() {
-  var P = esRead(), r = plBase('Escolar y adolescente', $('es-id').value.trim(), P.ctl, P.sex); r.dni = $('es-dni').value.replace(/\D/g, ''); r.nombre = $('es-nom').value.trim();
+  var P = esRead(), r = plBase('Escolar y adolescente', $('es-id').value.trim(), P.ctl, P.sex); r.dni = $('es-dni').value.replace(/\D/g, ''); r.nombre = $('es-nom').value.trim(); r.fnac = $('es-dob').value;
   if (P.m !== null) { r.edad_meses = Math.round(P.m * 10) / 10; r.edad_anios = P.dec !== null ? Math.round(P.dec * 100) / 100 : Math.round(P.m / 12 * 100) / 100; }
   r.peso_kg = P.w || ''; r.talla_cm = P.h || ''; r.cintura_cm = P.wc || '';
   plIndicators(r, ES_COPY);
@@ -3634,7 +3634,11 @@ function plRecEm() {
 
 /* ---- controles anteriores desde la planilla (trayectoria en las curvas) ---- */
 function plIsoAdd(iso, days) { var d = new Date(iso + 'T00:00:00'); if (isNaN(d.getTime())) return ''; d.setDate(d.getDate() + days); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-function plHistOK(p, r) { var em = r.modulo === 'Embarazada'; return p === 'em' ? em : (p === 'lc' ? r.modulo === 'Recién nacido y niño' : r.modulo === 'Escolar y adolescente'); }
+function plHistOK(p, r) {
+  var em = r.modulo === 'Embarazada';
+  if (r.modulo === 'Visita domiciliaria') { var am = plNum(r.edad_meses); if (am === null) return false; return p === 'lc' ? am < 61 : (p === 'es' ? am >= 60 : false); }
+  return p === 'em' ? em : (p === 'lc' ? r.modulo === 'Recién nacido y niño' : r.modulo === 'Escolar y adolescente');
+}
 function plRerender(p) { try { if (p === 'lc') grRender(); else if (p === 'es') esRender(); else emCalc(); } catch (e) { } }
 function plHistTxt(p) {
   var c0 = $(p + '-ctl') ? $(p + '-ctl').value : '', L = PLH[p].filter(function (r) { return !c0 || r.fecha < c0; }); if (!L.length) return '';
@@ -3652,6 +3656,8 @@ function plFillFrom(p, j, force) {
   if (j.codigo && cd && (force || !cd.value.trim())) cd.value = j.codigo;
   var last = (j.filas || []).filter(function (r) { return r.sexo; }).pop(), s0 = plSexo(j.sexo || (last && last.sexo));
   if (sx && p !== 'em' && s0 && (force || !sx.value)) { sx.value = s0; sx.dispatchEvent(new Event('input', { bubbles: true })); }
+  var db = $(p + '-dob');
+  if (db && j.fnac && (force || !db.value)) { db.value = j.fnac; db.dispatchEvent(new Event('input', { bubbles: true })); }
   if (typeof lvSync === 'function') lvSync(p);
 }
 function plHistFetch(p, manual) {
@@ -3872,7 +3878,7 @@ function lvApply(p, pt, force) {
     PLR[LV_P] = (PLJ.filas || []).filter(function (r) { return plHistOK(LV_P, r) && r.fecha; }); plMerge(LV_P); plFillFrom(LV_P, PLJ, true);
     var h = $(LV_P + '-hst'); if (h) h.innerHTML = PLH[LV_P].length ? plHistTxt(LV_P) : '';
     plRerender(LV_P); close();
-    var b = $(LV_P + '-ldn'); if (b) b.innerHTML = '<div class="alert info">' + ICON_INFO + '<span><b>Datos traídos de la planilla</b>: código ' + esc(PLJ.codigo) + (PLJ.nombre ? ' · ' + esc(PLJ.nombre) : '') + '. La planilla no guarda la fecha de nacimiento: complétela' + (LV_P === 'em' ? '' : ' para calcular la edad') + '.</span></div>';
+    var b = $(LV_P + '-ldn'); if (b) b.innerHTML = '<div class="alert info">' + ICON_INFO + '<span><b>Datos traídos de la planilla</b>: código ' + esc(PLJ.codigo) + (PLJ.nombre ? ' · ' + esc(PLJ.nombre) : '') + '. ' + (PLJ.fnac || LV_P === 'em' ? 'Fecha de nacimiento cargada desde la planilla.' : 'La planilla no tiene la fecha de nacimiento de esta persona: complétela (se guardará con el próximo control).') + '</span></div>';
   });
   m.querySelector('#lv-exp').addEventListener('click', function () {
     var a = lvAll(); if (!a.length) { msg.textContent = 'No hay nada para descargar.'; return; }
