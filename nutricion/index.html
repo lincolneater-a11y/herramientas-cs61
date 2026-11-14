@@ -3645,6 +3645,15 @@ function plHistTxt(p) {
   };
   return '<b>' + L.length + ' control' + (L.length === 1 ? '' : 'es') + ' anterior' + (L.length === 1 ? '' : 'es') + ' guardado' + (L.length === 1 ? '' : 's') + '</b> (se grafican como puntos pequeños): ' + L.map(one).join('; ') + '.';
 }
+function plSexo(v) { v = String(v || ''); return /var[oó]n|mascul/i.test(v) ? 'M' : (/mujer|femen/i.test(v) ? 'F' : ''); }
+function plFillFrom(p, j, force) {
+  var nm = $(p + '-nom'), cd = $(p + '-id'), sx = $(p + '-sex');
+  if (j.nombre && nm && (force || !nm.value)) nm.value = j.nombre;
+  if (j.codigo && cd && (force || !cd.value.trim())) cd.value = j.codigo;
+  var last = (j.filas || []).filter(function (r) { return r.sexo; }).pop(), s0 = plSexo(j.sexo || (last && last.sexo));
+  if (sx && p !== 'em' && s0 && (force || !sx.value)) { sx.value = s0; sx.dispatchEvent(new Event('input', { bubbles: true })); }
+  if (typeof lvSync === 'function') lvSync(p);
+}
 function plHistFetch(p, manual) {
   var cfg = plCfg(), st = $(p + '-hst'), dni = $(p + '-dni').value.replace(/\D/g, ''), cod = $(p + '-id').value.trim();
   if (!st) return;
@@ -3654,6 +3663,7 @@ function plHistFetch(p, manual) {
   plPost(cfg, { hist: { dni: dni, codigo: cod } }).then(function (j) {
     if (!j || !j.ok) { PLR[p] = []; plMerge(p); st.textContent = j && j.error === 'clave' ? 'La planilla rechazó la clave.' : 'No se pudo consultar la planilla' + (j && j.error ? ': ' + j.error : '') + '.'; plRerender(p); return; }
     PLR[p] = (j.filas || []).filter(function (r) { return plHistOK(p, r) && r.fecha; }); plMerge(p);
+    try { plFillFrom(p, j, false); } catch (x) { }
     st.innerHTML = PLH[p].length ? plHistTxt(p) : (j.codigo ? 'La persona (' + esc(j.codigo) + ') no tiene controles anteriores de este tipo en la planilla.' : 'No se encontró a la persona en la planilla: no hay controles anteriores.');
     plRerender(p);
   }).catch(function () { PLR[p] = []; plMerge(p); st.textContent = 'Sin conexión: no se pudieron traer los controles anteriores.'; });
@@ -3801,6 +3811,7 @@ function lvApply(p, pt, force) {
   m.innerHTML = '<div class="lv-box" role="dialog" aria-modal="true" aria-labelledby="lv-t"><div class="lv-h"><h3 id="lv-t">Cargar datos de un paciente</h3><button class="btn small" id="lv-x" type="button">Cerrar</button></div>'
     + '<label class="field"><span>Buscar por DNI, nombre o código</span><input type="search" id="lv-q" autocomplete="off" placeholder="Ej.: 40123456, Pérez, CS61-0001"></label>'
     + '<div id="lv-list" aria-live="polite"></div>'
+    + '<div id="lv-pl" hidden style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line)"><div class="lbl">Planilla compartida del centro</div><p class="note" style="margin:4px 0 8px">Trae de la planilla el código, los controles anteriores y, si el script lo permite, el nombre. Escriba el DNI arriba (sólo números).</p><button class="btn" id="lv-plb" type="button">Buscar este DNI en la planilla</button><div id="lv-plr" aria-live="polite" style="margin-top:8px"></div></div>'
     + '<p class="note" style="margin-top:12px">Los pacientes se guardan sólo en este navegador y este dispositivo (no se envían a ningún lado). En una computadora compartida conviene borrar los registros o hacer una copia y limpiarlos. Para no perder el historial si se borran los datos del navegador, descargue una copia de vez en cuando.</p>'
     + '<div class="lv-ac"><button class="btn" id="lv-exp" type="button">Descargar copia</button><label class="btn" style="cursor:pointer">Importar copia<input type="file" id="lv-imp" accept=".json,application/json" hidden></label></div><div class="note" id="lv-msg" style="margin-top:8px"></div></div>';
   document.body.appendChild(m);
@@ -3819,7 +3830,8 @@ function lvApply(p, pt, force) {
     }).join('') + (rs.length > 40 ? '<p class="note">Se muestran los primeros 40: afine la búsqueda.</p>' : '');
     list._rows = a;
   }
-  function open(p) { LV_P = p; msg.textContent = ''; q.value = ''; m.hidden = false; render(); setTimeout(function () { q.focus(); }, 30); }
+  var PLJ = null;
+  function open(p) { LV_P = p; msg.textContent = ''; q.value = ''; m.hidden = false; PLJ = null; m.querySelector('#lv-plr').innerHTML = ''; m.querySelector('#lv-pl').hidden = !plCfg(); render(); setTimeout(function () { q.focus(); }, 30); }
   function close() { m.hidden = true; }
   q.addEventListener('input', render);
   m.addEventListener('click', function (e) {
@@ -3837,6 +3849,30 @@ function lvApply(p, pt, force) {
       if (!window.confirm('¿Borrar a ' + (pd.nom || pd.dni || pd.cod || 'este paciente') + ' y todos sus controles guardados en este dispositivo? No se puede deshacer.')) return;
       var all = lvAll().filter(function (x) { return !(x.t === pd.t && x.dni === pd.dni && x.cod === pd.cod && x.nom === pd.nom); }); lvPut(all); ['lc', 'es', 'em'].forEach(lvSync); render();
     }
+  });
+  m.querySelector('#lv-plb').addEventListener('click', function () {
+    var cfg = plCfg(), box = m.querySelector('#lv-plr'), dni = lvDig(q.value);
+    if (!cfg) { box.textContent = 'Falta configurar la planilla (pestaña Inicio).'; return; }
+    if (dni.length < 6) { box.textContent = 'Escriba el DNI completo en el buscador de arriba.'; return; }
+    box.textContent = 'Buscando en la planilla…';
+    plPost(cfg, { hist: { dni: dni, codigo: '' } }).then(function (j) {
+      if (!j || !j.ok) { box.textContent = j && j.error === 'clave' ? 'La planilla rechazó la clave.' : 'No se pudo consultar la planilla' + (j && j.error ? ': ' + j.error : '') + '.'; return; }
+      if (!j.codigo) { box.textContent = 'Ese DNI no figura en la planilla.'; return; }
+      j.dni = dni; PLJ = j; var rows = (j.filas || []).filter(function (r) { return plHistOK(LV_P, r) && r.fecha; });
+      box.innerHTML = '<div class="lv-it"><b>' + esc(j.nombre || 'Persona encontrada') + '</b><div class="lv-m">DNI ' + esc(dni) + ' · código ' + esc(j.codigo) + '</div><div class="lv-m">' + rows.length + ' control' + (rows.length === 1 ? '' : 'es') + ' de «' + LV_NAME[LV_P] + '» en la planilla' + ((j.filas || []).length - rows.length ? ' · ' + ((j.filas || []).length - rows.length) + ' de otros tipos' : '') + '</div>'
+        + (rows.length ? '<ul class="lv-c">' + rows.slice(-6).reverse().map(function (r) { return '<li>' + esc(lvTxt(r)) + '</li>'; }).join('') + '</ul>' : '')
+        + (j.nombre ? '' : '<div class="lv-m">La planilla no devolvió el nombre (hace falta actualizar el script).</div>')
+        + '<div class="lv-ac"><button class="btn primary small" type="button" id="lv-plc">Cargar en esta valoración</button></div></div>';
+    }).catch(function () { box.textContent = 'Sin conexión: no se pudo consultar la planilla.'; });
+  });
+  m.querySelector('#lv-plr').addEventListener('click', function (e) {
+    if (!e.target.closest('#lv-plc') || !PLJ) return;
+    var c = $(LV_P + '-clear'); if (c) c.click();
+    var dn = $(LV_P + '-dni'); dn.value = PLJ.dni; LV_CUR[LV_P] = PLJ.dni;
+    PLR[LV_P] = (PLJ.filas || []).filter(function (r) { return plHistOK(LV_P, r) && r.fecha; }); plMerge(LV_P); plFillFrom(LV_P, PLJ, true);
+    var h = $(LV_P + '-hst'); if (h) h.innerHTML = PLH[LV_P].length ? plHistTxt(LV_P) : '';
+    plRerender(LV_P); close();
+    var b = $(LV_P + '-ldn'); if (b) b.innerHTML = '<div class="alert info">' + ICON_INFO + '<span><b>Datos traídos de la planilla</b>: código ' + esc(PLJ.codigo) + (PLJ.nombre ? ' · ' + esc(PLJ.nombre) : '') + '. La planilla no guarda la fecha de nacimiento: complétela' + (LV_P === 'em' ? '' : ' para calcular la edad') + '.</span></div>';
   });
   m.querySelector('#lv-exp').addEventListener('click', function () {
     var a = lvAll(); if (!a.length) { msg.textContent = 'No hay nada para descargar.'; return; }
