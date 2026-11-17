@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Panel de jefatura · CS 61 Solidaridad</title>
+<link rel="icon" type="image/png" href="../icon-192.png">
+<style>
+:root{--bg:#f1f5f8;--card:#fff;--ink:#14212e;--ink2:#566b7d;--line:#d5dee6;--navy:#14304f;--teal:#0d7a85;--gold:#c98a14;--red:#a8324a;--ok:#2f7d4f}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:#fff;padding:14px 18px}header h1{margin:0;font-size:1.15rem}header p{margin:2px 0 0;font-size:.82rem;color:#b6c8da}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+h2{margin:0 0 10px;font-size:1.02rem;color:var(--navy)}h3{margin:14px 0 6px;font-size:.9rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em}
+label{display:block;font-size:.82rem;color:var(--ink2);margin:8px 0 3px}
+input,select,button{font:inherit}input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+button{background:var(--teal);color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer}button.sec{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}.row>div{flex:1;min-width:150px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fbfdfe}.kpi b{display:block;font-size:1.7rem;color:var(--navy);line-height:1.1}.kpi span{font-size:.8rem;color:var(--ink2)}.kpi small{display:block;font-size:.75rem;color:var(--teal);font-weight:700}
+.bar{display:grid;grid-template-columns:minmax(120px,36%) 1fr 78px;gap:8px;align-items:center;margin:5px 0;font-size:.88rem}
+.bar i{display:block;height:14px;border-radius:7px;background:var(--teal);min-width:2px}.bar .t{background:#e6edf2;border-radius:7px;height:14px}.bar em{font-style:normal;text-align:right;color:var(--ink2);font-size:.82rem}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--ink2);font-weight:700;background:#f6f9fb}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.74rem;font-weight:700;margin:1px 2px 1px 0;background:#e6edf2;color:var(--ink2)}.tag.on{background:var(--teal);color:#fff}.tag.fr.on{background:var(--gold)}.tag.ctl.on{background:var(--navy)}.tag.vac.on{background:var(--ok)}
+.err{color:var(--red);font-weight:700;margin-top:8px}.note{font-size:.78rem;color:var(--ink2)}
+svg text{font:11px sans-serif;fill:#566b7d}
+@media print{header button,.noprint,#login{display:none!important}body{background:#fff}.card{break-inside:avoid;border-color:#bbb}}
+</style></head><body>
+<header><h1>Panel de jefatura · Centro de Salud N.º 61 Solidaridad</h1><p>Estadísticas de las herramientas: solo recuentos y porcentajes. No muestra DNI, nombres ni domicilios.</p></header>
+<main>
+<section class="card" id="login">
+ <h2>Acceso</h2>
+ <label for="u">Dirección del script de la planilla (termina en /exec)</label><input id="u" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec">
+ <label for="k">Clave de jefatura</label><input id="k" type="password" autocomplete="off">
+ <div class="row" style="margin-top:10px"><div><button id="go">Ver estadísticas</button></div></div>
+ <div id="e" class="err" role="alert"></div>
+ <p class="note">La clave se usa solo para esta consulta y no se guarda en el equipo (se olvida al cerrar la pestaña).</p>
+</section>
+<div id="app" hidden>
+ <section class="card noprint"><div class="row">
+  <div><label for="d1">Registros desde</label><input id="d1" type="date"></div>
+  <div><label for="d2">Hasta</label><input id="d2" type="date"></div>
+  <div><button id="rf">Actualizar</button></div>
+  <div><button class="sec" id="pr">Imprimir / guardar PDF</button></div>
+ </div><p class="note" id="gen"></p></section>
+ <div id="out"></div>
+</div>
+</main>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+var KEY='',URL_='',DATA=null,FILTRO='';
+function pct(a,b){return b>0?Math.round(a*1000/b)/10:null}
+function fp(a,b){var p=pct(a,b);return p===null?'—':String(p).replace('.',',')+' %'}
+function fm(v,d){return v==null||isNaN(v)?'—':(Math.round(v*Math.pow(10,d||0))/Math.pow(10,d||0)).toString().replace('.',',')}
+try{var o=JSON.parse(localStorage.getItem('cs61_pl')||'{}');if(o&&o.url)$('u').value=o.url}catch(x){}
+if(!$('u').value){fetch('../config.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(c){if(c&&c.url&&!$('u').value)$('u').value=c.url}).catch(function(){})}
+function kpi(n,t,sub){return '<div class="kpi"><b>'+esc(n)+'</b><span>'+esc(t)+'</span>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div>'}
+function bars(items,total,color){var mx=0;items.forEach(function(i){if(i.n>mx)mx=i.n});
+ return items.map(function(i){var w=mx?Math.max(i.n*100/mx,1.5):0;return '<div class="bar"><div>'+esc(i.k)+'</div><div class="t"><i style="width:'+w+'%;'+(color?'background:'+color:'')+'"></i></div><em>'+i.n+(total?' · '+fp(i.n,total):'')+'</em></div>'}).join('')||'<p class="note">Sin datos.</p>'}
+function serie(s,title){if(!s||!s.length)return '';var mx=1;s.forEach(function(x){if(x.n>mx)mx=x.n});var W=520,H=130,bw=W/s.length,h='';
+ s.forEach(function(x,i){var bh=Math.round(x.n/mx*80);h+='<rect x="'+(i*bw+6)+'" y="'+(100-bh)+'" width="'+(bw-12)+'" height="'+bh+'" rx="3" fill="#0d7a85"/><text x="'+(i*bw+bw/2)+'" y="'+(94-bh)+'" text-anchor="middle">'+(x.n||'')+'</text><text x="'+(i*bw+bw/2)+'" y="118" text-anchor="middle">'+esc(x.mes.slice(5)+'/'+x.mes.slice(2,4))+'</text>'});
+ return '<h3>'+esc(title)+'</h3><svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="'+esc(title)+'">'+h+'</svg>'}
+function tag(c,on,cls){return '<span class="tag '+cls+(on?' on':'')+'">'+c+'</span>'}
+function render(d){
+ var h='',p=d.pacientes||{},e=d.ecv,f=d.findrisc,c=d.controles,v=d.vacunas,vi=d.visitas,cb=d.cobertura||{total:0};
+ $('gen').textContent='Datos al '+d.generado+(d.desde||d.hasta?' · período: '+(d.desde||'inicio')+' a '+(d.hasta||'hoy'):'')+(d.faltan&&d.faltan.length?' · Hojas no encontradas: '+d.faltan.join(', '):'');
+ h+='<section class="card"><h2>Resumen general</h2><div class="kpis">'+
+  kpi(cb.total,'Personas con registros (por código)')+(e?kpi(e.personas,'Registro cardiovascular (ECV)'):'')+(f?kpi(f.personas,'Personas con test FINDRISC',f.tests+' tests en total'):'')+
+  (c?kpi(c.total,'Controles de nutrición / crecimiento'):'')+(vi?kpi(vi.total,'Visitas domiciliarias',vi.personas_valoradas+' personas valoradas'):'')+(v?kpi(v.consultas,'Consultas de vacunas'):'')+
+  (p.total!=null?kpi(p.total,'Códigos en «Pacientes»',p.con_consentimiento+' con consentimiento'):'')+'</div></section>';
+ if(e){h+='<section class="card"><h2>Enfermedades cardiovasculares (registro ECV)</h2><div class="kpis">'+
+  kpi(e.hta,'Con HTA (criterio operativo)',fp(e.hta,e.personas)+' de '+e.personas)+kpi(e.dbt,'Con diabetes (DBT)',fp(e.dbt,e.personas))+
+  kpi(e.acv_o_evento,'ACV o evento cardiovascular',fp(e.acv_o_evento,e.personas))+kpi(e.pa_no_controlada,'PA no controlada (≥140/90)',fp(e.pa_no_controlada,e.con_pa)+' de '+e.con_pa+' con PA')+
+  kpi(e.con_pa?fm(e.sist_sum/e.con_pa,0)+'/'+fm(e.diast_sum/e.con_pa,0):'—','PA media (mmHg)')+kpi(e.est,'Con estatinas',fp(e.est,e.personas))+'</div>'+
+  '<p class="note">HTA = persona del registro ECV con medicación antihipertensiva anotada o presión ≥140/90 en el último control. Es un criterio operativo de las herramientas, no un diagnóstico: confirmar con historia clínica.</p>'+
+  '<div class="cols"><div><h3>Seguimiento de la presión arterial</h3>'+bars([{k:'Control en últimos 6 meses',n:e.pa6},{k:'Entre 6 y 12 meses',n:e.pa12},{k:'Hace más de 12 meses',n:e.pa_mas12},{k:'Sin fecha de control',n:e.pa_sin}],e.personas,'#0d7a85')+
+  '<h3>Tratamiento y control</h3>'+bars([{k:'Con medicación registrada',n:e.med},{k:'Dos o más drogas',n:e.dos},{k:'Con estatinas',n:e.est},{k:'DBT con PA no controlada',n:e.dbt_pa_no},{k:'Control médico en 12 meses',n:e.cm12},{k:'Sin control médico registrado',n:e.cm_sin}],e.personas)+'</div>'+
+  '<div><h3>Cobertura</h3>'+bars([{k:'Con obra social',n:e.os_si},{k:'Sin obra social',n:e.os_no},{k:'Sin dato',n:e.os_sd},{k:'Inscriptos en SUMAR',n:e.sumar}],e.personas,'#14304f')+'</div></div></section>'}
+ if(f){var cats=f.categorias||{},cl={'Riesgo bajo':'#2f7d4f','Ligeramente elevado':'#8aa33a','Riesgo moderado':'#c98a14','Riesgo alto':'#d0662b','Riesgo muy alto':'#a8324a'};
+  h+='<section class="card"><h2>FINDRISC (riesgo de diabetes tipo 2)</h2><div class="kpis">'+kpi(f.personas,'Personas evaluadas (último test)',f.tests+' tests')+kpi(f.np?fm(f.sum/f.np,1):'—','Puntaje medio')+kpi(f.alto,'Riesgo alto o muy alto (≥15)',fp(f.alto,f.np))+kpi(f.imc_n?fm(f.imc_sum/f.imc_n,1):'—','IMC medio')+'</div>'+
+  '<div class="cols"><div><h3>Categorías de riesgo</h3>'+Object.keys(cats).filter(function(k){return cats[k]||cl[k]}).map(function(k){return bars([{k:k,n:cats[k]}],f.personas,cl[k]||'#888')}).join('')+'</div>'+
+  '<div><h3>Factores</h3>'+bars([{k:'Edad ≥ 45 años',n:f.e45},{k:'IMC ≥ 25',n:f.imc25},{k:'IMC ≥ 30 (obesidad)',n:f.imc30},{k:'Cintura elevada',n:f.cint},{k:'Sin actividad física',n:f.sinact},{k:'No come verduras a diario',n:f.sinveg},{k:'Con antihipertensivos',n:f.antihip},{k:'Glucemia alta previa',n:f.gluc},{k:'Antecedente familiar de DBT',n:f.fam}],f.personas)+'</div></div>'+
+  '<p class="note">Varones: '+f.varon+' · Mujeres: '+f.mujer+'</p>'+serie(f.serie,'Tests FINDRISC por mes (últimos 12 meses)')+'</section>'}
+ if(c){var mod=Object.keys(c.por_modulo).map(function(k){return{k:k,n:c.por_modulo[k]}}).sort(function(a,b){return b.n-a.n}),ed=Object.keys(c.edades).map(function(k){return{k:k+' años',n:c.edades[k]}}),sx=Object.keys(c.sexo).map(function(k){return{k:k,n:c.sexo[k]}});
+  h+='<section class="card"><h2>Controles de nutrición y crecimiento</h2><div class="cols"><div><h3>Según dónde se cargó (módulo)</h3>'+bars(mod,c.total)+'<h3>Sexo</h3>'+bars(sx,c.total,'#14304f')+'</div><div><h3>Grupo de edad</h3>'+bars(ed,c.total,'#14304f')+'<h3>Clasificaciones más frecuentes</h3>'+bars(c.clasificaciones.map(function(x){return{k:x.k,n:x.n}}),c.total,'#c98a14')+'</div></div>'+serie(c.serie,'Controles por mes (últimos 12 meses)')+(c.anonimos?'<p class="note">'+c.anonimos+' controles sin código (cargados sin DNI).</p>':'')+'</section>'}
+ if(vi){var pr=Object.keys(vi.prioridad).map(function(k){return{k:k,n:vi.prioridad[k]}}),tp=Object.keys(vi.tipos).map(function(k){return{k:k,n:vi.tipos[k]}}).sort(function(a,b){return b.n-a.n}).slice(0,8);
+  h+='<section class="card"><h2>Visitas domiciliarias</h2><div class="cols"><div><h3>Prioridad sugerida</h3>'+bars(pr,vi.total,'#a8324a')+'<h3>Tipo de visita</h3>'+bars(tp,vi.total)+'</div><div><h3>Zonas con más visitas</h3>'+bars(vi.zonas,vi.total,'#14304f')+'</div></div>'+serie(vi.serie,'Visitas por mes (últimos 12 meses)')+'</section>'}
+ if(v){h+='<section class="card"><h2>Vacunas</h2><div class="kpis">'+kpi(v.consultas,'Consultas registradas')+kpi(v.grupos.emb,'Embarazadas')+kpi(v.grupos.pue,'Puérperas')+kpi(v.grupos.ps,'Personal de salud')+kpi(v.grupos.zr,'Zona de riesgo')+kpi(v.grupos.fr,'Factor de riesgo')+'</div>'+serie(v.serie,'Consultas por mes (últimos 12 meses)')+'</section>'}
+ // clasificación por código
+ var cm=Object.keys(d.combinaciones||{}).map(function(k){return{k:k,n:d.combinaciones[k]}}).sort(function(a,b){return b.n-a.n});
+ h+='<section class="card"><h2>Clasificación por código: dónde se cargó cada persona</h2><div class="cols"><div><h3>Códigos con registros en cada módulo</h3>'+bars([{k:'ECV (cardiovascular)',n:cb.ecv||0},{k:'FINDRISC',n:cb.fr||0},{k:'Controles (nutrición / crecimiento)',n:cb.ctl||0},{k:'Vacunas',n:cb.vac||0}],cb.total)+'</div><div><h3>Combinaciones de módulos</h3>'+bars(cm,cb.total,'#14304f')+'</div></div>'+
+  '<div class="row noprint" style="margin-top:12px"><div><label for="fm">Filtrar la lista</label><select id="fm"><option value="">Todos los códigos</option><option value="ecv">Con ECV</option><option value="fr">Con FINDRISC</option><option value="ctl">Con Controles</option><option value="vac">Con Vacunas</option><option value="ecv-fr">ECV pero sin FINDRISC</option><option value="fr-ecv">FINDRISC pero sin ECV</option><option value="solo1">Cargados en un solo módulo</option></select></div><div><label for="fq">Buscar código</label><input id="fq" placeholder="CS61-0001"></div><div><button class="sec" id="csv">Descargar CSV</button></div></div>'+
+  '<div id="lista" style="max-height:420px;overflow:auto;margin-top:8px"></div><p class="note">La lista muestra solo el código anónimo y los módulos donde hay registros. La identidad queda únicamente en la hoja «Pacientes» de la planilla.</p></section>';
+ $('out').innerHTML=h;
+ $('fm').onchange=$('fq').oninput=lista;lista();
+ $('csv').onclick=function(){var r=filtrar(),t='codigo,ECV,FINDRISC,Controles,Vacunas,ultimo_registro\n'+r.map(function(x){return [x.c,x.ecv?'SI':'',x.fr?'SI':'',x.ctl?'SI':'',x.vac?'SI':'',x.ult].join(',')}).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+t],{type:'text/csv'}));a.download='clasificacion_por_codigo_CS61.csv';a.click()}}
+function filtrar(){var m=$('fm').value,q=$('fq').value.trim().toUpperCase();
+ return(DATA.codigos||[]).filter(function(x){var n=(x.ecv?1:0)+(x.fr?1:0)+(x.ctl?1:0)+(x.vac?1:0);
+  if(q&&x.c.indexOf(q)<0)return false;
+  if(!m)return true;if(m==='ecv-fr')return x.ecv&&!x.fr;if(m==='fr-ecv')return x.fr&&!x.ecv;if(m==='solo1')return n===1;return !!x[m]})}
+function lista(){var r=filtrar();$('lista').innerHTML='<table><thead><tr><th>Código</th><th>Módulos con registros</th><th>Último registro</th></tr></thead><tbody>'+
+ r.slice(0,500).map(function(x){return '<tr><td>'+esc(x.c)+'</td><td>'+tag('ECV'+(x.ecv?'':''),x.ecv,'')+tag('FINDRISC',x.fr,'fr')+tag('Controles',x.ctl,'ctl')+tag('Vacunas',x.vac,'vac')+'</td><td>'+esc(x.ult||'—')+'</td></tr>'}).join('')+'</tbody></table>'+(r.length>500?'<p class="note">Se muestran 500 de '+r.length+'. Use el filtro o descargue el CSV.</p>':'')+(r.length?'':'<p class="note">Sin resultados.</p>')}
+function pedir(){$('e').textContent='';
+ return fetch(URL_,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:KEY,stats:{desde:$('d1').value||'',hasta:$('d2').value||''}})}).then(function(r){return r.json()}).then(function(j){
+  if(!j||!j.ok)throw new Error(j&&j.error==='clave'?'Clave incorrecta.':'El script respondió con un error'+(j&&j.error?': '+j.error:'')+'. ¿Está actualizado Codigo.gs con la función de estadísticas?');
+  DATA=j;$('login').hidden=true;$('app').hidden=false;render(j)})}
+function entrar(){URL_=$('u').value.trim();KEY=$('k').value;
+ if(!/^https:\/\/script\.google\.com\//.test(URL_)){$('e').textContent='Falta la dirección del script (https://script.google.com/…/exec).';return}
+ if(!KEY){$('e').textContent='Escriba la clave de jefatura.';return}
+ $('go').disabled=true;$('go').textContent='Consultando…';
+ pedir().catch(function(x){$('e').textContent=String(x.message||x).indexOf('Failed')>=0?'No se pudo conectar. Revise la conexión y la dirección.':(x.message||String(x))}).then(function(){$('go').disabled=false;$('go').textContent='Ver estadísticas'})}
+$('go').onclick=entrar;$('k').onkeydown=function(e){if(e.key==='Enter')entrar()};
+$('rf').onclick=function(){$('rf').disabled=true;pedir().catch(function(x){alert(x.message||x)}).then(function(){$('rf').disabled=false})};
+$('pr').onclick=function(){window.print()};
+})();
+</script></body></html>
