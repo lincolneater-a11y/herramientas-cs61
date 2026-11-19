@@ -1,0 +1,37 @@
+[
+  {
+    "id": "crianza_biologica",
+    "titulo": "Crianza biológica (recostada)",
+    "clave": "Madre semi-recostada; bebé apoyado boca abajo sobre su torso, con vías respiratorias despejadas.",
+    "ilustracion": "02_posturas/ilustraciones/crianza_biologica.webp",
+    "tarjeta": "02_posturas/tarjetas/tarjeta_crianza_biologica.png"
+  },
+  {
+    "id": "cuna_clasica",
+    "titulo": "Cuna clásica",
+    "clave": "El brazo del mismo lado del pecho sostiene al bebé de frente, alineado y cerca de la madre.",
+    "ilustracion": "02_posturas/ilustraciones/cuna_clasica.webp",
+    "tarjeta": "02_posturas/tarjetas/tarjeta_cuna_clasica.png"
+  },
+  {
+    "id": "cuna_cruzada",
+    "titulo": "Cuna cruzada",
+    "clave": "El brazo contrario al pecho sostiene al bebé; la mano abierta acompaña cuello y hombros, sin empujar la nuca.",
+    "ilustracion": "02_posturas/ilustraciones/cuna_cruzada.webp",
+    "tarjeta": "02_posturas/tarjetas/tarjeta_cuna_cruzada.png"
+  },
+  {
+    "id": "pelota_de_rugby",
+    "titulo": "Pelota de rugby",
+    "clave": "El bebé se ubica al costado, por debajo del brazo, con los pies hacia la espalda y el abdomen libre.",
+    "ilustracion": "02_posturas/ilustraciones/pelota_de_rugby.webp",
+    "tarjeta": "02_posturas/tarjetas/tarjeta_pelota_de_rugby.png"
+  },
+  {
+    "id": "acostada_de_lado",
+    "titulo": "Acostada de lado",
+    "clave": "Madre y bebé de costado frente a frente; cara y nariz despejadas. Para dormir, devolverlo boca arriba a su espacio seguro.",
+    "ilustracion": "02_posturas/ilustraciones/acostada_de_lado.webp",
+    "tarjeta": "02_posturas/tarjetas/tarjeta_acostada_de_lado.png"
+  }
+]

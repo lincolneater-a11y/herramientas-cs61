@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1160" viewBox="0 0 900 1160" role="img" aria-label="Plantilla de tarjeta de resultado, sin texto">
+<rect width="900" height="1160" fill="#FFFDF9"/><rect x="26" y="26" width="848" height="1108" rx="45" fill="#FAF3E0" stroke="#E8DAD2" stroke-width="6"/>
+<circle cx="450" cy="246" r="123" fill="#2A9D8F" opacity=".14"/><path d="M397 250l38 38 82-90" stroke="#2A9D8F" stroke-width="23" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="83" y="444" width="734" height="510" rx="32" fill="white" stroke="#E8DAD2" stroke-width="4"/>
+<rect x="83" y="980" width="734" height="106" rx="27" fill="#2A9D8F"/>
+</svg>

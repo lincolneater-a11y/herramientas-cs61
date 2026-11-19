@@ -1,0 +1,29 @@
+{
+  "titulo": "Succión y acople al pecho",
+  "profundo": {
+    "nombre": "Acople profundo",
+    "senales": [
+      "Boca bien abierta y labio inferior hacia afuera.",
+      "Mentón en contacto con el pecho; nariz despejada.",
+      "Succiones profundas y rítmicas, con pausas.",
+      "Deglución visible o audible y mejillas redondeadas."
+    ]
+  },
+  "superficial": {
+    "nombre": "Acople superficial",
+    "senales": [
+      "Boca poco abierta y labios hacia adentro.",
+      "Toma principalmente el pezón; mentón separado.",
+      "Puede haber mejillas hundidas, chasquidos o poca deglución.",
+      "Puede causar dolor y dificultar la transferencia de leche."
+    ]
+  },
+  "nota": "Las succiones rápidas al inicio pueden ser normales. Evaluar toda la toma, el confort y la deglución.",
+  "fuentes": [
+    "https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/breastfeeding/positioning-and-attachment/",
+    "https://www.unicef.org/parenting/food-nutrition/breastfeeding-positions"
+  ],
+  "comparacion": "03_tecnica_lactancia/acople/comparacion_acople_profundo_vs_superficial.png",
+  "tarjeta_profundo": "03_tecnica_lactancia/acople/acople_profundo.png",
+  "tarjeta_superficial": "03_tecnica_lactancia/acople/acople_superficial.png"
+}

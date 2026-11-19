@@ -1,0 +1,158 @@
+{
+  "canvas": {
+    "width": 1920,
+    "height": 1080
+  },
+  "casillas": [
+    {
+      "numero": 1,
+      "x": 290,
+      "y": 840,
+      "tipo": "normal"
+    },
+    {
+      "numero": 2,
+      "x": 550,
+      "y": 840,
+      "tipo": "normal"
+    },
+    {
+      "numero": 3,
+      "x": 810,
+      "y": 840,
+      "tipo": "mitos"
+    },
+    {
+      "numero": 4,
+      "x": 1070,
+      "y": 840,
+      "tipo": "normal"
+    },
+    {
+      "numero": 5,
+      "x": 1330,
+      "y": 840,
+      "tipo": "normal"
+    },
+    {
+      "numero": 6,
+      "x": 1330,
+      "y": 670,
+      "tipo": "sensibilizacion"
+    },
+    {
+      "numero": 7,
+      "x": 1070,
+      "y": 670,
+      "tipo": "normal"
+    },
+    {
+      "numero": 8,
+      "x": 810,
+      "y": 670,
+      "tipo": "normal"
+    },
+    {
+      "numero": 9,
+      "x": 550,
+      "y": 670,
+      "tipo": "tecnica"
+    },
+    {
+      "numero": 10,
+      "x": 290,
+      "y": 670,
+      "tipo": "normal"
+    },
+    {
+      "numero": 11,
+      "x": 290,
+      "y": 500,
+      "tipo": "normal"
+    },
+    {
+      "numero": 12,
+      "x": 550,
+      "y": 500,
+      "tipo": "mitos"
+    },
+    {
+      "numero": 13,
+      "x": 810,
+      "y": 500,
+      "tipo": "normal"
+    },
+    {
+      "numero": 14,
+      "x": 1070,
+      "y": 500,
+      "tipo": "normal"
+    },
+    {
+      "numero": 15,
+      "x": 1330,
+      "y": 500,
+      "tipo": "conservacion"
+    },
+    {
+      "numero": 16,
+      "x": 1330,
+      "y": 330,
+      "tipo": "normal"
+    },
+    {
+      "numero": 17,
+      "x": 1070,
+      "y": 330,
+      "tipo": "normal"
+    },
+    {
+      "numero": 18,
+      "x": 810,
+      "y": 330,
+      "tipo": "sensibilizacion"
+    },
+    {
+      "numero": 19,
+      "x": 550,
+      "y": 330,
+      "tipo": "normal"
+    },
+    {
+      "numero": 20,
+      "x": 290,
+      "y": 330,
+      "tipo": "normal"
+    },
+    {
+      "numero": 21,
+      "x": 290,
+      "y": 160,
+      "tipo": "tecnica"
+    },
+    {
+      "numero": 22,
+      "x": 550,
+      "y": 160,
+      "tipo": "normal"
+    },
+    {
+      "numero": 23,
+      "x": 810,
+      "y": 160,
+      "tipo": "mitos"
+    },
+    {
+      "numero": 24,
+      "x": 1070,
+      "y": 160,
+      "tipo": "normal"
+    },
+    {
+      "numero": 25,
+      "x": 1330,
+      "y": 160,
+      "tipo": "normal"
+    }
+  ]
+}

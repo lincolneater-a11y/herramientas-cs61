@@ -1,0 +1,42 @@
+[
+  {
+    "id": "mitos",
+    "titulo": "Mitos y creencias",
+    "color": "#F4A261",
+    "icono": "05_preguntados/iconos/mitos.svg",
+    "insignia_bloqueada": "05_preguntados/medallas/mitos_bloqueada.svg",
+    "insignia_ganada": "05_preguntados/medallas/mitos_ganada.svg"
+  },
+  {
+    "id": "tecnica",
+    "titulo": "Técnica y posturas",
+    "color": "#2A9D8F",
+    "icono": "05_preguntados/iconos/tecnica.svg",
+    "insignia_bloqueada": "05_preguntados/medallas/tecnica_bloqueada.svg",
+    "insignia_ganada": "05_preguntados/medallas/tecnica_ganada.svg"
+  },
+  {
+    "id": "conservacion",
+    "titulo": "Extracción y conservación",
+    "color": "#457B9D",
+    "icono": "05_preguntados/iconos/conservacion.svg",
+    "insignia_bloqueada": "05_preguntados/medallas/conservacion_bloqueada.svg",
+    "insignia_ganada": "05_preguntados/medallas/conservacion_ganada.svg"
+  },
+  {
+    "id": "sensibilizacion",
+    "titulo": "Sensibilización y salud",
+    "color": "#E76F51",
+    "icono": "05_preguntados/iconos/sensibilizacion.svg",
+    "insignia_bloqueada": "05_preguntados/medallas/sensibilizacion_bloqueada.svg",
+    "insignia_ganada": "05_preguntados/medallas/sensibilizacion_ganada.svg"
+  },
+  {
+    "id": "comodin",
+    "titulo": "Comodín",
+    "color": "#E9AE31",
+    "icono": "05_preguntados/iconos/comodin.svg",
+    "insignia_bloqueada": "05_preguntados/medallas/comodin_bloqueada.svg",
+    "insignia_ganada": "05_preguntados/medallas/comodin_ganada.svg"
+  }
+]
