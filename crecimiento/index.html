@@ -374,10 +374,10 @@ details.card[open] > summary { margin-bottom: 12px; }
       <label class="field"><span>Edad (años)</span><input type="number" id="lc-ageY" min="0" max="5" inputmode="numeric"><small>Se completa sola con las fechas; desde los 12 meses se registra en años, meses y días.</small></label>
       <label class="field"><span>Meses</span><input type="number" id="lc-ageM" min="0" max="11" inputmode="numeric"></label>
       <label class="field"><span>Días</span><input type="number" id="lc-ageD" min="0" max="31" inputmode="numeric"></label>
-      <label class="field"><span>Peso actual (g)</span><input type="number" id="lc-w" min="300" max="20000" inputmode="numeric"><small>Peso de hoy: es el que se grafica.</small></label>
+      <label class="field"><span>Peso actual <select id="lc-wu" style="width:auto;padding:2px 6px;margin-left:6px" aria-label="Unidad del peso"><option value="g">g</option><option value="kg">kg</option></select></span><input type="number" id="lc-w" min="300" max="20000" inputmode="numeric"><small>Peso de hoy: es el que se grafica. Elija kg si le resulta más cómodo (ej.: 9,350).</small></label>
       <label class="field"><span>Longitud / talla actual (cm)</span><input type="number" id="gr-len" min="30" max="130" step="0.1" inputmode="decimal"><small>Se grafica en longitud/edad.</small></label>
       <label class="field" id="gr-pc-w"><span>Perímetro cefálico actual (cm)</span><input type="number" id="gr-pc" min="20" max="60" step="0.1" inputmode="decimal"><small>Se grafica en PC/edad.</small></label>
-      <label class="field"><span>Situación especial (opcional)</span><select id="lc-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
+      <label class="field"><span>Situación especial (opcional)</span><select id="lc-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="acon">Acondroplasia</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
       <label class="field"><span>Peso de nacimiento (g)</span><input type="number" id="lc-pn" min="300" max="6000" inputmode="numeric"></label>
       <label class="field"><span>Longitud de nacimiento (cm)</span><input type="number" id="lc-ln" min="25" max="65" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Perímetro cefálico al nacer (cm)</span><input type="number" id="lc-pcn" min="18" max="42" step="0.1" inputmode="decimal"></label>
@@ -633,7 +633,7 @@ details.card[open] > summary { margin-bottom: 12px; }
       <label class="field"><span>Peso (kg)</span><input type="number" id="es-w" min="10" max="200" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Talla (cm)</span><input type="number" id="es-h" min="80" max="230" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Circunferencia de cintura (cm)</span><input type="number" id="es-wc" min="30" max="160" step="0.1" inputmode="decimal"><small>Opcional · de 2 a 19 años. Se mide en el borde superior de la cresta ilíaca y se compara por percentilos (Fernández y cols.).</small></label>
-      <label class="field"><span>Situación especial (opcional)</span><select id="es-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
+      <label class="field"><span>Situación especial (opcional)</span><select id="es-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="acon">Acondroplasia</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
     </div>
     <div class="chips" id="es-chips"></div>
   </div>
@@ -815,7 +815,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 'use strict';
 var $ = function (id) { return document.getElementById(id); };
 var MD = 30.4375;
-function val(id) { var e = $(id); if (!e || e.value === '') return null; var n = parseFloat(String(e.value).replace(',', '.')); return isFinite(n) ? n : null; }
+function val(id) { var e = $(id); if (!e || e.value === '') return null; var n = parseFloat(String(e.value).replace(',', '.')); if (!isFinite(n)) return null; if (id === 'lc-w') { var u = $('lc-wu'); if (u && u.value === 'kg') n = Math.round(n * 1000); } return n; }
 function fmt(n, d) { if (n === null || n === undefined || !isFinite(n)) return '—'; d = d || 0; return n.toLocaleString('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function todayISO() { var d = new Date(); var m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0'); return d.getFullYear() + '-' + m + '-' + dd; }
@@ -3847,9 +3847,9 @@ function condPts(p) {
   if (p === 'es') { esPts(esRead()).forEach(function (q) { if (q.m === null || q.m === undefined) return; var o = { m: q.m, w: q.w, h: q.h, b: q.b }; if (q.cur) cur = o; else out.push(o); }); }
   else {
     var P = readPatient();
-    GH.forEach(function (h) { if ((h.m === null && h.d === null) || !(h.w || h.l)) return; out.push({ m: ((h.m || 0) * MD + (h.d || 0)) / MD, w: h.w ? h.w / 1000 : null, h: h.l || null }); });
-    PLH.lc.forEach(function (r) { var m = +r.edad_meses; if (r.edad_meses === '' || r.edad_meses === null || !isFinite(m) || !(r.peso_kg || r.talla_cm)) return; out.push({ m: m, w: r.peso_kg ? +r.peso_kg : null, h: r.talla_cm ? +r.talla_cm : null }); });
-    if (P.hasAge && (P.w || val('gr-len'))) cur = { m: P.chron / MD, w: P.w ? P.w / 1000 : null, h: val('gr-len') };
+    GH.forEach(function (h) { if ((h.m === null && h.d === null) || !(h.w || h.l || h.pc)) return; out.push({ m: ((h.m || 0) * MD + (h.d || 0)) / MD, w: h.w ? h.w / 1000 : null, h: h.l || null, c: h.pc || null }); });
+    PLH.lc.forEach(function (r) { var m = +r.edad_meses; if (r.edad_meses === '' || r.edad_meses === null || !isFinite(m) || !(r.peso_kg || r.talla_cm || r.pc_cm)) return; out.push({ m: m, w: r.peso_kg ? +r.peso_kg : null, h: r.talla_cm ? +r.talla_cm : null, c: r.pc_cm ? +r.pc_cm : null }); });
+    if (P.hasAge && (P.w || val('gr-len') || val('gr-pc'))) cur = { m: P.chron / MD, w: P.w ? P.w / 1000 : null, h: val('gr-len'), c: val('gr-pc') };
   }
   out.sort(function (a, b) { return a.m - b.m; }); if (cur) out.push(cur); return out;
 }
@@ -3862,6 +3862,18 @@ function condRender(p) {
 }
 ['es', 'lc'].forEach(function (p) { var e = $(p + '-cond'); if (e) e.addEventListener('change', function () { if (p === 'es') esRender(); else grRender(); }); });
 
+/* unidad del peso actual del lactante (g o kg) */
+(function () {
+  var u = $('lc-wu'), w = $('lc-w'); if (!u || !w) return;
+  function setU(k) { u.value = k; w.min = k === 'kg' ? '0.3' : '300'; w.max = k === 'kg' ? '20' : '20000'; w.step = k === 'kg' ? '0.001' : '1'; w.setAttribute('inputmode', k === 'kg' ? 'decimal' : 'numeric'); }
+  try { var k0 = localStorage.getItem('cs61_lcwu'); if (k0 === 'kg') setU('kg'); } catch (e) { }
+  u.addEventListener('change', function (ev) {
+    var k = u.value, n = w.value === '' ? null : parseFloat(String(w.value).replace(',', '.'));
+    if (n !== null && isFinite(n)) w.value = k === 'kg' ? String(Math.round(n) / 1000) : String(Math.round(n * 1000));
+    setU(k); try { localStorage.setItem('cs61_lcwu', k); } catch (e) { }
+    w.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+})();
 /* ---- planilla de Google (opcional) ---- */
 var PL_COLS = ['id', 'registrado', 'fecha_control', 'modulo', 'codigo', 'profesional', 'sexo', 'edad_anios', 'edad_meses', 'peso_kg', 'talla_cm', 'pc_cm', 'imc', 'cintura_cm', 'z_peso_edad', 'z_talla_edad', 'z_pc_edad', 'z_peso_talla', 'z_imc_edad', 'clasificacion', 'semanas_gest', 'peso_pregest_kg', 'imc_pregest', 'vel_talla_cm_anio', 'vel_centilo', 'talla_blanco_cm', 'detalle', 'condicion'];
 function plGet(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }

@@ -314,6 +314,34 @@ function siluetas(sx,imc){
  s.appendChild(E("text",{x:W/2,y:282,"text-anchor":"middle","class":"gm"},"Siluetas esquemáticas: ilustran la categoría, no la forma real del cuerpo."));
  return s;
 }
+/* siluetas de niños y niñas según el puntaje Z del IMC/edad (OMS 2007) */
+function siluetasNi(sx,z){
+ var cats=[["< −2 DE","Delgadez","#4aa8e0",.7],["−2 a +1 DE","Normal","#7fa832",.9],["+1 a +2 DE","Sobrepeso","#e8b923",1.15],["+2 a +3 DE","Obesidad","#f2994a",1.5],["> +3 DE","Obesidad grave","#e5533d",1.9]];
+ var sel=z<-2?0:z<=1?1:z<=2?2:z<=3?3:4,W=640,H=420,s=svgNew(W,H),cw=W/5;
+ s.setAttribute("class","gb gfig");s.setAttribute("aria-label","Silueta según el puntaje Z del IMC para la edad");
+ s.appendChild(E("text",{x:14,y:14,"class":"gh"},"Categoría de IMC/edad (OMS 2007) · Z "+(z>0?"+":"")+f(z,2)));
+ function fig(cx,y0,k,fem,col,op){
+  var hs=11+k*2.4,hb=8+(k-.7)*17,hw=hb*(fem?1.06:.95),lg=3+k*2.6,g=E("g",{opacity:op});
+  if(fem){[-1,1].forEach(function(sg){g.appendChild(E("circle",{cx:cx+sg*13,cy:y0+18,r:5.5,fill:col}))})}
+  else{[-8,0,8].forEach(function(dx){g.appendChild(E("circle",{cx:cx+dx,cy:y0+3,r:5,fill:col}))})}
+  g.appendChild(E("circle",{cx:cx,cy:y0+13,r:11.5,fill:col}));
+  g.appendChild(E("path",{fill:col,d:"M"+(cx-hs)+" "+(y0+30)+" Q"+cx+" "+(y0+24)+" "+(cx+hs)+" "+(y0+30)+" C"+(cx+hb)+" "+(y0+46)+" "+(cx+hb*1.05)+" "+(y0+60)+" "+(cx+hw)+" "+(y0+74)+" L"+(cx+hw*.8)+" "+(y0+122)+" L"+(cx+lg*.5+1)+" "+(y0+122)+" L"+(cx+lg*.5)+" "+(y0+86)+" L"+(cx-lg*.5)+" "+(y0+86)+" L"+(cx-lg*.5-1)+" "+(y0+122)+" L"+(cx-hw*.8)+" "+(y0+122)+" L"+(cx-hw)+" "+(y0+74)+" C"+(cx-hb*1.05)+" "+(y0+60)+" "+(cx-hb)+" "+(y0+46)+" "+(cx-hs)+" "+(y0+30)+" Z"}));
+  [-1,1].forEach(function(sg){g.appendChild(E("path",{d:"M"+(cx+sg*(hs+1))+" "+(y0+34)+" L"+(cx+sg*(hb+5+k*1.6))+" "+(y0+84),style:"fill:none;stroke:"+col+";stroke-width:"+(4+k*1.1)+";stroke-linecap:round"}))});
+  s.appendChild(g);
+ }
+ cats.forEach(function(c,i){
+  var cx=cw*i+cw/2,on=i===sel,op=on?1:.38;
+  fig(cx,22,c[3],false,c[2],(sx==="m"?op:.38*.7));
+  fig(cx,262,c[3],true,c[2],(sx==="f"?op:.38*.7));
+  s.appendChild(E("rect",{x:cx-cw/2+4,y:158,width:cw-8,height:36,rx:5,fill:c[2],"fill-opacity":on?1:.55,stroke:on?"var(--ink)":"none","stroke-width":2.5}));
+  s.appendChild(E("text",{x:cx,y:173,"text-anchor":"middle","class":"gh",style:"fill:#fff;font-size:11px"},c[0]));
+  s.appendChild(E("text",{x:cx,y:187,"text-anchor":"middle","class":"gt",style:"fill:#fff;font-size:11px;font-weight:700"},c[1]));
+  if(on)s.appendChild(E("path",{d:"M"+(cx-7)+" 204 L"+(cx+7)+" 204 L"+cx+" 197 Z","class":"gmk"}));
+ });
+ s.appendChild(E("text",{x:W/2,y:H-22,"text-anchor":"middle","class":"gm"},"Arriba varones, abajo mujeres: se resalta el sexo del paciente."));
+ s.appendChild(E("text",{x:W/2,y:H-8,"text-anchor":"middle","class":"gm"},"Siluetas esquemáticas: ilustran la categoría, no la forma real del cuerpo."));
+ return s;
+}
 /* gráfico cintura (eje x) × talla (eje y) con zonas por índice cintura-talla */
 function cinturaTalla(cc,h,ict){
  var W=640,H=380,L=48,R=14,T=34,Bt=48,x0=40,x1=130,y0=100,y1=200;
@@ -364,6 +392,7 @@ function graf(d){
    if(d.icc){var u=d.sx==="m"?0.9:0.85,a2=d.sx==="m"?0.7:0.65,b2=d.sx==="m"?1.1:1.05;g.appendChild(gauge("Índice cintura-cadera",a2,b2,[[a2,u,"ok","Sin riesgo"],[u,b2,"warn","Riesgo aumentado"]],d.icc,f(d.icc,2),2))}
   }else{var p=document.createElement("p");p.className="note";p.textContent="Cargá la circunferencia de cintura para ver también el gráfico cintura × talla, el índice cintura-talla y la regla de la mitad de la talla.";g.appendChild(p)}
  }else{
+  g.appendChild(siluetasNi(d.sx,d.z));
   g.appendChild(curva(d.sx,d.meses,d.imc,d.z));
   if(d.wq){var q=d.wq.ref,a3=Math.floor(q[0]-3),b3=Math.ceil(Math.max(q[4]*1.12,d.cc+3));g.appendChild(gauge("Cintura por percentiles (Fernández y cols.)",a3,b3,[[a3,q[3],"ok","< P75"],[q[3],q[4],"warn","P75 a P90"],[q[4],b3,"crit","≥ P90"]],d.cc,f(d.cc,1)+" cm · "+CS61C.waistTxt(d.wq),0))}
   if(d.cc)g.appendChild(gauge("Índice cintura-talla (niños y adolescentes)",0.3,0.7,[[0.3,0.5,"ok","< 0,5"],[0.5,0.7,"warn","≥ 0,5"]],d.ict,f(d.ict,2),2));
