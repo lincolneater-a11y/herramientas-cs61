@@ -119,7 +119,7 @@ th{color:var(--mute);font-weight:600}
 <h2>Gráficos</h2>
 <div id="gr"></div>
 <div class="row"><button id="gprint" class="s">Imprimir resultado y gráficos</button></div>
-<p class="note">Referencias: OMS (IMC adultos y niños 5–19 años, 2007), OPS para ≥65 años, cintura OMS, ICT 0,5 / 0,6. Son puntos de corte orientativos de riesgo, no diagnóstico.</p>
+<p class="note">Referencias: OMS (IMC adultos y niños 5–19 años, 2007), OPS para ≥65 años, cintura OMS (adultos), ICT 0,5 / 0,6 y percentiles de cintura de Fernández y cols. 2004 (niños, vía SAP). Son puntos de corte orientativos de riesgo, no diagnóstico.</p>
 </section>
 
 <section class="card" aria-label="Registro">
@@ -131,6 +131,7 @@ th{color:var(--mute);font-weight:600}
 </section>
 </main>
 
+<script src="../shared/cond.js"></script>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
@@ -215,7 +216,11 @@ function calc(){
   var z=zImc(imc,meses,sx),cp=clasifPed(z);r.z=Math.round(z*100)/100;r.c=cp[0];
   kp.push(["Z IMC/edad",(z>0?"+":"")+f(z,2)+" DE"]);
   it.push(["IMC/edad: z = "+(z>0?"+":"")+f(z,2),cp[0],cp[1],"OMS 2007: delgadez <−2, sobrepeso >+1, obesidad >+2 DE"]);
-  if(cc){it.push(["Circunferencia de cintura: "+f(cc,1)+" cm","Sin referencia","na","Esta versión no incluye tablas de percentiles de cintura. Comparala con la referencia que uses."]);}
+  if(cc){var wq=CS61C.waist(sx==="m"?"M":"F",meses/12,cc);
+   if(wq){var wr=CS61C.waistRow(sx==="m"?"M":"F",meses/12,cc);r.cp=CS61C.waistTxt(wq);
+    kp.push(["Cintura (percentil)",wq.band==="≥ P90"?"≥ P90":(wq.pct===null?"< P10":"P"+f(wq.pct,0))]);
+    it.push(["Circunferencia de cintura: "+f(cc,1)+" cm · "+CS61C.waistTxt(wq),wq.cls[1],wq.cls[0]==="bad"?"crit":(wq.cls[0]==="mid"?"warn":"ok"),"Referencia (Fernández y cols. 2004, NHANES III, según la SAP): "+wr.ref+". ≥ P90 = adiposidad abdominal."]);}
+   else it.push(["Circunferencia de cintura: "+f(cc,1)+" cm","Sin referencia","na","La tabla de percentiles cubre de 2 a 19 años."]);}
   if(ict){var t4=ict>=0.5?["Riesgo aumentado","warn"]:["Sin riesgo aumentado","ok"];
    it.push(["Índice cintura-talla: "+f(ict,2),t4[0],t4[1],"Punto de corte 0,5, también usado en niños y adolescentes"]);}
   if(meses<61)$("err").textContent="";
@@ -224,7 +229,7 @@ function calc(){
   $("nt").textContent=aviso;
  }
  cur=r;
- graf({modo:modo,sx:sx,ed:ed,imc:imc,cc:cc,h:h,ict:ict,icc:icc,meses:meses,z:r.z,p:p});
+ graf({modo:modo,sx:sx,ed:ed,imc:imc,cc:cc,h:h,ict:ict,icc:icc,meses:meses,z:r.z,p:p,wq:(modo!=="A"&&cc)?CS61C.waist(sx==="m"?"M":"F",meses/12,cc):null});
  $("kp").innerHTML="";kp.forEach(function(k){var d=document.createElement("div");d.className="kpi";var b=document.createElement("b");b.textContent=k[1];var s=document.createElement("span");s.textContent=k[0];d.appendChild(b);d.appendChild(s);$("kp").appendChild(d)});
  $("ind").innerHTML="";it.forEach(function(x){var d=document.createElement("div");d.className="it";var n=document.createElement("span");n.className="n";n.textContent=x[0];var pl=document.createElement("span");pl.className="pill "+x[2];pl.textContent=x[1];var de=document.createElement("span");de.className="d";de.textContent=x[3];d.appendChild(n);d.appendChild(pl);d.appendChild(de);$("ind").appendChild(d)});
  $("rc").hidden=false;
@@ -360,6 +365,7 @@ function graf(d){
   }else{var p=document.createElement("p");p.className="note";p.textContent="Cargá la circunferencia de cintura para ver también el gráfico cintura × talla, el índice cintura-talla y la regla de la mitad de la talla.";g.appendChild(p)}
  }else{
   g.appendChild(curva(d.sx,d.meses,d.imc,d.z));
+  if(d.wq){var q=d.wq.ref,a3=Math.floor(q[0]-3),b3=Math.ceil(Math.max(q[4]*1.12,d.cc+3));g.appendChild(gauge("Cintura por percentiles (Fernández y cols.)",a3,b3,[[a3,q[3],"ok","< P75"],[q[3],q[4],"warn","P75 a P90"],[q[4],b3,"crit","≥ P90"]],d.cc,f(d.cc,1)+" cm · "+CS61C.waistTxt(d.wq),0))}
   if(d.cc)g.appendChild(gauge("Índice cintura-talla (niños y adolescentes)",0.3,0.7,[[0.3,0.5,"ok","< 0,5"],[0.5,0.7,"warn","≥ 0,5"]],d.ict,f(d.ict,2),2));
  }
  $("gc").hidden=false;

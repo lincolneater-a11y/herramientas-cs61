@@ -377,6 +377,7 @@ details.card[open] > summary { margin-bottom: 12px; }
       <label class="field"><span>Peso actual (g)</span><input type="number" id="lc-w" min="300" max="20000" inputmode="numeric"><small>Peso de hoy: es el que se grafica.</small></label>
       <label class="field"><span>Longitud / talla actual (cm)</span><input type="number" id="gr-len" min="30" max="130" step="0.1" inputmode="decimal"><small>Se grafica en longitud/edad.</small></label>
       <label class="field" id="gr-pc-w"><span>Perímetro cefálico actual (cm)</span><input type="number" id="gr-pc" min="20" max="60" step="0.1" inputmode="decimal"><small>Se grafica en PC/edad.</small></label>
+      <label class="field"><span>Situación especial (opcional)</span><select id="lc-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
       <label class="field"><span>Peso de nacimiento (g)</span><input type="number" id="lc-pn" min="300" max="6000" inputmode="numeric"></label>
       <label class="field"><span>Longitud de nacimiento (cm)</span><input type="number" id="lc-ln" min="25" max="65" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Perímetro cefálico al nacer (cm)</span><input type="number" id="lc-pcn" min="18" max="42" step="0.1" inputmode="decimal"></label>
@@ -410,7 +411,7 @@ details.card[open] > summary { margin-bottom: 12px; }
     <div class="src-h" style="margin:16px 0 6px"><span class="lbl">Controles anteriores (opcional)</span><button class="btn small" id="gr-add" type="button">Agregar control</button></div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0"><button class="btn small" data-plh="lc" type="button">Traer controles anteriores de la planilla</button></div><div class="note" id="lc-hst" style="margin:6px 0 8px"></div>
     <div id="gr-hist"></div>
-    <div id="gr-out" style="margin-top:14px"></div>
+    <div id="gr-out" style="margin-top:14px"></div><div id="lc-cond-out"></div>
   </div>
 
   <div class="card" id="lc-req"><h3>3 · Requerimientos</h3><div id="lc-req-body"></div></div>
@@ -631,14 +632,15 @@ details.card[open] > summary { margin-bottom: 12px; }
       <label class="field"><span>Días</span><input type="number" id="es-ageD" min="0" max="31" inputmode="numeric"></label>
       <label class="field"><span>Peso (kg)</span><input type="number" id="es-w" min="10" max="200" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Talla (cm)</span><input type="number" id="es-h" min="80" max="230" step="0.1" inputmode="decimal"></label>
-      <label class="field"><span>Circunferencia de cintura (cm)</span><input type="number" id="es-wc" min="30" max="160" step="0.1" inputmode="decimal"><small>Opcional · de 10 a 18 años. Se mide en el borde superior de la cresta ilíaca.</small></label>
+      <label class="field"><span>Circunferencia de cintura (cm)</span><input type="number" id="es-wc" min="30" max="160" step="0.1" inputmode="decimal"><small>Opcional · de 2 a 19 años. Se mide en el borde superior de la cresta ilíaca y se compara por percentilos (Fernández y cols.).</small></label>
+      <label class="field"><span>Situación especial (opcional)</span><select id="es-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
     </div>
     <div class="chips" id="es-chips"></div>
   </div>
 
   <div class="card">
     <h3>2 · Estado nutricional y curvas</h3>
-    <div id="es-out"></div>
+    <div id="es-out"></div><div id="es-cond-out"></div>
   </div>
 
   <div class="card">
@@ -807,6 +809,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 <p class="foot">Herramienta de apoyo para profesionales de la salud. Verifique siempre los datos con las guías vigentes y el rótulo de cada producto.</p>
 </main>
 
+<script src="../shared/cond.js"></script>
 <script>
 (function () {
 'use strict';
@@ -3138,7 +3141,8 @@ function grHistHTML() {
 }
 var GR_SEL = 'wfa', GR_COPY = [], GR_OLD = false;
 function pctTxt(pc) { return pc < 0.1 ? '< 0,1' : (pc > 99.9 ? '> 99,9' : fmt(pc, pc < 10 || pc > 90 ? 1 : 0)); }
-function grRender() {
+function grRender() { grRender0(); try { condRender('lc'); } catch (e) { } }
+function grRender0() {
   var out = $('gr-out'), P = readPatient(), mode = grMode(P), pts = grPoints(P);
   if (!P.sex) { out.innerHTML = '<div class="alert info">' + ICON_INFO + '<span>Seleccione el sexo para aplicar las curvas.</span></div>'; return; }
   if (!P.hasAge) { out.innerHTML = '<div class="alert info">' + ICON_INFO + '<span>Ingrese la edad (o las fechas) del paciente.</span></div>'; return; }
@@ -3386,7 +3390,7 @@ function capRender() { var Pc = readPatient(); $('lc-cap').innerHTML = (Pc.hasAg
     var b = e.target.closest('button'); if (!b) return;
     if (b.id === 'gr-add') { GH.push({ m: null, d: null, w: null, l: null, pc: null }); $('gr-hist').innerHTML = grHistHTML(); rerender(); }
     if (b.hasAttribute('data-grrm')) { GH.splice(+b.getAttribute('data-grrm'), 1); $('gr-hist').innerHTML = grHistHTML(); rerender(); }
-    if (b.id === 'gr-copy') copyText(AGES_COPY.concat([''], GR_COPY).join('\n'), b);
+    if (b.id === 'gr-copy') copyText(AGES_COPY.concat([''], GR_COPY, COND_L.lc).join('\n'), b);
     if (b.id === 'gr-save') plSave(plRecLc(), b);
   });
   function all() { agesRender(); grRender(); capRender(); }
@@ -3615,7 +3619,7 @@ function esClass(k, z) {
   if (k === 'h') return z < -3 ? ['bad', 'Talla baja severa'] : (z < -2 ? ['mid', 'Talla baja'] : (z > 2 ? ['mid', 'Talla alta'] : ['ok', 'Normal']));
   return z < -3 ? ['bad', 'Bajo peso severo'] : (z < -2 ? ['mid', 'Bajo peso'] : (z > 2 ? ['mid', 'Peso alto para la edad'] : ['ok', 'Normal']));
 }
-var ES_META = { b: { n: 'IMC para la edad', u: 'kg/m²', d: 1 }, h: { n: 'Talla para la edad', u: 'cm', d: 1 }, w: { n: 'Peso para la edad', u: 'kg', d: 1 }, wc: { n: 'Peso para la edad (CDC 2000, 10 a 19 años)', u: 'kg', d: 1 } };
+var ES_META = { b: { n: 'IMC para la edad', u: 'kg/m²', d: 1 }, h: { n: 'Talla para la edad', u: 'cm', d: 1 }, w: { n: 'Peso para la edad', u: 'kg', d: 1 }, wc: { n: 'Peso para la edad (SAP 2013, 5 a 19 años)', u: 'kg', d: 1 } };
 var ESH = [], ES_COPY = [];
 function esDays(a, b) { if (!a || !b) return null; var d = (new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5; return isFinite(d) ? d : null; }
 function esRead() {
@@ -3655,9 +3659,9 @@ function esTarget(P) {
   return o;
 }
 function esChart(P, k, pts) {
-  var series = [], band = null, cfg = (ZMODE ? { b: [10, 42, 4], h: [100, 200, 10], w: [10, 60, 5], wc: [20, 120, 10] } : { b: [10, 34, 4], h: [100, 190, 10], w: [10, 50, 5], wc: [20, 110, 10] })[k], tgt = (k === 'h' && P.tgt && P.fh && P.mh) ? esTarget(P) : null, last = k === 'w' ? 120 : 228, x1 = last / 12, m0 = k === 'wc' ? 120 : 60;
+  var series = [], band = null, cfg = (ZMODE ? { b: [10, 42, 4], h: [100, 200, 10], w: [10, 60, 5], wc: [10, 100, 10] } : { b: [10, 34, 4], h: [100, 190, 10], w: [10, 50, 5], wc: [10, 100, 10] })[k], tgt = (k === 'h' && P.tgt && P.fh && P.mh) ? esTarget(P) : null, last = k === 'w' ? 120 : 228, x1 = last / 12, m0 = 60;
   (ZMODE ? ZS : PCTS).forEach(function (pc) {
-    var s = []; for (var m = m0; m <= last; m += 2) { var p = (k === 'wc' ? cdcLMS(P.sex, m) : w07LMS(P.sex, k, m)); s.push([m / 12, vOf(pc[1], p[0], p[1], p[2])]); }
+    var s = []; for (var m = m0; m <= last; m += 2) { if (k === 'wc') { s.push([m / 12, CS61C.sapVal(P.sex, m, pc[1])]); continue; } var p = w07LMS(P.sex, k, m); s.push([m / 12, vOf(pc[1], p[0], p[1], p[2])]); }
     var st = (ZMODE ? zsty : psty)(pc); st.pts = s; series.push(st);
   });
   if (tgt) {
@@ -3666,10 +3670,10 @@ function esChart(P, k, pts) {
     series.push({ pts: [[18.2, tgt.t], [19, tgt.t]], col: 'var(--gold)', w: 3 });
     if (tgt.proj) series.push({ pts: tgt.proj, col: 'var(--bordeaux)', w: 1.6, dash: '5 4' });
   }
-  var pp = []; pts.forEach(function (p) { var v = k === 'b' ? p.b : (k === 'h' ? p.h : p.w); if (v && (k !== 'wc' || p.m >= 120)) pp.push([p.m / 12, v]); });
-  return lineChart({ band: band, x0: (k === 'wc' ? 10 : 5), x1: x1, xs: (k === 'w' || k === 'wc') ? 1 : 2, y0: cfg[0], y1: cfg[1], ys: cfg[2], xl: 'Edad (años)', yl: { b: 'IMC (kg/m²)', h: 'Talla (cm)', w: 'Peso (kg)', wc: 'Peso (kg)' }[k], series: series, pts: pp, rpad: 32, aria: (k === 'wc' ? 'Curva CDC 2000 ' : 'Curva OMS 2007 ') + (ZMODE ? 'en puntaje Z ' : '') + 'de ' + ES_META[k].n.toLowerCase() + ' con los puntos del paciente' });
+  var pp = []; pts.forEach(function (p) { var v = k === 'b' ? p.b : (k === 'h' ? p.h : p.w); if (v && (k !== 'wc' || (p.m >= 60 && p.m <= 228))) pp.push([p.m / 12, v]); });
+  return lineChart({ band: band, x0: 5, x1: x1, xs: (k === 'w' || k === 'wc') ? 1 : 2, y0: cfg[0], y1: cfg[1], ys: cfg[2], xl: 'Edad (años)', yl: { b: 'IMC (kg/m²)', h: 'Talla (cm)', w: 'Peso (kg)', wc: 'Peso (kg)' }[k], series: series, pts: pp, rpad: 32, aria: (k === 'wc' ? 'Curva SAP 2013 ' : 'Curva OMS 2007 ') + (ZMODE ? 'en puntaje Z ' : '') + 'de ' + ES_META[k].n.toLowerCase() + ' con los puntos del paciente' });
 }
-function esRender() { esRender0(); try { esAcu(); } catch (e) { } }
+function esRender() { esRender0(); try { esAcu(); } catch (e) { } try { condRender('es'); } catch (e) { } }
 function esRender0() {
   var out = $('es-out'), P = esRead(), L = [], T = '', H = '';
   $('es-tan-l').textContent = P.sex === 'M' ? 'Estadio de Tanner: genitales' : (P.sex === 'F' ? 'Estadio de Tanner: mamas' : 'Estadio de Tanner: mama / genitales');
@@ -3682,26 +3686,24 @@ function esRender0() {
   var rows = [];
   if (P.w && P.h) rows.push(['b', P.w / Math.pow(P.h / 100, 2)]);
   if (P.h) rows.push(['h', P.h]);
-  if (P.w && P.m <= 120) rows.push(['w', P.w]);
-  if (P.w && P.m > 120) { var zc = cdcWZ(P.sex, P.m, P.w); if (zc !== null) { var pcc = normCdf(zc) * 100; T += '<tr><td>Peso para la edad (CDC 2000, referencia complementaria)</td><td>' + fmt(P.w, 1) + ' kg</td><td>' + (zc >= 0 ? '+' : '−') + fmt(Math.abs(zc), 2) + '</td><td>' + pctTxt(pcc) + '</td><td><span class="badge info">Sin clasificación: usar IMC/edad</span></td></tr>'; L.push('Peso para la edad (CDC 2000, referencial): ' + fmt(P.w, 1) + ' kg · z ' + fmt(zc, 2) + ' · P' + fmt(pcc, 0)); } }
+  if (P.w) { var zc = CS61C.sapZ(P.sex, P.m, P.w); if (zc !== null) { var pcc = CS61C.cdf(zc) * 100, cw = zc < -3 ? ['bad', 'Bajo peso severo para la edad'] : (zc < -2 ? ['mid', 'Bajo peso para la edad'] : (zc > 2 ? ['mid', 'Peso alto para la edad: valorar con IMC'] : ['ok', 'Peso adecuado para la edad'])); T += '<tr><td>Peso para la edad (SAP 2013)</td><td>' + fmt(P.w, 1) + ' kg</td><td>' + (zc >= 0 ? '+' : '−') + fmt(Math.abs(zc), 2) + '</td><td>' + pctTxt(pcc) + '</td><td><span class="badge ' + cw[0] + '">' + cw[1] + '</span></td></tr>'; L.push('Peso para la edad (SAP 2013): ' + fmt(P.w, 1) + ' kg · z ' + fmt(zc, 2) + ' · P' + fmt(pcc, 0) + ' · ' + cw[1]); } }
   rows.forEach(function (r) {
     var z = w07Z(P.sex, r[0], P.m, r[1]); if (z === null) return; var pc = normCdf(z) * 100, c = esClass(r[0], z), mt = ES_META[r[0]];
     T += '<tr><td>' + mt.n + '</td><td>' + fmt(r[1], r[0] === 'w' ? 1 : 1) + ' ' + mt.u + '</td><td>' + (z >= 0 ? '+' : '−') + fmt(Math.abs(z), 2) + '</td><td>' + pctTxt(pc) + '</td><td><span class="badge ' + c[0] + '">' + c[1] + '</span></td></tr>';
     L.push(mt.n + ': ' + fmt(r[1], 1) + ' ' + mt.u + ' · z ' + fmt(z, 2) + ' · P' + fmt(pc, 0) + ' · ' + c[1]);
   });
-    if (P.wc) {
-    var wr = wcRef(P.sex, P.m / 12);
-    if (wr) {
-      var wcl = P.wc >= wr[1] ? ['mid', 'Elevada (≥ P90)'] : (P.wc >= wr[0] ? ['ok', 'Entre P50 y P90'] : ['ok', 'Menor que P50']), wp = P.wc >= wr[1] ? '≥ P90' : (P.wc >= wr[0] ? 'P50 a P90' : '&lt; P50');
-      T += '<tr><td>Circunferencia de cintura</td><td>' + fmt(P.wc, 1) + ' cm</td><td>—</td><td>' + wp + '</td><td><span class="badge ' + wcl[0] + '">' + wcl[1] + '</span></td></tr>';
-      L.push('Circunferencia de cintura: ' + fmt(P.wc, 1) + ' cm · P50 ' + fmt(wr[0], 1) + ' · P90 ' + fmt(wr[1], 1) + ' cm · ' + wcl[1]);
-      H += '';
-    } else T += '<tr><td>Circunferencia de cintura</td><td>' + fmt(P.wc, 1) + ' cm</td><td>—</td><td>—</td><td><span class="badge info">Sin referencia antes de los 10 años</span></td></tr>';
+  if (P.wc) {
+    var wq = CS61C.waistRow(P.sex, P.m / 12, P.wc);
+    if (wq) {
+      T += '<tr><td>Circunferencia de cintura</td><td>' + fmt(P.wc, 1) + ' cm</td><td>—</td><td>' + CS61C.waistTxt(wq.o) + '</td><td><span class="badge ' + wq.o.cls[0] + '">' + wq.o.cls[1] + '</span></td></tr>';
+      L.push('Circunferencia de cintura: ' + fmt(P.wc, 1) + ' cm · ' + CS61C.waistTxt(wq.o) + ' · referencia ' + wq.ref + ' · ' + wq.o.cls[1]);
+    } else T += '<tr><td>Circunferencia de cintura</td><td>' + fmt(P.wc, 1) + ' cm</td><td>—</td><td>—</td><td><span class="badge info">Sin referencia fuera de 2 a 19 años</span></td></tr>';
   }
-  if (T) H += '<div class="tw"><table class="tbl"><thead><tr><th>Indicador</th><th>Valor</th><th>Z</th><th>Percentil</th><th>Clasificación OMS</th></tr></thead><tbody>' + T + '</tbody></table></div><p class="note" style="margin-top:8px">OMS 2007: IMC/edad con delgadez &lt; −2 DE, sobrepeso &gt; +1 DE y obesidad &gt; +2 DE; talla baja &lt; −2 DE. El peso/edad sólo se usa hasta los 10 años y no sirve para valorar sobrepeso. Desde los 10 años la OMS no publica peso/edad: se muestra la curva del CDC 2000 sólo como referencia complementaria (no se usa para clasificar; priorizar IMC/edad y talla/edad). Los percentilos se estiman a partir del puntaje Z.' + (P.wc && wcRef(P.sex, P.m / 12) ? ' Cintura: referencia de Fernández y cols. (2004) adaptada por el Comité Nacional de Nutrición (SAP), P50 y P90 de 10 a 18 años, con interpolación entre edades; un valor ≥ P90 indica adiposidad abdominal y mayor riesgo cardiometabólico.' : '') + '</p>';
+  if (T) H += '<div class="tw"><table class="tbl"><thead><tr><th>Indicador</th><th>Valor</th><th>Z</th><th>Percentil</th><th>Clasificación OMS</th></tr></thead><tbody>' + T + '</tbody></table></div><p class="note" style="margin-top:8px">OMS 2007: IMC/edad con delgadez &lt; −2 DE, sobrepeso &gt; +1 DE y obesidad &gt; +2 DE; talla baja &lt; −2 DE. Peso/edad de 5 a 19 años: tabla de la Guía de la SAP 2013 (P50 y desvío estándar por hemidistribución, datos OMS/NCHS); no sirve para valorar sobrepeso: priorizar IMC/edad y talla/edad. Los percentilos se estiman a partir del puntaje Z.' + (P.wc ? ' Cintura: percentilos de Fernández y cols. (2004, NHANES III; 2 a 18 años; P10 a P90) incluidos en la Guía de la SAP, con interpolación entre edades; ≥ P90 indica adiposidad abdominal y mayor riesgo cardiometabólico (componente del síndrome metabólico). Se muestra además el punto de corte P80 de Taylor y cols. (cintura mínima, DEXA).' : '') + '</p>';
   else H += '<div class="alert info">' + ICON_INFO + '<span>Ingrese peso y talla para evaluar.</span></div>';
   var pts = esPts(P);
-  ['b', 'h'].concat(P.m <= 120 ? ['w'] : ['wc']).forEach(function (k) { H += '<div class="lbl" style="margin:18px 0 2px">' + ES_META[k].n + '</div><div class="gr-chart">' + esChart(P, k, pts) + '</div>'; });
+  ['b', 'h', 'wc'].forEach(function (k) { H += '<div class="lbl" style="margin:18px 0 2px">' + ES_META[k].n + '</div><div class="gr-chart">' + esChart(P, k, pts) + '</div>'; });
+  if (P.m >= 24 && P.m <= 228) H += '<details style="margin-top:14px"><summary><b>Circunferencia de cintura: tabla de referencia por percentilos (' + (P.sex === 'M' ? 'varones' : 'mujeres') + ')</b></summary>' + CS61C.waistTable(P.sex) + '<p class="note">Fernández y cols., J Pediatr 2004 (NHANES III), según la Guía de la SAP 2013. Medir siempre en el mismo sitio y registrarlo.</p></details>';
   H += '<div class="legend" style="margin-top:4px"><span><i style="background:var(--teal)"></i>' + (ZMODE ? 'Z 0 (mediana)' : 'P50') + '</span><span><i style="background:var(--ink-2)"></i>' + (ZMODE ? 'Z −3 · −2 · −1 · +1 · +2 · +3 (puntaje Z)' : 'P3 · P10 · P25 · P75 · P90 · P97') + '</span><span><i style="background:var(--bordeaux);border-radius:50%"></i>Paciente</span>' + ((P.tgt && P.fh && P.mh) ? '<span><i style="background:var(--gold)"></i>Talla blanco ± 8,5 cm (a los 19 años)</span><span><i style="background:var(--bordeaux);height:0;border-top:2px dashed var(--bordeaux);background:none"></i>Proyección por el canal actual</span>' : '') + '</div>';
   H += '<div class="actions" style="margin-top:12px"><button class="btn" id="es-copy" type="button">Copiar valoración</button><button class="btn primary" id="es-save" type="button">Guardar en la planilla</button></div>';
   out.innerHTML = H; ES_COPY = ['Valoración antropométrica OMS 2007 · ' + todayISO() + ($('es-id').value.trim() ? ' · ' + $('es-id').value.trim() : ''), 'Edad: ' + Math.floor(P.m / 12) + ' años ' + Math.floor(P.m % 12) + ' m · ' + (P.sex === 'M' ? 'varón' : 'mujer') + (P.w ? ' · peso ' + fmt(P.w, 1) + ' kg' : '') + (P.h ? ' · talla ' + fmt(P.h, 1) + ' cm' : '')].concat(L);
@@ -3800,7 +3802,7 @@ function esAcu() {
   }
   if (cl.h) dxL.push(cl.h === 'Normal' ? 'Talla para la edad normal' + zs('h') + '.' : cl.h + ' según talla/edad' + zs('h') + '.');
   if (cl.w && cl.w !== 'Normal') dxL.push(cl.w + ' según peso/edad' + zs('w') + '.');
-  if (P.wc) { var wr = wcRef(P.sex, P.m / 12); if (wr && P.wc >= wr[1]) dxL.push('Circunferencia de cintura elevada (≥ P90).'); }
+  if (P.wc) { var wq2 = CS61C.waist(P.sex, P.m / 12, P.wc); if (wq2 && wq2.band === '≥ P90') dxL.push('Circunferencia de cintura elevada (≥ P90).'); }
   var vl = esVelCopy.length ? esVelCopy[esVelCopy.length - 1] : '', vh = /centilo TW[^:]*: (Enlentecida|Baja|Acelerada)/.exec(vl.split(' · ')[0] || '');
   if (vh) dxL.push('Velocidad de talla ' + (vh[1] === 'Acelerada' ? 'acelerada' : (vh[1] === 'Baja' ? 'baja' : 'enlentecida')) + ' en el último intervalo (interpretar con el estadio de Tanner).');
   var dx = dxL.join('\n') + '\nCódigos de la lista de Acuario a considerar: ' + cod.join('; ') + '.';
@@ -3830,15 +3832,38 @@ function esAcu() {
     var b = e.target.closest('button'); if (!b) return;
     if (b.id === 'es-add') { ESH.push({ d: '', w: null, h: null }); $('es-hist').innerHTML = esHistHTML(); esRender(); }
     if (b.hasAttribute('data-eshrm')) { ESH.splice(+b.getAttribute('data-eshrm'), 1); $('es-hist').innerHTML = esHistHTML(); esRender(); }
-    if (b.id === 'es-copy') copyText(ES_COPY.concat(esVelCopy, esMatCopy).join('\n'), b);
+    if (b.id === 'es-copy') copyText(ES_COPY.concat(esVelCopy, esMatCopy, COND_L.es).join('\n'), b);
     if (b.id === 'es-save') plSave(plRecEs(), b);
     if (b.id === 'es-clear') { ['es-id', 'es-dob', 'es-ageY', 'es-ageM', 'es-ageD', 'es-w', 'es-h', 'es-wc', 'es-fh', 'es-mh'].forEach(function (i) { $(i).value = ''; }); $('es-ctl').value = todayISO(); $('es-sex').value = ''; $('es-tan').value = ''; $('es-vp').value = ''; ESH = []; $('es-hist').innerHTML = esHistHTML(); esRender(); }
   });
   $('es-ctl').value = todayISO(); $('es-hist').innerHTML = esHistHTML(); esRender();
 })();
 
+
+/* ---- situaciones especiales (curvas específicas) ---- */
+var COND_L = { es: [], lc: [] };
+function condPts(p) {
+  var out = [], cur = null;
+  if (p === 'es') { esPts(esRead()).forEach(function (q) { if (q.m === null || q.m === undefined) return; var o = { m: q.m, w: q.w, h: q.h, b: q.b }; if (q.cur) cur = o; else out.push(o); }); }
+  else {
+    var P = readPatient();
+    GH.forEach(function (h) { if ((h.m === null && h.d === null) || !(h.w || h.l)) return; out.push({ m: ((h.m || 0) * MD + (h.d || 0)) / MD, w: h.w ? h.w / 1000 : null, h: h.l || null }); });
+    PLH.lc.forEach(function (r) { var m = +r.edad_meses; if (r.edad_meses === '' || r.edad_meses === null || !isFinite(m) || !(r.peso_kg || r.talla_cm)) return; out.push({ m: m, w: r.peso_kg ? +r.peso_kg : null, h: r.talla_cm ? +r.talla_cm : null }); });
+    if (P.hasAge && (P.w || val('gr-len'))) cur = { m: P.chron / MD, w: P.w ? P.w / 1000 : null, h: val('gr-len') };
+  }
+  out.sort(function (a, b) { return a.m - b.m; }); if (cur) out.push(cur); return out;
+}
+function condRender(p) {
+  CS61C.setChart(lineChart);
+  var sel = $(p + '-cond'), out = $(p + '-cond-out'); if (!sel || !out) return; COND_L[p] = [];
+  var id = sel.value; if (!id) { out.innerHTML = ''; return; }
+  var r = CS61C.panel(id, $(p + '-sex').value, condPts(p)); COND_L[p] = r.lines || [];
+  out.innerHTML = '<div style="margin-top:22px;padding-top:14px;border-top:1px solid var(--line)"><h4 style="margin:0 0 6px">Situación especial</h4>' + r.html + '</div>';
+}
+['es', 'lc'].forEach(function (p) { var e = $(p + '-cond'); if (e) e.addEventListener('change', function () { if (p === 'es') esRender(); else grRender(); }); });
+
 /* ---- planilla de Google (opcional) ---- */
-var PL_COLS = ['id', 'registrado', 'fecha_control', 'modulo', 'codigo', 'profesional', 'sexo', 'edad_anios', 'edad_meses', 'peso_kg', 'talla_cm', 'pc_cm', 'imc', 'cintura_cm', 'z_peso_edad', 'z_talla_edad', 'z_pc_edad', 'z_peso_talla', 'z_imc_edad', 'clasificacion', 'semanas_gest', 'peso_pregest_kg', 'imc_pregest', 'vel_talla_cm_anio', 'vel_centilo', 'talla_blanco_cm', 'detalle'];
+var PL_COLS = ['id', 'registrado', 'fecha_control', 'modulo', 'codigo', 'profesional', 'sexo', 'edad_anios', 'edad_meses', 'peso_kg', 'talla_cm', 'pc_cm', 'imc', 'cintura_cm', 'z_peso_edad', 'z_talla_edad', 'z_pc_edad', 'z_peso_talla', 'z_imc_edad', 'clasificacion', 'semanas_gest', 'peso_pregest_kg', 'imc_pregest', 'vel_talla_cm_anio', 'vel_centilo', 'talla_blanco_cm', 'detalle', 'condicion'];
 function plGet(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
 function plSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 function plCfg() { var c = plGet('cs61_pl'); if (!(c && c.url && c.key)) c = plGet('cs61_plcv'); return (c && c.url && c.key) ? c : null; }
@@ -3870,7 +3895,7 @@ function plRecLc() {
     return { fecha: f, modulo: 'Recién nacido y niño', sexo: r.sexo, edad_meses: Math.round(ch / MD * 10) / 10, edad_anios: Math.round(ch / MD / 12 * 100) / 100, peso_kg: h.w ? h.w / 1000 : '', talla_cm: h.l || '', pc_cm: h.pc || '' };
   }).filter(function (x) { return x.fecha && x.fecha < ctlL; });
   var ex = []; try { if (LAST) ex.push(lcSummary(LAST)); } catch (e) { }
-  r.detalle = AGES_COPY.concat([''], GR_COPY, [''], ex).join('\n'); return r;
+  r.condicion = CS61C.label($('lc-cond').value); r.detalle = AGES_COPY.concat([''], GR_COPY, [''], ex, COND_L.lc.length ? [''].concat(COND_L.lc) : []).join('\n'); return r;
 }
 function plRecEs() {
   var P = esRead(), r = plBase('Escolar y adolescente', $('es-id').value.trim(), P.ctl, P.sex); r.dni = $('es-dni').value.replace(/\D/g, ''); r.nombre = $('es-nom').value.trim(); r.fnac = $('es-dob').value;
@@ -3886,7 +3911,7 @@ function plRecEs() {
     var dd = esDays(P.dob, h.d), mm = dd !== null && dd >= 0 ? Math.round(dd / MD * 10) / 10 : '';
     return { fecha: h.d, modulo: 'Escolar y adolescente', sexo: r.sexo, edad_meses: mm, edad_anios: mm === '' ? '' : Math.round(mm / 12 * 100) / 100, peso_kg: h.w || '', talla_cm: h.h || '', imc: (h.w && h.h) ? Math.round(h.w / Math.pow(h.h / 100, 2) * 10) / 10 : '' };
   });
-  r.detalle = ES_COPY.concat(esVelCopy, esMatCopy).join('\n'); return r;
+  r.condicion = CS61C.label($('es-cond').value); r.detalle = ES_COPY.concat(esVelCopy, esMatCopy, COND_L.es.length ? [''].concat(COND_L.es) : []).join('\n'); return r;
 }
 function plRecEm() {
   var E = EM_REC || {}, r = plBase('Embarazada', $('em-id').value.trim(), $('em-ctl') ? $('em-ctl').value : '', ''); r.dni = $('em-dni').value.replace(/\D/g, ''); r.nombre = $('em-nom').value.trim();
@@ -3924,6 +3949,7 @@ function plFillFrom(p, j, force) {
   if (j.codigo && cd && (force || !cd.value.trim())) cd.value = j.codigo;
   var last = (j.filas || []).filter(function (r) { return r.sexo; }).pop(), s0 = plSexo(j.sexo || (last && last.sexo));
   if (sx && p !== 'em' && s0 && (force || !sx.value)) { sx.value = s0; sx.dispatchEvent(new Event('input', { bubbles: true })); }
+  var cn = $(p + '-cond'); if (cn && j.condicion && p !== 'em' && (force || !cn.value)) { var cv = CS61C.idOf(j.condicion); if (cv && cn.value !== cv) { cn.value = cv; cn.dispatchEvent(new Event('change', { bubbles: true })); } }
   var db = $(p + '-dob');
   if (db && j.fnac && (force || !db.value)) { db.value = j.fnac; db.dispatchEvent(new Event('input', { bubbles: true })); }
   if (typeof lvSync === 'function') lvSync(p);
@@ -4000,8 +4026,8 @@ function plSave(rec, btn) {
 })();
 /* ---- historial local de pacientes: buscar por DNI, cargar datos y controles previos ---- */
 var LV_KEY = 'cs61_val_v1', LV_IDS = {
-  lc: ['lc-id', 'lc-dni', 'lc-nom', 'lc-sex', 'lc-dob', 'lc-pn', 'lc-ln', 'lc-pcn', 'lc-egt', 'lc-pre', 'lc-egw', 'lc-egd'],
-  es: ['es-id', 'es-dni', 'es-nom', 'es-sex', 'es-dob', 'es-fh', 'es-mh'],
+  lc: ['lc-id', 'lc-dni', 'lc-nom', 'lc-sex', 'lc-dob', 'lc-pn', 'lc-ln', 'lc-pcn', 'lc-egt', 'lc-pre', 'lc-egw', 'lc-egd', 'lc-cond'],
+  es: ['es-id', 'es-dni', 'es-nom', 'es-sex', 'es-dob', 'es-fh', 'es-mh', 'es-cond'],
   em: ['em-id', 'em-dni', 'em-nom', 'em-age', 'em-fum', 'em-h', 'em-wpre', 'em-multi']
 }, LV_MOD = { 'Recién nacido y niño': 'lc', 'Escolar y adolescente': 'es', 'Embarazada': 'em' }, LV_NAME = { lc: 'Recién nacido y niño', es: 'Escolar y adolescente', em: 'Embarazada' }, LV_CUR = {}, LV_P = 'lc';
 function lvAll() { var a = plGet(LV_KEY); return Array.isArray(a) ? a : []; }
