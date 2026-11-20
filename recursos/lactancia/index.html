@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Juegos de lactancia materna · CS 61</title>
+<link rel="icon" type="image/png" href="../../icon-192.png"><link rel="apple-touch-icon" href="../../icon-192.png"><meta name="theme-color" content="#2A9D8F">
+<style>
+:root{--bg:#FFFDF9;--crema:#FAF3E0;--ink:#273142;--ink2:#5b6778;--line:#E8DAD2;--mit:#F4A261;--tec:#2A9D8F;--con:#457B9D;--sen:#F28482;--com:#E9AE31;--ok:#2A9D8F;--bad:#c4474a}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer}img{max-width:100%}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--tec);color:#fff}
+header h1{margin:0;font-size:1.05rem;flex:1}header a,header button{color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.55);border-radius:10px;padding:6px 12px;font-weight:700;font-size:.85rem;text-decoration:none}
+main{max-width:1180px;margin:0 auto;padding:14px}
+.scr{display:none}.scr.on{display:block}
+h2{margin:.2em 0 .3em;font-size:1.5rem}p.sub{margin:0 0 14px;color:var(--ink2)}
+.menu{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:16px}
+.mi{background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px;text-align:left;border-top:8px solid var(--tec)}
+.mi:nth-child(2){border-top-color:var(--mit)}.mi:nth-child(3){border-top-color:var(--con)}.mi:nth-child(4){border-top-color:var(--sen)}
+.mi b{display:block;font-size:1.2rem;margin:4px 0}.mi span{color:var(--ink2);font-size:.92rem}.mi .em{font-size:2rem;display:block}
+.mi:hover,.mi:focus-visible{outline:3px solid var(--com)}
+.hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.hero img{width:130px;height:130px}
+.panel{background:#fff;border:2px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.panel h3{margin:0 0 8px;font-size:1.05rem}
+.opts{display:flex;gap:8px;flex-wrap:wrap}.opts label{display:flex;align-items:center;gap:6px;background:var(--crema);border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:700}
+.opts input{accent-color:var(--tec);width:18px;height:18px}
+.names{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.names label{display:flex;align-items:center;gap:8px}.names img{width:34px;height:34px}.names input{flex:1;min-width:0;padding:8px 10px;border:2px solid var(--line);border-radius:10px;font:inherit}
+.btn{background:var(--tec);color:#fff;border:0;border-radius:14px;padding:12px 22px;font-weight:800;font-size:1.05rem}.btn.s{background:#fff;color:var(--ink);border:2px solid var(--line)}.btn.o{background:var(--mit);color:#3b2410}.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* OCA */
+.oca{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:980px){.oca{grid-template-columns:minmax(0,1fr) 270px}}
+.board{position:relative;width:100%;aspect-ratio:16/9;background:#fff;border:2px solid var(--line);border-radius:14px;overflow:hidden}
+.board>img.bg{position:absolute;inset:0;width:100%;height:100%}
+.tok{position:absolute;width:5.2%;aspect-ratio:1;transform:translate(-50%,-50%);transition:left .28s ease,top .28s ease;z-index:3;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
+.tok.cur{z-index:4;animation:bob 1s infinite}@keyframes bob{50%{transform:translate(-50%,-62%)}}
+.tb{position:absolute;width:3.6%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:2}
+.side{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.dice{width:92px;height:92px}.turn{font-weight:800;font-size:1.1rem;margin:6px 0}.log{min-height:3.2em;color:var(--ink2);font-size:.95rem;margin:8px 0}
+.leg{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.82rem;color:var(--ink2);margin-top:8px;justify-content:center}.leg i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.plist{display:flex;flex-direction:column;gap:6px;margin-top:10px;text-align:left;font-size:.9rem}.plist div{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:10px}.plist .cur{background:var(--crema);font-weight:800}.plist img{width:26px;height:26px}
+/* RULETA */
+.pre{display:grid;gap:14px;grid-template-columns:minmax(0,1fr);align-items:start}@media (min-width:900px){.pre{grid-template-columns:minmax(0,420px) minmax(0,1fr)}}
+.wheelbox .disk,.wheelbox .ptr{pointer-events:none}
+.wheelbox{position:relative;width:min(100%,440px);aspect-ratio:1;margin:0 auto}
+.wheelbox .disk{width:100%;height:100%;transition:transform 4.2s cubic-bezier(.17,.67,.12,1)}
+.wheelbox .ptr{position:absolute;left:50%;top:-3%;width:15%;transform:translateX(-50%);z-index:2}
+.team{background:#fff;border:3px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}.team.cur{border-color:var(--com);background:#FFF8E5}
+.team b{display:block}.meds{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}.meds img{width:40px;height:40px}.meds span{font-size:.7rem;color:var(--ink2);display:block;text-align:center}
+/* MODAL */
+#modal{position:fixed;inset:0;background:rgba(39,49,66,.62);display:none;align-items:center;justify-content:center;padding:12px;z-index:50}
+#modal.on{display:flex}
+.mc{background:#fff;border-radius:20px;max-width:760px;width:100%;max-height:94vh;overflow:auto;border-top:12px solid var(--tec)}
+.mc .in{padding:16px 18px 18px}.tagc{display:inline-flex;align-items:center;gap:8px;font-weight:800;padding:4px 12px 4px 6px;border-radius:30px;color:#fff;font-size:.92rem}.tagc img{width:28px;height:28px;background:#fff;border-radius:50%}
+.mc h3{margin:10px 0;font-size:1.3rem;line-height:1.3}.qimg{display:block;margin:6px auto 10px;max-height:260px;border-radius:12px}
+.ob{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:1.02rem}
+.ob:hover:not(:disabled),.ob:focus-visible{border-color:var(--tec);background:#F2FAF8}.ob.ok{background:#DDF3EC;border-color:var(--ok);font-weight:700}.ob.bad{background:#FBE2E2;border-color:var(--bad)}.ob:disabled{cursor:default}
+.tbar{height:10px;background:#eee;border-radius:6px;overflow:hidden;margin:8px 0}.tbar i{display:block;height:100%;background:var(--tec);width:100%}
+.fb{display:flex;gap:12px;align-items:flex-start;margin-top:10px;padding:12px;background:var(--crema);border-radius:14px}.fb img{width:64px;height:64px;flex:none}.fb b{display:block}
+.big{font-size:3rem;text-align:center}
+/* POSTURAS */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}.tabs button{padding:8px 14px;border-radius:30px;border:2px solid var(--line);background:#fff;font-weight:700}.tabs button.on{background:var(--tec);color:#fff;border-color:var(--tec)}
+.grid5{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}.pc{background:#fff;border:2px solid var(--line);border-radius:16px;padding:8px;text-align:center}.pc img{border-radius:12px;width:100%}.pc b{display:block;margin:4px 0}
+.two{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.two img{border-radius:14px;width:100%}
+.sg li{margin:4px 0}
+@media (prefers-reduced-motion:reduce){.wheelbox .disk,.tok{transition-duration:.3s!important}.tok.cur{animation:none}}
+</style></head><body>
+<header><a href="../" aria-label="Volver a Recursos">← Recursos</a><h1>Juegos de lactancia materna</h1><button id="snd" aria-label="Sonido">🔊</button><button id="home" aria-label="Menú de juegos">Menú</button></header>
+<main>
+<section class="scr on" id="s-home">
+ <div class="hero"><img src="img/mascota/mascota_bienvenida.svg" alt="Gota de leche sonriente, la mascota de los juegos"><div><h2>¡Hola! Vamos a jugar y a aprender sobre lactancia</h2><p class="sub">Para usar en la sala de espera, en talleres o en casa. Se puede jugar solo o en equipos, desde un celular, una tablet o proyectado en una pantalla.</p></div></div>
+ <div class="menu">
+  <button class="mi" data-go="oca"><span class="em">🎲</span><b>Juego de la Oca</b><span>Un camino de 25 casilleros hacia los 6 meses de lactancia exclusiva. De 1 a 4 jugadores.</span></button>
+  <button class="mi" data-go="pre"><span class="em">🎡</span><b>Preguntados</b><span>Girá la ruleta, respondé y ganá las 4 medallas de las categorías. De 1 a 4 equipos.</span></button>
+  <button class="mi" data-go="quiz"><span class="em">⏱️</span><b>Quiz rápido</b><span>Preguntas con tiempo y puntaje. Solo o por turnos. Con preguntas de imágenes.</span></button>
+  <button class="mi" data-go="pos"><span class="em">🤱</span><b>Posturas y técnica</b><span>Las 5 posturas para amamantar, el agarre y la extracción manual, para mirar y repasar.</span></button>
+ </div>
+ <p class="sub" style="margin-top:18px;font-size:.86rem">Material educativo del Centro de Salud N.º 61. No reemplaza la consulta con el equipo de salud: ante dolor, grietas, fiebre o dudas sobre el peso del bebé, consultar.</p>
+</section>
+
+<section class="scr" id="s-ocas"><h2>Juego de la Oca de la lactancia</h2><p class="sub">Del nacimiento a los 6 meses. Tirá el dado y seguí el camino.</p>
+ <div class="panel"><h3>¿Cuántos jugadores?</h3><div class="opts" id="o-n"></div></div>
+ <div class="panel"><h3>Nombres</h3><div class="names" id="o-names"></div></div>
+ <div class="panel"><h3>Reglas</h3><ul class="sg"><li><b>Mitos</b> (naranja): respondé bien para quedarte; si fallás, <b>retrocedés 2</b>.</li><li><b>Técnica</b> (verde) y <b>Conservación</b> (azul): si acertás, <b>avanzás 2</b>.</li><li><b>Sensibilización</b> (rosa): se comparte una reflexión y <b>avanzás 1</b>.</li><li><b>De teta a teta</b>: una red de apoyo te hace avanzar y <b>tirás otra vez</b>.</li><li>Gana quien llega primero a la meta (casillero 25). Si te pasás, rebotás hacia atrás.</li></ul></div>
+ <button class="btn" id="o-go">¡A jugar!</button></section>
+<section class="scr" id="s-oca"></section>
+
+<section class="scr" id="s-pres"><h2>Preguntados de la lactancia</h2><p class="sub">Girá la ruleta, respondé la pregunta de la categoría y juntá las 4 medallas.</p>
+ <div class="panel"><h3>¿Cuántos equipos o jugadores?</h3><div class="opts" id="p-n"></div></div>
+ <div class="panel"><h3>Nombres</h3><div class="names" id="p-names"></div></div>
+ <div class="panel"><h3>Reglas</h3><ul class="sg"><li>Cada medalla se gana con <b>2 respuestas correctas</b> de esa categoría.</li><li>Si acertás, <b>girás de nuevo</b>. Si fallás, pasa el turno (en modo solo, seguís jugando).</li><li>El <b>Comodín</b> te deja elegir la categoría.</li><li>Gana quien junta primero las 4 medallas.</li></ul></div>
+ <button class="btn" id="p-go">¡A girar!</button></section>
+<section class="scr" id="s-pre"></section>
+
+<section class="scr" id="s-quizs"><h2>Quiz rápido</h2><p class="sub">Respondé antes de que se acabe el tiempo: cuanto más rápido, más puntos.</p>
+ <div class="panel"><h3>Tema</h3><div class="opts" id="q-t"></div></div>
+ <div class="panel"><h3>Cantidad de preguntas</h3><div class="opts" id="q-c"></div></div>
+ <div class="panel"><h3>Tiempo por pregunta</h3><div class="opts" id="q-s"></div></div>
+ <div class="panel"><h3>Jugadores (se turnan en cada pregunta)</h3><div class="opts" id="q-n"></div><div class="names" id="q-names" style="margin-top:10px"></div></div>
+ <button class="btn" id="q-go">Empezar</button></section>
+<section class="scr" id="s-quiz"></section>
+
+<section class="scr" id="s-pos"><h2>Posturas y técnica</h2>
+ <div class="tabs" id="pt"><button data-t="a" class="on">5 posturas</button><button data-t="b">Agarre (acople)</button><button data-t="c">Alineación y extracción</button></div>
+ <div id="pb"></div></section>
+</main>
+<div id="modal" role="dialog" aria-modal="true"><div class="mc" id="mc"></div></div>
+<script src="datos.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
+var REDUCE=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ---- sonido ---- */
+var SND=true;try{SND=localStorage.getItem('cs61_lact_snd')!=='0'}catch(e){}
+var AC=null;function tone(f,d,t,v){if(!SND)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||.08;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+function sOk(){tone(660,.15);setTimeout(function(){tone(880,.25)},130)}function sBad(){tone(220,.3,'sawtooth',.05)}function sTick(){tone(520,.05,'square',.03)}function sWin(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,.3)},i*140)})}
+function paintSnd(){$('snd').textContent=SND?'🔊':'🔇';$('snd').setAttribute('aria-pressed',SND)}
+$('snd').onclick=function(){SND=!SND;try{localStorage.setItem('cs61_lact_snd',SND?'1':'0')}catch(e){}paintSnd();if(SND)sTick()};paintSnd();
+/* ---- pantallas ---- */
+var CUR='home',TIMER=null;
+function show(id){CUR=id;clearInterval(TIMER);closeM();['home','ocas','oca','pres','pre','quizs','quiz','pos'].forEach(function(s){$('s-'+s).classList.toggle('on',s===id)});window.scrollTo(0,0)}
+$('home').onclick=function(){if(CUR!=='home'&&(CUR==='oca'||CUR==='pre'||CUR==='quiz')&&!confirm('¿Salir de la partida y volver al menú?'))return;show('home')};
+document.querySelectorAll('[data-go]').forEach(function(b){b.onclick=function(){var g=b.getAttribute('data-go');if(g==='oca')show('ocas');else if(g==='pre')show('pres');else if(g==='quiz')show('quizs');else{show('pos');posTab('a')}}});
+/* ---- modal ---- */
+function openM(html,col){$('mc').style.borderTopColor=col||'var(--tec)';$('mc').innerHTML='<div class="in">'+html+'</div>';$('modal').classList.add('on');var b=$('mc').querySelector('button');if(b)b.focus()}
+function closeM(){$('modal').classList.remove('on')}
+function catTag(c){var k=CATS[c];return '<span class="tagc" style="background:'+k.col+'"><img alt="" src="img/ruleta/'+c+'.svg">'+esc(k.t)+'</span>'}
+function cardP(o){return new Promise(function(res){openM((o.tag||'')+'<h3>'+esc(o.title)+'</h3>'+(o.html||'<p>'+esc(o.text)+'</p>')+'<div class="row" style="margin-top:12px">'+(o.mas?'<img alt="" src="img/mascota/'+o.mas+'.svg" width="56" height="56">':'')+'<button class="btn" id="cb">'+esc(o.btn||'Continuar')+'</button></div>',o.col);$('cb').onclick=function(){closeM();res()}})}
+/* ---- pregunta (modal) ---- */
+function build(q){var items;if(q.post){var cor=POSTURAS.filter(function(p){return p.id===q.post})[0],oth=shuf(POSTURAS.filter(function(p){return p.id!==q.post})).slice(0,3);items=shuf([{t:cor.t,ok:true}].concat(oth.map(function(p){return{t:p.t,ok:false}})))}
+ else items=shuf(q.o.map(function(t,i){return{t:t,ok:i===q.a}}));return items}
+function ask(q,opt,cb){opt=opt||{};var items=build(q),done=false,t0=Date.now(),tl=opt.time||0,col=CATS[q.c].col;
+ var h=(opt.head||'')+catTag(q.c)+(q.img?'<img class="qimg" alt="Ilustración de la pregunta" src="img/'+q.img+'">':'')+'<h3>'+esc(q.q)+'</h3>'+(tl?'<div class="tbar"><i id="tb"></i></div>':'')+
+  items.map(function(it,i){return '<button class="ob" data-i="'+i+'">'+esc(it.t)+'</button>'}).join('')+'<div id="fbk"></div>';
+ openM(h,col);
+ function fin(sel){if(done)return;done=true;clearInterval(TIMER);var ok=sel>=0&&items[sel].ok,left=tl?Math.max(0,1-(Date.now()-t0)/(tl*1000)):0;
+  $('mc').querySelectorAll('.ob').forEach(function(b,i){b.disabled=true;if(items[i].ok)b.classList.add('ok');else if(i===sel)b.classList.add('bad')});
+  ok?sOk():sBad();
+  $('fbk').innerHTML='<div class="fb"><img alt="" src="img/mascota/'+(ok?'mascota_acierto':'mascota_animo')+'.svg"><div><b>'+(sel<0?'¡Se acabó el tiempo!':ok?'¡Correcto!':'Casi…')+'</b>'+esc(q.e)+'</div></div><div class="row" style="margin-top:12px"><button class="btn" id="nx">Continuar</button></div>';
+  $('nx').focus();$('nx').onclick=function(){closeM();cb(ok,left)}}
+ $('mc').querySelectorAll('.ob').forEach(function(b){b.onclick=function(){fin(+b.getAttribute('data-i'))}});
+ if(tl){TIMER=setInterval(function(){var r=1-(Date.now()-t0)/(tl*1000);if($('tb'))$('tb').style.width=Math.max(0,r*100)+'%';if(r<=0)fin(-1)},100)}}
+function askP(q,o){return new Promise(function(r){ask(q,o,function(ok,left){r({ok:ok,left:left})})})}
+/* ---- configuraciones comunes ---- */
+var FICH=['gota','corazon','estrella','osito','flor','panal'];
+function radios(box,name,vals,def,cb){$(box).innerHTML=vals.map(function(v){return '<label><input type="radio" name="'+name+'" value="'+esc(v[0])+'"'+(String(v[0])===String(def)?' checked':'')+'> '+esc(v[1])+'</label>'}).join('');$(box).querySelectorAll('input').forEach(function(i){i.onchange=function(){cb&&cb(i.value)}})}
+function val(name){var r=document.querySelector('input[name="'+name+'"]:checked');return r?r.value:''}
+function names(box,n,pref,fichas){var h='';for(var i=0;i<4;i++){h+='<label style="'+(i<n?'':'display:none')+'">'+(fichas?'<img alt="" src="img/oca/ficha_'+FICH[i]+'.svg">':'')+'<input aria-label="Nombre '+(i+1)+'" maxlength="18" value="'+pref+' '+(i+1)+'"></label>'}$(box).innerHTML=h}
+function getNames(box,n){var a=[];$(box).querySelectorAll('input').forEach(function(i,k){if(k<n)a.push(i.value.trim()||('Jugador '+(k+1)))});return a}
+/* ======================= OCA ======================= */
+var BOARD=null,TIPOS={},O=null;
+fetch('tablero_oca_25.json').then(function(r){return r.json()}).then(function(j){BOARD=j}).catch(function(){});
+radios('o-n','on',[[1,'1 jugador'],[2,'2 jugadores'],[3,'3 jugadores'],[4,'4 jugadores']],2,function(v){names('o-names',+v,'Jugador',true)});names('o-names',2,'Jugador',true);
+$('o-go').onclick=function(){if(!BOARD){alert('Todavía se está cargando el tablero. Probá de nuevo en un instante.');return}var n=+val('on');O={n:n,players:getNames('o-names',n).map(function(nm,i){return{nm:nm,f:FICH[i],pos:1}}),turn:0,busy:false,won:false,pool:{}};BOARD.casillas.forEach(function(c){TIPOS[c.numero]=c.tipo});ocaView()};
+function cell(n){return BOARD.casillas[n-1]}
+function ocaView(){show('oca');var h='<div class="oca"><div><div class="board" id="bd"><img class="bg" alt="Tablero del juego: camino de 25 casilleros" src="img/oca/tablero_oca_25.svg">';
+ Object.keys(TETA).forEach(function(k){var c=cell(+k);h+='<img class="tb" alt="" title="De teta a teta" src="img/oca/casilla_de_teta_a_teta.svg" style="left:'+((c.x+44)/19.2)+'%;top:'+((c.y-44)/10.8)+'%">'});
+ O.players.forEach(function(p,i){h+='<img class="tok" id="tk'+i+'" alt="Ficha de '+esc(p.nm)+'" src="img/oca/ficha_'+p.f+'.svg">'});
+ h+='</div><div class="leg"><span><i style="background:var(--mit)"></i>Mitos</span><span><i style="background:var(--tec)"></i>Técnica</span><span><i style="background:var(--con)"></i>Conservación</span><span><i style="background:var(--sen)"></i>Sensibilización</span><span><img alt="" src="img/oca/casilla_de_teta_a_teta.svg" width="18" style="vertical-align:-4px"> De teta a teta</span></div></div>'+
+ '<div class="side"><div class="turn" id="trn"></div><img id="dc" class="dice" alt="Dado" src="img/oca/dado_1.svg"><div class="row" style="justify-content:center;margin-top:8px"><button class="btn" id="roll">Tirar el dado</button></div><div class="log" id="lg" role="status" aria-live="polite">¡Que empiece el camino!</div><div class="plist" id="pl"></div></div></div>';
+ $('s-oca').innerHTML=h;$('roll').onclick=ocaTurn;ocaPlace();ocaUi()}
+function ocaPlace(){O.players.forEach(function(p,i){var c=cell(p.pos),dx=(i%2?1:-1)*(O.n>1?18:0),dy=(i>1?1:-1)*(O.n>2?16:0);var t=$('tk'+i);t.style.left=((c.x+dx)/19.2)+'%';t.style.top=((c.y+dy)/10.8)+'%';t.classList.toggle('cur',i===O.turn&&!O.won)})}
+function ocaUi(){$('trn').textContent='Turno de '+O.players[O.turn].nm;$('pl').innerHTML=O.players.map(function(p,i){return '<div class="'+(i===O.turn?'cur':'')+'"><img alt="" src="img/oca/ficha_'+p.f+'.svg"><span>'+esc(p.nm)+' · casillero '+p.pos+'</span></div>'}).join('');ocaPlace()}
+function log(t){$('lg').textContent=t}
+function nextQ(c){O.pool[c]=O.pool[c]&&O.pool[c].length?O.pool[c]:shuf(Q.filter(function(q){return q.c===c&&!q.post}));return O.pool[c].pop()}
+async function ocaTurn(){if(O.busy||O.won)return;O.busy=true;$('roll').disabled=true;var p=O.players[O.turn];
+ var d=0;for(var i=0;i<10;i++){d=1+Math.floor(Math.random()*6);$('dc').src='img/oca/dado_'+d+'.svg';sTick();await wait(REDUCE?40:90)}
+ log(p.nm+' sacó un '+d+'.');await wait(300);await ocaMove(p,d);var again=await ocaLand(p);
+ if(!O.won){if(!again)O.turn=(O.turn+1)%O.n;ocaUi();if(again)log(p.nm+' tira otra vez.')}O.busy=false;if($('roll'))$('roll').disabled=false}
+async function ocaMove(p,d){var dir=1;for(var i=0;i<d;i++){if(p.pos===25)dir=-1;p.pos+=dir;ocaUi();await wait(REDUCE?60:230)}}
+async function ocaGo(p,to){var dir=to>p.pos?1:-1;while(p.pos!==to){p.pos+=dir;ocaUi();await wait(REDUCE?50:200)}}
+async function ocaWin(p){O.won=true;ocaUi();sWin();openM('<div class="big">🏆</div><h3 style="text-align:center">¡'+esc(p.nm)+' llegó a la meta!</h3><p>¡Felicidades! Recorriste los primeros 6 meses de lactancia materna exclusiva con información, técnica y apoyo. A partir de ahí comienza la alimentación complementaria, manteniendo la lactancia hasta los 2 años o más, según lo deseen la mamá y el bebé.</p><div class="row"><img alt="" src="img/mascota/mascota_acierto.svg" width="64"><button class="btn" id="wa">Jugar de nuevo</button><button class="btn s" id="wm">Menú</button></div>','var(--com)');
+ $('wa').onclick=function(){closeM();$('o-go').onclick()};$('wm').onclick=function(){show('home')}}
+async function ocaLand(p){if(p.pos===25){await ocaWin(p);return false}
+ if(TETA[p.pos]){var from=p.pos;await cardP({title:'¡De teta a teta!',text:TETA_TXT[from]+' Avanzás hasta el casillero '+TETA[from]+' y tirás otra vez.',col:'var(--com)',mas:'mascota_acierto',btn:'¡Genial!'});await ocaGo(p,TETA[from]);return true}
+ var t=TIPOS[p.pos];
+ if(t==='mitos'){var r=await askP(nextQ('mitos'));if(!r.ok){log('Retrocede 2 casilleros.');await ocaGo(p,Math.max(1,p.pos-2))}else log('¡Se queda en su lugar!')}
+ else if(t==='tecnica'||t==='conservacion'){var r2=await askP(nextQ(t));if(r2.ok){var to=Math.min(25,p.pos+2);log('¡Avanza 2 casilleros!');await ocaGo(p,to);if(p.pos===25){await ocaWin(p);return false}}else log('Se queda en su lugar. ¡La próxima!')}
+ else if(t==='sensibilizacion'){O.ref=O.ref&&O.ref.length?O.ref:shuf(REFLEXIONES);await cardP({tag:catTag('sensibilizacion'),title:'Para compartir',text:O.ref.pop(),col:CATS.sensibilizacion.col,mas:'mascota_bienvenida',btn:'Lo compartimos: avanzar 1'});await ocaGo(p,p.pos+1)}
+ else log('Casillero libre.');
+ return false}
+/* ======================= PREGUNTADOS ======================= */
+var P=null;
+radios('p-n','pn',[[1,'Solo (1)'],[2,'2 equipos'],[3,'3 equipos'],[4,'4 equipos']],2,function(v){names('p-names',+v,+v===1?'Jugador':'Equipo',false)});names('p-names',2,'Equipo',false);
+$('p-go').onclick=function(){var n=+val('pn');P={n:n,t:getNames('p-names',n).map(function(nm){return{nm:nm,pr:{mitos:0,tecnica:0,conservacion:0,sensibilizacion:0},med:{},err:0,ok:0}}),turn:0,rot:0,busy:false,pool:{}};preView()};
+function pnext(c){P.pool[c]=P.pool[c]&&P.pool[c].length?P.pool[c]:shuf(Q.filter(function(q){return q.c===c}));return P.pool[c].pop()}
+function preView(){show('pre');$('s-pre').innerHTML='<div class="pre"><div><div class="wheelbox"><img class="disk" id="wd" alt="Ruleta con 5 categorías: Mitos, Técnica, Conservación, Sensibilización y Comodín" src="img/ruleta/ruleta_disco.svg"><img class="ptr" alt="" src="img/ruleta/puntero.svg"></div><div class="row" style="justify-content:center;margin-top:12px"><button class="btn o" id="spin">¡Girar la ruleta!</button></div><p class="sub" id="plog" role="status" aria-live="polite" style="text-align:center;margin-top:8px"></p></div><div id="sb"></div></div>';$('spin').onclick=pspin;pUi()}
+function pUi(){$('sb').innerHTML=P.t.map(function(t,i){return '<div class="team'+(i===P.turn?' cur':'')+'"><b>'+esc(t.nm)+(i===P.turn?' · le toca':'')+'</b><div class="meds">'+CAT_IDS.map(function(c){return '<div><img alt="'+(t.med[c]?'Medalla ganada: ':'Medalla pendiente: ')+CATS[c].t+'" src="img/ruleta/'+c+(t.med[c]?'_ganada':'_bloqueada')+'.svg"><span>'+(t.med[c]?'✔':t.pr[c]+'/2')+'</span></div>'}).join('')+'</div>'+(P.n===1?'<small>Errores: '+t.err+'</small>':'')+'</div>'}).join('')}
+async function pspin(){if(P.busy)return;P.busy=true;$('spin').disabled=true;var t=P.t[P.turn];
+ var sec=Math.floor(Math.random()*5),center=sec*72+36+(Math.random()*40-20);var base=P.rot-(P.rot%360);P.rot=base+360*(REDUCE?1:5)+(360-center);if(P.rot<=base)P.rot+=360;
+ $('wd').style.transitionDuration=REDUCE?'.4s':'4.2s';$('wd').style.transform='rotate('+P.rot+'deg)';var k=0,iv=setInterval(function(){sTick()},REDUCE?9999:260);await wait(REDUCE?500:4400);clearInterval(iv);
+ var cat=sec<4?CAT_IDS[sec]:null;
+ if(cat&&t.med[cat]){$('plog').textContent='Ya tenés esa medalla.';cat=null;await choose(t,'Ya ganaste esa medalla. ¡Elegí otra categoría!')}else if(!cat){await choose(t,'¡Comodín! Elegí la categoría que quieras.')}
+ if(!cat){cat=P.pick}
+ if(!cat){P.busy=false;$('spin').disabled=false;return}
+ await pask(t,cat)}
+function choose(t,msg){return new Promise(function(res){var libres=CAT_IDS.filter(function(c){return !t.med[c]});if(!libres.length){P.pick=null;res();return}
+ openM('<h3>'+esc(msg)+'</h3>'+libres.map(function(c){return '<button class="ob" data-c="'+c+'" style="border-left:12px solid '+CATS[c].col+'">'+esc(CATS[c].t)+'</button>'}).join(''),'var(--com)');
+ $('mc').querySelectorAll('.ob').forEach(function(b){b.onclick=function(){P.pick=b.getAttribute('data-c');closeM();res()}})})}
+async function pask(t,cat){var r=await askP(pnext(cat),{head:'<div style="font-weight:800;margin-bottom:6px">'+esc(t.nm)+'</div>'});
+ if(r.ok){t.ok++;t.pr[cat]++;if(t.pr[cat]>=2&&!t.med[cat]){t.med[cat]=1;sWin();await cardP({tag:catTag(cat),title:'¡Medalla de '+CATS[cat].t+'!',html:'<div class="big"><img alt="" src="img/ruleta/'+cat+'_ganada.svg" width="110"></div>',col:CATS[cat].col,mas:'mascota_acierto',btn:'¡Sigamos!'})}
+  pUi();if(CAT_IDS.every(function(c){return t.med[c]})){pWin(t);return}$('plog').textContent=t.nm+' acertó y gira otra vez.'}
+ else{t.err++;if(P.n>1){P.turn=(P.turn+1)%P.n;$('plog').textContent='Le toca a '+P.t[P.turn].nm+'.'}else $('plog').textContent='Seguí intentando.';pUi()}
+ P.busy=false;$('spin').disabled=false}
+function pWin(t){sWin();openM('<div class="big">🏆</div><h3 style="text-align:center">¡'+esc(t.nm)+' ganó las 4 medallas!</h3><p style="text-align:center">'+(P.n===1?'Respondió '+t.ok+' preguntas bien y se equivocó en '+t.err+'. ':'')+'¡Excelente trabajo! Acompañar la lactancia también es cuidar a quien amamanta.</p><div class="row"><img alt="" src="img/mascota/mascota_acierto.svg" width="64"><button class="btn" id="wa">Jugar de nuevo</button><button class="btn s" id="wm">Menú</button></div>','var(--com)');
+ $('wa').onclick=function(){closeM();$('p-go').onclick()};$('wm').onclick=function(){show('home')}}
+/* ======================= QUIZ ======================= */
+var Z=null;
+radios('q-t','qt',[['all','Todos los temas'],['pos','Posturas y técnica (con imágenes)']],'all');
+radios('q-c','qc',[[5,'5'],[10,'10'],[15,'15']],10);radios('q-s','qs',[[0,'Sin tiempo'],[15,'15 s'],[25,'25 s'],[40,'40 s']],25);
+radios('q-n','qn',[[1,'Solo'],[2,'2'],[3,'3'],[4,'4']],1,function(v){names('q-names',+v,+v===1?'Jugador':'Equipo',false);$('q-names').style.display=+v===1?'none':'grid'});names('q-names',1,'Jugador',false);$('q-names').style.display='none';
+$('q-go').onclick=function(){var n=+val('qn'),pool=val('qt')==='pos'?Q.filter(function(q){return q.post||q.img}):Q;var qs=shuf(pool).slice(0,+val('qc'));Z={n:n,qs:qs,i:0,time:+val('qs'),pl:getNames('q-names',n).map(function(nm){return{nm:nm,sc:0,ok:0}}),miss:[]};zNext()};
+async function zNext(){show('quiz');if(Z.i>=Z.qs.length){zEnd();return}var p=Z.pl[Z.i%Z.n],q=Z.qs[Z.i];
+ $('s-quiz').innerHTML='<div class="panel"><b>Pregunta '+(Z.i+1)+' de '+Z.qs.length+'</b>'+(Z.n>1?' · Turno de <b>'+esc(p.nm)+'</b>':'')+'<div class="row" style="margin-top:6px">'+Z.pl.map(function(x){return '<span class="opts"><label>'+esc(x.nm)+': '+x.sc+' pts</label></span>'}).join('')+'</div></div>';
+ var r=await askP(q,{time:Z.time,head:Z.n>1?'<div style="font-weight:800;margin-bottom:6px">Turno de '+esc(p.nm)+'</div>':''});
+ if(r.ok){p.ok++;p.sc+=100+(Z.time?Math.round(r.left*50):0)}else Z.miss.push(q);Z.i++;zNext()}
+function zEnd(){var tot=Z.qs.length,r=Z.pl.slice().sort(function(a,b){return b.sc-a.sc}),solo=Z.n===1,good=solo?Z.pl[0].ok/tot:1;sWin();
+ $('s-quiz').innerHTML='<div class="panel" style="text-align:center"><img alt="" src="img/mascota/'+(good>=.6?'mascota_acierto':'mascota_animo')+'.svg" width="110"><h2>'+(solo?'¡Terminaste!':'¡Fin del juego!')+'</h2>'+
+  r.map(function(p,i){return '<p style="font-size:1.15rem;margin:4px 0">'+(i===0&&!solo?'🏆 ':'')+'<b>'+esc(p.nm)+'</b>: '+p.sc+' puntos · '+p.ok+' respuestas correctas'+(solo?' de '+tot:'')+'</p>'}).join('')+
+  '<div class="row" style="justify-content:center;margin-top:12px"><button class="btn" id="za">Jugar otra vez</button><button class="btn s" id="zm">Menú</button></div></div>'+
+  (Z.miss.length?'<div class="panel"><h3>Para repasar ('+Z.miss.length+')</h3>'+Z.miss.map(function(q){return '<p><b>'+esc(q.q)+'</b><br>'+esc(q.e)+'</p>'}).join('')+'</div>':'<div class="panel"><h3>¡Sin errores!</h3></div>');
+ $('za').onclick=function(){show('quizs')};$('zm').onclick=function(){show('home')}}
+/* ======================= POSTURAS ======================= */
+function posTab(t){document.querySelectorAll('#pt button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-t')===t)});var h='';
+ if(t==='a'){h='<p class="sub">Tocá una postura para ver su ficha.</p><div class="grid5">'+POSTURAS.map(function(p,i){return '<button class="pc" data-p="'+i+'" style="cursor:pointer"><img alt="Ilustración: '+esc(p.t)+'" src="img/'+p.img+'"><b>'+esc(p.t)+'</b></button>'}).join('')+'</div><div class="row" style="margin-top:14px"><button class="btn" id="pq">Practicar con el quiz de imágenes</button></div>'}
+ else if(t==='b'){var A=ACOPLE;h='<div class="panel"><img alt="Comparación entre acople profundo y acople superficial" src="img/tec/comparacion_acople_profundo_vs_superficial.webp" style="border-radius:14px;width:100%"></div><div class="two"><div class="panel"><h3 style="color:var(--tec)">Acople profundo</h3><ul class="sg">'+A.p.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div><div class="panel"><h3 style="color:var(--bad)">Acople superficial</h3><ul class="sg">'+A.s.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div></div><p class="sub">Las succiones rápidas del comienzo pueden ser normales. Se evalúa toda la toma, la deglución y el confort. Si amamantar duele, se pide ayuda.</p>'}
+ else h='<div class="two"><div><img alt="Tarjeta: alineación corporal del bebé" src="img/tec/alineacion_corporal.webp"></div><div><img alt="Tarjeta: extracción manual de leche" src="img/tec/extraccion_manual.webp"></div></div>';
+ $('pb').innerHTML=h;document.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){var p=POSTURAS[+b.getAttribute('data-p')];openM('<div class="two"><div><img alt="Ficha: '+esc(p.t)+'" src="img/'+p.card+'"></div><div><h3>'+esc(p.t)+'</h3><p>'+esc(p.clave)+'</p><p><b>Cuándo sirve más:</b> '+esc(p.sirve)+'</p><p><b>Clave:</b> '+esc(p.por)+'</p><button class="btn" id="cb">Cerrar</button></div></div>');$('cb').onclick=closeM}});
+ if($('pq'))$('pq').onclick=function(){show('quizs');document.querySelector('input[name="qt"][value="pos"]').checked=true}}
+var ACOPLE={p:['Boca bien abierta y labio inferior hacia afuera.','Mentón en contacto con el pecho; nariz despejada.','Succiones profundas y rítmicas, con pausas.','Deglución visible o audible y mejillas redondeadas.'],s:['Boca poco abierta y labios hacia adentro.','Toma principalmente el pezón; mentón separado.','Puede haber mejillas hundidas, chasquidos o poca deglución.','Puede causar dolor y dificultar la transferencia de leche.']};
+$('pt').onclick=function(e){var b=e.target.closest('button');if(b)posTab(b.getAttribute('data-t'))};
+$('modal').onclick=function(e){if(e.target===$('modal')&&CUR==='pos')closeM()};
+})();
+</script></body></html>
