@@ -123,11 +123,13 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
     </div>
     <textarea id="tx" aria-label="Transcripción de la consulta" placeholder="Al grabar, aquí aparece lo que se dice. También puede escribir o pegar texto."></textarea>
     <div id="interim" aria-hidden="true"></div>
+    <div id="sug"></div>
     <div class="row"><label class="sub" for="redact" style="margin:0">Ocultar antes de enviar a la IA</label><input type="text" id="redact" placeholder="Nombre, apellido, lugar (se detectan solos)" style="flex:1;min-width:200px"></div>
     <div class="row">
       <button class="pri" id="go">Generar nota</button>
       <button id="stop" class="warn" hidden>Cancelar</button>
       <button id="gl-apply">Corregir con el glosario</button>
+      <button id="gl-sug">Revisar términos dudosos</button>
       <button id="audio-dl" hidden>Descargar audio</button>
       <button id="clr" class="warn">Nueva consulta</button>
     </div>
@@ -180,6 +182,11 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
   <div class="row"><input type="file" id="voc-file" accept=".txt,.csv,.docx,.xlsx" aria-label="Subir glosario"><button id="voc-add">Agregar archivo o texto pegado</button></div>
   <p class="sub">En un archivo, las líneas con dos columnas o con «→» («ache te a → HTA») se agregan como corrección directa; las demás, como vocabulario.</p>
 
+  <h3>Banco de términos (carga masiva)</h3>
+  <p class="sub">Suba uno o varios glosarios grandes (.txt, .csv, .docx o .xlsx; un término por línea o por celda). No hay un límite práctico: a la IA se le envían <b>sólo los términos relacionados con cada consulta</b>, así que conviene cargar todo lo que tenga (diccionarios médicos, listas de fármacos, vademécum, siglas del servicio). Las líneas «escuchado → correcto» se guardan como corrección directa.</p>
+  <div class="row"><input type="file" id="bank-file" multiple accept=".txt,.csv,.docx,.xlsx" aria-label="Subir términos al banco"><button id="bank-add">Agregar al banco</button></div>
+  <p class="sub" id="bank-info"></p>
+  <div class="row"><button id="gl-base">Agregar siglas habituales (ache te a, ele de ele…)</button><button id="bank-exp">Exportar banco y correcciones</button><button id="bank-clr" class="warn">Vaciar banco</button></div>
   <h3>Correcciones directas (escuchado → correcto)</h3>
   <div id="gl-ed"></div><div class="row"><button id="gl-add">+ Corrección</button></div>
   <h3>Modelo de bloques de la planilla seleccionada</h3>
@@ -192,6 +199,7 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
   <div class="note">La grabación sigue activa mientras usa estas herramientas.</div>
   <iframe id="tf0" title="Herramientas de nutrición"></iframe><iframe id="tf1" title="Registro cardiovascular" hidden></iframe><iframe id="tf2" title="Calculadora antropométrica" hidden></iframe><iframe id="tf3" title="Recursos para la comunidad" hidden></iframe><iframe id="tf4" title="Calendario de vacunación" hidden></iframe><iframe id="tf5" title="Crecimiento y desarrollo" hidden></iframe><iframe id="tf6" title="Embarazo y control prenatal" hidden></iframe>
 </aside>
+<script src="banco.js"></script>
 <script>(function(){
 var $=function(i){return document.getElementById(i)};
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -219,6 +227,7 @@ var PRESETS=[
  {id:'onc',name:'Oncología y soporte nutricional',t:['caquexia','desnutrición relacionada con la enfermedad','nutrición enteral','nutrición parenteral','sonda nasogástrica','SNG','gastrostomía','suplemento oral','MUST','valoración global subjetiva','VGS','quimioterapia','radioterapia','mucositis','xerostomía','disgeusia','pérdida de peso involuntaria','anorexia','hiporexia','tumor','cáncer']},
  {id:'arg',name:'Alimentos y costumbres de Salta / NOA',t:['mate cocido','yerba mate','facturas','criollitos','milanesa','empanadas salteñas','locro','humita','tamales','quinoa','chía','polenta','zapallo','anco','choclo','papa andina','maíz','charqui','dulce de leche','membrillo','sopa','guiso','fideos','arroz','pan francés','gaseosa','jugo en polvo','asado','chorizo','mortadela','sándwich de miga','alfajor','pochoclo','harina de maíz','cabrito','llama','algarroba','tuna','cayote']}
 ];
+if(window.CS61B)CS61B.presets.forEach(function(p){if(!PRESETS.some(function(q){return q.id===p.id}))PRESETS.push(p)});
 var S={prof:'',plans:[],cur:LIBRE,auto:[],gl:[],vsel:['nut','arg'],vcus:'',vals:{},dudas:[]};
 var busy=null;
 
@@ -226,12 +235,12 @@ var busy=null;
 function pk(){return 'cs61_cons2_'+(S.prof||'').trim().toLowerCase().replace(/\s+/g,'_')}
 function defGl(){return [{a:'ache te a',b:'HTA'},{a:'de be te dos',b:'DBT2'},{a:'i eme ce',b:'IMC'},{a:'hemoglobina glicosilada',b:'HbA1c'},{a:'colesterol malo',b:'LDL'}]}
 function loadCfg(){
-  S.plans=[];S.cur=LIBRE;S.gl=defGl();S.vsel=['nut','arg'];S.vcus='';
+  S.plans=[];S.cur=LIBRE;S.gl=defGl();S.vsel=['nut','arg'];S.vcus='';loadBank();
   var j=lsGet(pk());
   if(j){try{var o=JSON.parse(j);if(o.plans)S.plans=o.plans;if(o.cur)S.cur=o.cur;if(o.gl)S.gl=o.gl;if(o.vsel)S.vsel=o.vsel;if(typeof o.vcus==='string')S.vcus=o.vcus}catch(e){}}
   if(S.cur!==LIBRE&&S.cur!==BASEN&&!S.plans.some(function(p){return p.name===S.cur}))S.cur=LIBRE;
 }
-function saveCfg(){lsSet(pk(),JSON.stringify({plans:S.plans,cur:S.cur,gl:S.gl,vsel:S.vsel,vcus:S.vcus}))}
+function saveCfg(){IDX=null;lsSet(pk(),JSON.stringify({plans:S.plans,cur:S.cur,gl:S.gl,vsel:S.vsel,vcus:S.vcus}))}
 function saveDraft(){lsSet('cs61_cons2_draft',JSON.stringify({tx:$('tx').value,vals:S.vals,dudas:S.dudas,auto:S.auto}))}
 function userPlan(){return S.plans.filter(function(p){return p.name===S.cur})[0]||null}
 function tpl(){if(S.cur===LIBRE)return S.auto;if(S.cur===BASEN)return BASE;var p=userPlan();return p?p.tpl:S.auto}
@@ -292,7 +301,7 @@ function renderCfg(){
   S.gl.forEach(function(x,i){g+='<div class="er g"><input type="text" data-ga="'+i+'" value="'+esc(x.a)+'" aria-label="Término escuchado"><input type="text" data-gb="'+i+'" value="'+esc(x.b)+'" aria-label="Forma correcta"><button data-gdel="'+i+'" class="warn" aria-label="Quitar">×</button></div>'});
   $('gl-ed').innerHTML=g;
   var v='';PRESETS.forEach(function(p){v+='<label><input type="checkbox" data-pre="'+p.id+'"'+(S.vsel.indexOf(p.id)>=0?' checked':'')+'><span><b>'+esc(p.name)+'</b> · '+p.t.length+' términos</span></label>'});
-  $('voc-presets').innerHTML=v;$('voc-cus').value=S.vcus;
+  $('voc-presets').innerHTML=v;$('voc-cus').value=S.vcus;$('bank-info').textContent=BANK.length?BANK.length+' términos en el banco de este dispositivo.':'El banco está vacío.';
 }
 $('tpl-ed').addEventListener('input',function(e){var up=userPlan(),t=e.target,i=t.getAttribute('data-i');if(!up||i==null)return;up.tpl[i][t.getAttribute('data-k')]=t.value;saveCfg()});
 $('tpl-ed').addEventListener('change',function(e){var up=userPlan(),t=e.target,i=t.getAttribute('data-fmt');if(up&&i!=null){up.tpl[i].fmt=t.value;saveCfg()}renderFields()});
@@ -400,6 +409,111 @@ function vocab(){
   S.vcus.split(/[\n,;]+/).forEach(function(x){x=x.trim();if(x&&!set[x]){set[x]=1;out.push(x)}});
   return out.slice(0,1500);
 }
+
+/* ---------- banco de términos y selección por parecido ---------- */
+var BANK=[],IDX=null;
+function bankKey(){return pk()+'_bank'}
+function loadBank(){var j=lsGet(bankKey());BANK=j?j.split('\n').filter(Boolean):[];IDX=null}
+function saveBank(){try{localStorage.setItem(bankKey(),BANK.join('\n'));IDX=null;return true}catch(e){return false}}
+function nrm(w){return String(w).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9ñ]/g,'')}
+function phon(w){
+  w=String(w).toLowerCase().replace(/ñ/g,'#').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/#/g,'ñ').replace(/[^a-zñ0-9]/g,'');
+  w=w.replace(/ll/g,'y').replace(/qu/g,'k').replace(/gu([ei])/g,'g$1').replace(/c([ei])/g,'s$1').replace(/g([ei])/g,'j$1').replace(/z/g,'s').replace(/c/g,'k').replace(/v/g,'b').replace(/h/g,'').replace(/w/g,'u').replace(/x/g,'ks').replace(/y/g,'i').replace(/ps/g,'s').replace(/([a-zñ0-9])\1+/g,'$1');
+  return w;
+}
+function lev1(a,b){ // distancia de edición <= 1
+  if(a===b)return true;var la=a.length,lb=b.length;if(Math.abs(la-lb)>1)return false;
+  var i=0,j=0,d=0;while(i<la&&j<lb){if(a[i]===b[j]){i++;j++;continue}d++;if(d>1)return false;if(la>lb)i++;else if(lb>la)j++;else{i++;j++}}
+  return d+(la-i)+(lb-j)<=1;
+}
+function allTerms(){
+  var seen={},out=[];
+  function add(t){t=String(t).trim();if(!t)return;var k=t.toLowerCase();if(seen[k])return;seen[k]=1;out.push(t)}
+  PRESETS.forEach(function(p){p.t.forEach(add)});
+  S.vcus.split(/[\n,;]+/).forEach(add);BANK.forEach(add);
+  return out;
+}
+function buildIdx(){
+  var terms=allTerms(),ex={},ph={},fl={},known={};
+  terms.forEach(function(t){
+    t.split(/[\s\/\-]+/).forEach(function(w){
+      var n=nrm(w);if(n.length<4)return;known[n]=1;
+      (ex[n]=ex[n]||[]).push(t);
+      var k=phon(w);(ph[k]=ph[k]||[]).push([t,w,n]);
+      var c=n.charAt(0);(fl[c]=fl[c]||{})[n]=1;
+    });
+  });
+  var f2={};Object.keys(fl).forEach(function(c){f2[c]=Object.keys(fl[c])});
+  IDX={terms:terms,ex:ex,ph:ph,fl:f2,known:known};
+}
+function toks(txt){
+  var m=String(txt).match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]{4,}/g)||[],seen={},o=[];
+  m.forEach(function(w){var n=nrm(w);if(n.length>=4&&!seen[n]){seen[n]=1;o.push([w,n])}});return o;
+}
+function vocabFor(txt){
+  if(!IDX)buildIdx();
+  var set={},out=[];
+  function add(t){var k=t.toLowerCase();if(!set[k]){set[k]=1;out.push(t)}}
+  S.vsel.forEach(function(id){PRESETS.forEach(function(p){if(p.id===id)p.t.forEach(add)})});
+  S.vcus.split(/[\n,;]+/).forEach(function(x){x=x.trim();if(x)add(x)});
+  var base=out.slice(0,1200);out=base;set={};base.forEach(function(t){set[t.toLowerCase()]=1});
+  var rel=[];
+  toks(txt).forEach(function(tk){
+    var w=tk[1],hit=[];
+    (IDX.ex[w]||[]).forEach(function(t){hit.push(t)});
+    (IDX.ph[phon(w)]||[]).forEach(function(x){hit.push(x[0])});
+    if(w.length>=5){(IDX.fl[w.charAt(0)]||[]).forEach(function(c){if(c!==w&&lev1(w,c))(IDX.ex[c]||[]).forEach(function(t){hit.push(t)})})}
+    hit.slice(0,6).forEach(function(t){if(!set[t.toLowerCase()]){set[t.toLowerCase()]=1;rel.push(t)}});
+  });
+  return out.concat(rel.slice(0,500));
+}
+function suggestions(txt){
+  if(!IDX)buildIdx();
+  var res=[],seen={};
+  toks(txt).forEach(function(tk){
+    var w=tk[0],n=tk[1];if(n.length<5||IDX.known[n]||/^[0-9]+$/.test(n))return;
+    var cand=null,c1=IDX.ph[phon(w)];
+    if(c1){for(var i=0;i<c1.length;i++){if(c1[i][2]!==n&&c1[i][2].length>=5){cand=c1[i];break}}}
+    if(!cand&&n.length>=7){var arr=IDX.fl[n.charAt(0)]||[];for(var j=0;j<arr.length;j++){if(lev1(n,arr[j])&&arr[j]!==n){cand=[null,(IDX.ex[arr[j]]||[arr[j]])[0].split(/[\s\/\-]+/).filter(function(x){return nrm(x)===arr[j]})[0]||arr[j],arr[j]];break}}}
+    if(cand&&!seen[n]){seen[n]=1;res.push({a:w,b:cand[1]})}
+  });
+  return res.slice(0,40);
+}
+$('gl-sug').onclick=function(){
+  var sg=suggestions($('tx').value),box=$('sug');
+  if(!sg.length){box.innerHTML='<p class="sub">No se encontraron términos dudosos con lo que hay en el vocabulario y el banco.</p>';return}
+  box.innerHTML='<div class="dudas"><h3>Posibles errores de transcripción</h3><p class="sub">Palabras que suenan o se escriben casi igual que un término del vocabulario. Aplique sólo las que correspondan.</p><ul>'+sg.map(function(x,i){return '<li><b>'+esc(x.a)+'</b> → <b>'+esc(x.b)+'</b> <button data-sg="'+i+'">Aplicar</button></li>'}).join('')+'</ul></div>';
+  box._sg=sg;
+};
+$('sug').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-sg]');if(!b)return;var x=$('sug')._sg[+b.getAttribute('data-sg')];
+  $('tx').value=$('tx').value.replace(new RegExp('(^|[^\\p{L}])'+rx(x.a)+'(?![\\p{L}])','giu'),function(m,p){return p+x.b});saveDraft();b.textContent='Listo ✓';b.disabled=true;
+});
+$('bank-add').onclick=async function(){
+  var fs=$('bank-file').files;if(!fs.length){$('stat').textContent='Elija uno o más archivos.';return}
+  var set={};BANK.forEach(function(t){set[t.toLowerCase()]=1});var add=0,cor=0;
+  try{
+    for(var k=0;k<fs.length;k++){
+      var rows=await fileRows(fs[k]);
+      rows.forEach(function(r){
+        if(r.length>=2&&r[0]&&r[1]){S.gl.push({a:r[0],b:r[1]});cor++;return}
+        var l=(r[0]||'').trim();if(!l)return;
+        var m=/^(.+?)\s*(?:→|->|=>)\s*(.+)$/.exec(l);
+        if(m){S.gl.push({a:m[1].trim(),b:m[2].trim()});cor++;return}
+        l.split(/[;\t,]+/).forEach(function(t){t=t.trim();if(t.length>1&&t.length<80&&!set[t.toLowerCase()]&&BANK.length<100000){set[t.toLowerCase()]=1;BANK.push(t);add++}});
+      });
+    }
+  }catch(e){$('stat').textContent='No se pudo leer alguno de los archivos (use .txt, .csv, .docx o .xlsx).';return}
+  var seenG={};S.gl=S.gl.filter(function(x){var q=x.a.toLowerCase();if(seenG[q])return false;seenG[q]=1;return true});
+  if(!saveBank()){BANK.length=Math.max(0,BANK.length-add);$('stat').textContent='El archivo es demasiado grande para guardarlo en este dispositivo. Divídalo en partes más chicas.';return}
+  saveCfg();renderCfg();$('bank-file').value='';$('stat').textContent='Banco actualizado: '+add+' términos nuevos'+(cor?' y '+cor+' correcciones directas':'')+'.';
+};
+$('bank-clr').onclick=function(){if(!BANK.length||!window.confirm('¿Vaciar el banco de términos de este dispositivo? (No se tocan las correcciones directas ni los vocabularios de especialidad.)'))return;BANK=[];saveBank();renderCfg()};
+$('gl-base').onclick=function(){var have={};S.gl.forEach(function(x){have[x.a.toLowerCase()]=1});var n=0;((window.CS61B&&CS61B.gl)||[]).forEach(function(x){if(!have[x.a.toLowerCase()]){S.gl.push({a:x.a,b:x.b});n++}});saveCfg();renderCfg();$('stat').textContent=n?'Se agregaron '+n+' siglas habituales.':'Ya estaban todas las siglas habituales.'};
+$('bank-exp').onclick=function(){
+  var L=['# Correcciones (escuchado → correcto)'].concat(S.gl.filter(function(x){return x.a&&x.b}).map(function(x){return x.a+' → '+x.b})).concat(['','# Términos'],S.vcus.split(/[\n,;]+/).map(function(x){return x.trim()}).filter(Boolean),BANK);
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([L.join('\n')],{type:'text/plain;charset=utf-8'}));a.download='banco_terminos_cs61.txt';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+};
 function buildPrompt(txt){
   var libre=S.cur===LIBRE,T=tpl(),locked={},cur={};
   T.forEach(function(f){var v=S.vals[f.id];if(v&&v.src==='man'&&v.t)locked[f.label]=v.t;else if(v&&v.t)cur[f.label]=v.t});
@@ -409,7 +523,7 @@ function buildPrompt(txt){
   if(libre)p+='BLOQUES: definí vos los bloques según lo conversado, en el orden de una historia clínica de nutrición (por ejemplo motivo de la visita, historia y factores de riesgo, hábitos alimentarios, medicación, antropometría, evaluación, recomendaciones), entre 3 y 8, con nombres claros. No incluyas bloques sin contenido. Cada bloque tiene "fmt": "p" (párrafo) o "l" (lista; una idea por línea que empieza con "- ").\n';
   else p+='BLOQUES (nombre [formato] — qué incluye). Completá exactamente estos bloques, con el nombre dado:\n'+T.map(function(f){return f.label+' ['+(f.fmt==='l'?'LISTA: una idea por línea, cada línea empieza con "- "':'PÁRRAFO')+'] — '+(f.hint||'')}).join('\n')+'\nSi un bloque no tiene información en la consulta, devolvelo vacío.\n';
   p+='GLOSARIO (escuchado → correcto):\n'+(S.gl.filter(function(x){return x.a&&x.b}).map(function(x){return x.a+' → '+x.b}).join('\n')||'(vacío)')
-   +'\nVOCABULARIO (términos correctos de la especialidad; si algo transcripto suena parecido, usá este término):\n'+(vocab().join(', ')||'(vacío)')
+   +'\nVOCABULARIO (términos correctos de la especialidad y del banco, seleccionados por su parecido con lo transcripto; si algo transcripto suena parecido, usá este término):\n'+(vocabFor(txt).join(', ')||'(vacío)')
    +'\nBLOQUES YA EDITADOS POR EL PROFESIONAL (no los reescribas; no los incluyas en la respuesta):\n'+JSON.stringify(locked)
    +'\nBORRADOR ACTUAL (podés mejorarlo con la transcripción completa):\n'+JSON.stringify(cur)
    +'\nTRANSCRIPCIÓN (los datos identificatorios se reemplazaron por [reservado] o [DNI]; no los incluyas en la nota, referite a "la persona" o "el paciente"):\n"""\n'+redact(txt)+'\n"""\n';
@@ -499,6 +613,7 @@ function manual(why){
 async function run(){
   var txt=$('tx').value.trim();
   if(txt.length<20){$('stat').textContent='Todavía hay muy poco texto para generar la nota.';return}
+  var tg=applyGl(txt);if(tg!==txt){txt=tg;$('tx').value=tg;saveDraft()}
   var ya=redactTerms().map(function(x){return x.toLowerCase()}),nuevos=[];
   detectNames(txt).forEach(function(n){if(ya.indexOf(n.toLowerCase())<0&&nuevos.indexOf(n)<0)nuevos.push(n)});
   if(nuevos.length){$('redact').value=(redactTerms().concat(nuevos)).join(', ');lsSet('cs61_cons2_redact',$('redact').value)}
