@@ -262,3 +262,13 @@ html[data-ds="home"] .c h3{font-size:1.12rem}
   html[data-ds="home"] .c .go{padding-top:4px}
 }
 @media (prefers-reduced-motion:reduce){.ico3d{transition:none}}
+
+/* ---------- 13. Íconos 3D en herramientas (encabezados, tarjetas) ---------- */
+.pico-row{display:flex;align-items:center;gap:14px;margin:0 0 4px}
+.pico-row h1,.pico-row h2{margin:0}
+.pico{width:76px;height:76px;object-fit:contain;flex:none;filter:drop-shadow(0 8px 8px rgba(5,25,60,.28));user-select:none;-webkit-user-drag:none}
+.pico.pico-h{width:56px;height:56px;margin-right:12px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
+.tile > .tile-ico{width:92px;height:92px;margin:-2px 0 0 -4px;filter:drop-shadow(0 8px 8px rgba(5,25,60,.28));transition:transform .3s var(--ds-ease)}
+.tile:hover > .tile-ico{transform:translateY(-3px) scale(1.06) rotate(-3deg)}
+@media (max-width:560px){.pico{width:64px;height:64px}.tile > .tile-ico{width:80px;height:80px}}
+@media print{.pico,.tile-ico{display:none!important}}

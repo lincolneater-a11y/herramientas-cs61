@@ -32,7 +32,7 @@ details{margin-top:10px}summary{cursor:pointer;font-weight:700}
 </style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><style>.sw-tool{order:99;margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;font-family:inherit}.sw-tool:hover,.sw-tool:focus-visible{background:rgba(255,255,255,.14);outline:2px solid #e0b25a;outline-offset:2px}@media print{.sw-tool{display:none!important}}@media(max-width:520px){.sw-tool{padding:5px 9px;font-size:.74rem}}</style><script src="../shared/ds.js"></script><link rel="stylesheet" href="../shared/ds.css"></head><body>
 <header class="hdr"><div class="hdr-in"><div class="brand"><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Desarrollo infantil en la visita</h1><small>Centro de Salud N.º 61 · Agentes sanitarios · Basado en el IODI del Ministerio de Salud</small></div></div></div></header>
 <main>
-<h2>¿Qué debería estar haciendo este niño o niña?</h2>
+<div class="pico-row"><img class="pico" id="pico-main" src="../assets/icons/desarrollo-infantil-visita.webp" alt="" width="384" height="384" decoding="async"><h2>¿Qué debería estar haciendo este niño o niña?</h2></div>
 <p class="sub">Cargue la fecha de nacimiento: la herramienta calcula la edad, muestra una imagen de cómo suele estar a esa edad y qué ya debería haber logrado. No guarda datos: todo queda en este navegador.</p>
 <div class="warnb"><b>Es una ayuda para observar, no un diagnóstico.</b> Cada niño tiene su ritmo. Ante cualquier duda o si algo que ya debería hacer todavía no lo hace, avise al equipo de salud del centro. Basado en el Instrumento de Observación del Desarrollo Infantil (IODI) del Ministerio de Salud, hasta los 47 meses.</div>
 <div class="split">
@@ -239,7 +239,7 @@ document.addEventListener('click', function (e) {
 $('d-ctl').value = todayISO(); render();
 </script><script>/*EMBED*/try{if(window.top!==window){var a=document.querySelector(".sw-tool");if(a)a.style.display="none"}}catch(e){}</script><script>/*CFGSYNC*/(function(){try{fetch("../config.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(c){if(!c||!c.url||!/^https:\/\/script\.google\.com\//.test(c.url))return;["cs61_pl","cs61_plcv","cs61_cons_api"].forEach(function(k){try{var o=JSON.parse(localStorage.getItem(k)||"null");if(o&&o.key&&o.url!==c.url){o.url=c.url;localStorage.setItem(k,JSON.stringify(o))}}catch(e){}})}).catch(function(){})}catch(e){}})();</script><script src="../egg.js"></script><script>
 /* Desde Pediatría (?v=iodi) la herramienta se llama «Desarrollo infantil IODI» */
-(function(){if(!/[?&]v=iodi/.test(location.search))return;
+(function(){if(!/[?&]v=iodi/.test(location.search))return;var pi=document.getElementById('pico-main');if(pi)pi.src='../assets/icons/desarrollo-infantil-iodi.webp';
  var h=document.querySelector('.brand h1');if(h)h.textContent='Desarrollo infantil IODI';
  var sm=document.querySelector('.brand small');if(sm)sm.textContent='Centro de Salud N.º 61 · Pediatría · Basado en el IODI del Ministerio de Salud';
  try{document.title='Desarrollo infantil IODI · CS 61'}catch(e){}})();
