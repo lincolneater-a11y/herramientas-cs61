@@ -187,6 +187,10 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
   <div class="row"><input type="file" id="bank-file" multiple accept=".txt,.csv,.docx,.xlsx" aria-label="Subir términos al banco"><button id="bank-add">Agregar al banco</button></div>
   <p class="sub" id="bank-info"></p>
   <div class="row"><button id="gl-base">Agregar siglas habituales (ache te a, ele de ele…)</button><button id="bank-exp">Exportar banco y correcciones</button><button id="bank-clr" class="warn">Vaciar banco</button></div>
+  <h3>Banco compartido del centro</h3>
+  <p class="sub">Todo el equipo puede usar los mismos términos y correcciones. <b>Se descargan solos cuando hay internet y quedan guardados en el dispositivo: la consulta funciona igual sin conexión.</b> Al compartir se envían sólo términos y correcciones (nunca el texto de las consultas); no incluya nombres de personas.</p>
+  <div class="row"><button id="sh-sync">Actualizar desde el centro</button><button id="sh-send">Compartir mis términos con el centro</button></div>
+  <p class="sub" id="sh-info"></p>
   <h3>Correcciones directas (escuchado → correcto)</h3>
   <div id="gl-ed"></div><div class="row"><button id="gl-add">+ Corrección</button></div>
   <h3>Modelo de bloques de la planilla seleccionada</h3>
@@ -301,6 +305,7 @@ function renderCfg(){
   S.gl.forEach(function(x,i){g+='<div class="er g"><input type="text" data-ga="'+i+'" value="'+esc(x.a)+'" aria-label="Término escuchado"><input type="text" data-gb="'+i+'" value="'+esc(x.b)+'" aria-label="Forma correcta"><button data-gdel="'+i+'" class="warn" aria-label="Quitar">×</button></div>'});
   $('gl-ed').innerHTML=g;
   var v='';PRESETS.forEach(function(p){v+='<label><input type="checkbox" data-pre="'+p.id+'"'+(S.vsel.indexOf(p.id)>=0?' checked':'')+'><span><b>'+esc(p.name)+'</b> · '+p.t.length+' términos</span></label>'});
+  $('sh-info').textContent=SH.ts?('Banco del centro en este dispositivo: '+SH.t.length+' términos y '+SH.c.length+' correcciones (actualizado '+new Date(SH.ts).toLocaleString('es-AR')+').'):'Todavía no se descargó el banco del centro.';
   $('voc-presets').innerHTML=v;$('voc-cus').value=S.vcus;$('bank-info').textContent=BANK.length?BANK.length+' términos en el banco de este dispositivo.':'El banco está vacío.';
 }
 $('tpl-ed').addEventListener('input',function(e){var up=userPlan(),t=e.target,i=t.getAttribute('data-i');if(!up||i==null)return;up.tpl[i][t.getAttribute('data-k')]=t.value;saveCfg()});
@@ -398,8 +403,9 @@ $('voc-add').onclick=async function(){
 };
 
 /* ---------- glosario y prompt ---------- */
+function glAll(){var seen={},o=[];S.gl.concat(SH.c).forEach(function(x){if(x.a&&x.b){var k=x.a.toLowerCase();if(!seen[k]){seen[k]=1;o.push(x)}}});return o.sort(function(a,b){return b.a.length-a.a.length})}
 function applyGl(txt){
-  S.gl.forEach(function(x){if(x.a&&x.b){txt=txt.replace(new RegExp('(^|[^\\p{L}])'+rx(x.a)+'(?![\\p{L}])','giu'),function(m,p){return p+x.b})}});
+  glAll().forEach(function(x){if(x.a&&x.b){txt=txt.replace(new RegExp('(^|[^\\p{L}])'+rx(x.a)+'(?![\\p{L}])','giu'),function(m,p){return p+x.b})}});
   return txt;
 }
 $('gl-apply').onclick=function(){var n=applyGl($('tx').value);var c=n!==$('tx').value;$('tx').value=n;saveDraft();$('stat').textContent=c?'Glosario aplicado al texto.':'No había términos del glosario para corregir.'};
@@ -411,7 +417,8 @@ function vocab(){
 }
 
 /* ---------- banco de términos y selección por parecido ---------- */
-var BANK=[],IDX=null;
+var BANK=[],IDX=null,SH={t:[],c:[],ts:0};
+function loadShared(){try{var o=JSON.parse(lsGet('cs61_cons2_shared')||'null');if(o&&o.t)SH=o}catch(e){}IDX=null}
 function bankKey(){return pk()+'_bank'}
 function loadBank(){var j=lsGet(bankKey());BANK=j?j.split('\n').filter(Boolean):[];IDX=null}
 function saveBank(){try{localStorage.setItem(bankKey(),BANK.join('\n'));IDX=null;return true}catch(e){return false}}
@@ -430,7 +437,7 @@ function allTerms(){
   var seen={},out=[];
   function add(t){t=String(t).trim();if(!t)return;var k=t.toLowerCase();if(seen[k])return;seen[k]=1;out.push(t)}
   PRESETS.forEach(function(p){p.t.forEach(add)});
-  S.vcus.split(/[\n,;]+/).forEach(add);BANK.forEach(add);
+  S.vcus.split(/[\n,;]+/).forEach(add);BANK.forEach(add);SH.t.forEach(add);
   return out;
 }
 function buildIdx(){
@@ -514,6 +521,50 @@ $('bank-exp').onclick=function(){
   var L=['# Correcciones (escuchado → correcto)'].concat(S.gl.filter(function(x){return x.a&&x.b}).map(function(x){return x.a+' → '+x.b})).concat(['','# Términos'],S.vcus.split(/[\n,;]+/).map(function(x){return x.trim()}).filter(Boolean),BANK);
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([L.join('\n')],{type:'text/plain;charset=utf-8'}));a.download='banco_terminos_cs61.txt';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
 };
+
+/* ---------- sincronización con el banco compartido (planilla) ---------- */
+async function bancoPost(body){
+  var cfg=api();if(!cfg)throw {msg:'Falta conectar el script (sección «Conexión»).'};
+  body.k=cfg.key;var r;
+  try{r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})}catch(e){throw {msg:'Sin conexión con el script.',off:1}}
+  var j;try{j=JSON.parse(await r.text())}catch(e){throw {msg:'El script no respondió bien. Falta publicar la nueva versión del script (Implementar → Administrar implementaciones → Nueva versión).'}}
+  if(!j.ok)throw {msg:j.error==='clave'?'El script rechazó la clave.':'Error del script: '+j.error};
+  return j;
+}
+async function shSync(manual){
+  if(!navigator.onLine){if(manual)$('stat').textContent='Sin internet: se usa el banco guardado en el dispositivo.';return}
+  if(!api())return;
+  try{
+    var j=await bancoPost({bancoget:{}}),t=[],c=[];
+    (j.items||[]).forEach(function(x){if(x[0]==='t')t.push(x[1]);else if(x[0]==='c')c.push({a:x[1],b:x[2]})});
+    SH={t:t,c:c,ts:Date.now()};
+    if(!lsSetOk('cs61_cons2_shared',JSON.stringify(SH))){SH.t=t.slice(0,20000);lsSetOk('cs61_cons2_shared',JSON.stringify(SH))}
+    IDX=null;renderCfg();if(manual)$('stat').textContent='Banco del centro actualizado: '+t.length+' términos y '+c.length+' correcciones.';
+  }catch(e){if(manual)$('stat').textContent=(e&&e.msg)||'No se pudo actualizar el banco del centro.'}
+}
+function lsSetOk(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}
+function shItems(){
+  var have={};SH.t.forEach(function(t){have['t|'+t.toLowerCase()]=1});SH.c.forEach(function(x){have['c|'+x.a.toLowerCase()+'|'+x.b.toLowerCase()]=1});
+  var out=[],seen={};
+  function addT(t){t=String(t).trim();var k='t|'+t.toLowerCase();if(t.length>1&&t.length<80&&!have[k]&&!seen[k]){seen[k]=1;out.push(['t',t])}}
+  S.vcus.split(/[\n,;]+/).forEach(addT);BANK.forEach(addT);
+  var base={};defGl().forEach(function(x){base[x.a.toLowerCase()]=1});
+  S.gl.forEach(function(x){if(!x.a||!x.b)return;var k='c|'+x.a.toLowerCase()+'|'+x.b.toLowerCase();if(!have[k]&&!seen[k]){seen[k]=1;out.push(['c',x.a,x.b])}});
+  return out;
+}
+async function shSend(auto){
+  var it=shItems();
+  if(!it.length){if(!auto)$('stat').textContent='No hay términos nuevos para compartir.';lsSet('cs61_cons2_sharepend','');return}
+  if(!auto&&!window.confirm('Se enviarán '+it.length+' términos/correcciones al banco compartido del centro (sin texto de consultas). ¿Continuar?'))return;
+  if(!navigator.onLine||!api()){lsSet('cs61_cons2_sharepend','1');if(!auto)$('stat').textContent='Sin internet: se enviarán automáticamente cuando haya conexión.';return}
+  try{
+    var n=0;for(var i=0;i<it.length;i+=2000){var j=await bancoPost({bancoadd:{items:it.slice(i,i+2000),prof:S.prof}});n+=j.nuevos||0}
+    lsSet('cs61_cons2_sharepend','');await shSync(false);$('stat').textContent='Se compartieron '+n+' términos o correcciones nuevos con el centro.';
+  }catch(e){lsSet('cs61_cons2_sharepend','1');$('stat').textContent=((e&&e.msg)||'No se pudo compartir')+(e&&e.off?' Se reintentará cuando haya internet.':'')}
+}
+$('sh-sync').onclick=function(){shSync(true)};
+$('sh-send').onclick=function(){shSend(false)};
+window.addEventListener('online',function(){shSync(false);if(lsGet('cs61_cons2_sharepend'))shSend(true)});
 function buildPrompt(txt){
   var libre=S.cur===LIBRE,T=tpl(),locked={},cur={};
   T.forEach(function(f){var v=S.vals[f.id];if(v&&v.src==='man'&&v.t)locked[f.label]=v.t;else if(v&&v.t)cur[f.label]=v.t});
@@ -522,7 +573,7 @@ function buildPrompt(txt){
    +'REGLAS: usá SOLO lo dicho en la transcripción; no inventes, no diagnostiques, no completes valores no mencionados. Español rioplatense profesional, sin nombres de personas ni DNI. En evaluación/diagnóstico y recomendaciones incluí únicamente lo que el profesional dijo o indicó en la consulta; no agregues indicaciones propias. Corregí términos mal transcriptos según el glosario y el vocabulario. Los datos ambiguos, contradictorios o que parecen errores de transcripción (cifras, dosis, fármacos, fechas) van en "dudas" como pregunta corta para confirmar.\n';
   if(libre)p+='BLOQUES: definí vos los bloques según lo conversado, en el orden de una historia clínica de nutrición (por ejemplo motivo de la visita, historia y factores de riesgo, hábitos alimentarios, medicación, antropometría, evaluación, recomendaciones), entre 3 y 8, con nombres claros. No incluyas bloques sin contenido. Cada bloque tiene "fmt": "p" (párrafo) o "l" (lista; una idea por línea que empieza con "- ").\n';
   else p+='BLOQUES (nombre [formato] — qué incluye). Completá exactamente estos bloques, con el nombre dado:\n'+T.map(function(f){return f.label+' ['+(f.fmt==='l'?'LISTA: una idea por línea, cada línea empieza con "- "':'PÁRRAFO')+'] — '+(f.hint||'')}).join('\n')+'\nSi un bloque no tiene información en la consulta, devolvelo vacío.\n';
-  p+='GLOSARIO (escuchado → correcto):\n'+(S.gl.filter(function(x){return x.a&&x.b}).map(function(x){return x.a+' → '+x.b}).join('\n')||'(vacío)')
+  p+='GLOSARIO (escuchado → correcto):\n'+(glAll().filter(function(x){return S.gl.indexOf(x)>=0||txt.toLowerCase().indexOf(x.a.toLowerCase())>=0}).slice(0,600).map(function(x){return x.a+' → '+x.b}).join('\n')||'(vacío)')
    +'\nVOCABULARIO (términos correctos de la especialidad y del banco, seleccionados por su parecido con lo transcripto; si algo transcripto suena parecido, usá este término):\n'+(vocabFor(txt).join(', ')||'(vacío)')
    +'\nBLOQUES YA EDITADOS POR EL PROFESIONAL (no los reescribas; no los incluyas en la respuesta):\n'+JSON.stringify(locked)
    +'\nBORRADOR ACTUAL (podés mejorarlo con la transcripción completa):\n'+JSON.stringify(cur)
@@ -775,7 +826,9 @@ $('prof').addEventListener('change',function(){S.prof=$('prof').value;lsSet('cs6
   if(!dj){try{var od=JSON.parse(lsGet('cs61_cons_draft')||'null');if(od&&od.tx)dj=JSON.stringify({tx:od.tx})}catch(e){}}
   if(dj){try{var d=JSON.parse(dj);$('tx').value=d.tx||'';S.vals=d.vals||{};S.dudas=d.dudas||[];S.auto=d.auto||[]}catch(e){}}
   $('redact').value=lsGet('cs61_cons2_redact')||'';
-  planOptions();renderCfg();renderFields();
+  loadShared();planOptions();renderCfg();renderFields();
+  if(!SH.ts||Date.now()-SH.ts>6*3600e3)shSync(false);
+  if(lsGet('cs61_cons2_sharepend'))shSend(true);
 })();
 })();
 </script><script>/*CFGSYNC*/(function(){try{fetch("../config.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(c){if(!c||!c.url||!/^https:\/\/script\.google\.com\//.test(c.url))return;["cs61_pl","cs61_plcv","cs61_cons_api"].forEach(function(k){try{var o=JSON.parse(localStorage.getItem(k)||"null");if(o&&o.key&&o.url!==c.url){o.url=c.url;localStorage.setItem(k,JSON.stringify(o))}}catch(e){}})}).catch(function(){})}catch(e){}})();</script><script src="../egg.js"></script></body></html>
