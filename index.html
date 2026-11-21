@@ -59,6 +59,11 @@ function render(){
  var ok=T[P];document.querySelectorAll('[data-t]').forEach(function(a){var t=a.getAttribute('data-t');a.hidden=!(all||ok.indexOf(t)>-1);a.style.order=ok.indexOf(t)<0?99:ok.indexOf(t)});
  $('all').textContent=all?'Ver sólo las de mi perfil':'Ver todas las herramientas';$('all').hidden=P==='nutricion';
  document.title='Herramientas CS 61 · '+N[P];
+ /* Pediatría: la herramienta se muestra como «Desarrollo infantil IODI» */
+ var dv=document.querySelector('[data-t="desarrollo"]');
+ if(dv){var iodi=P==='pediatria',h3=dv.querySelector('h3');
+  if(h3)h3.textContent=iodi?'Desarrollo infantil IODI':'Desarrollo infantil en la visita';
+  dv.setAttribute('href',iodi?'desarrollo/?v=iodi':'desarrollo/')}
  $('inst').hidden=!ev;$('ih').hidden=!!ev||matchMedia('(display-mode: standalone)').matches;
 }
 document.querySelectorAll('[data-m]').forEach(function(b){b.addEventListener('click',function(){step=2;render()})});$('bk').addEventListener('click',function(){step=1;render()});
