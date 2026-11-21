@@ -244,3 +244,21 @@ html[data-ds="game"] .menu>*:hover,html[data-ds="game"] .opts button:hover:not(:
   html[data-ds="game"] body > header button,html[data-ds="game"] body > header a{padding:6px 10px;font-size:.82rem}
   .ds-fab{width:42px;height:42px;right:10px;bottom:10px}
 }
+
+/* ---------- 12. Íconos 3D institucionales (assets/icons, recortados sin fondo) ---------- */
+html[data-ds="home"] a.c,html[data-ds="home"] button.c{min-height:0;display:grid;grid-template-columns:132px 1fr;grid-template-rows:auto auto 1fr;column-gap:14px;align-content:start;align-items:start;padding:18px 18px 16px}
+html[data-ds="home"] a.c::before,html[data-ds="home"] button.c::before{width:96px;height:96px;right:-26px;top:-26px;opacity:.5}
+html[data-ds="home"] .c .ico3d{grid-column:1;grid-row:1/4;align-self:center}
+html[data-ds="home"] .c > :not(.ico3d){grid-column:2}
+.ico3d{display:block;width:132px;height:132px;object-fit:contain;margin:0;filter:drop-shadow(0 10px 10px rgba(5,25,60,.35));
+  transition:transform .3s var(--ds-ease),filter .3s;transform-origin:50% 70%;user-select:none;-webkit-user-drag:none}
+html[data-ds="home"] .c:hover .ico3d,html[data-ds="home"] .c:focus-visible .ico3d{transform:translateY(-4px) scale(1.07) rotate(-3deg);filter:drop-shadow(0 16px 14px rgba(5,25,60,.42))}
+html[data-ds="home"] .c:active .ico3d{transform:scale(.96)}
+html[data-ds="home"] .c h3{font-size:1.12rem}
+@media (max-width:560px){
+  html[data-ds="home"] .g{grid-template-columns:1fr}
+  html[data-ds="home"] a.c,html[data-ds="home"] button.c{grid-template-columns:96px 1fr;padding:14px 16px;align-items:center}
+  html[data-ds="home"] .c .ico3d{width:96px;height:96px}
+  html[data-ds="home"] .c .go{padding-top:4px}
+}
+@media (prefers-reduced-motion:reduce){.ico3d{transition:none}}
