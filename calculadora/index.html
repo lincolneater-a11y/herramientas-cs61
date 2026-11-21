@@ -323,7 +323,7 @@ function siluetasNi(sx,z){
  function fig(cx,y0,k,fem,col,op){
   var hs=11+k*2.4,hb=8+(k-.7)*17,hw=hb*(fem?1.06:.95),lg=3+k*2.6,g=E("g",{opacity:op});
   if(fem){[-1,1].forEach(function(sg){g.appendChild(E("circle",{cx:cx+sg*13,cy:y0+18,r:5.5,fill:col}))})}
-  else{[-8,0,8].forEach(function(dx){g.appendChild(E("circle",{cx:cx+dx,cy:y0+3,r:5,fill:col}))})}
+  else{g.appendChild(E("path",{fill:col,d:"M"+(cx-11.5)+" "+(y0+11)+" Q"+(cx-9)+" "+(y0-1)+" "+cx+" "+(y0-1)+" Q"+(cx+9)+" "+(y0-1)+" "+(cx+11.5)+" "+(y0+11)+" Z"}))}
   g.appendChild(E("circle",{cx:cx,cy:y0+13,r:11.5,fill:col}));
   g.appendChild(E("path",{fill:col,d:"M"+(cx-hs)+" "+(y0+30)+" Q"+cx+" "+(y0+24)+" "+(cx+hs)+" "+(y0+30)+" C"+(cx+hb)+" "+(y0+46)+" "+(cx+hb*1.05)+" "+(y0+60)+" "+(cx+hw)+" "+(y0+74)+" L"+(cx+hw*.8)+" "+(y0+122)+" L"+(cx+lg*.5+1)+" "+(y0+122)+" L"+(cx+lg*.5)+" "+(y0+86)+" L"+(cx-lg*.5)+" "+(y0+86)+" L"+(cx-lg*.5-1)+" "+(y0+122)+" L"+(cx-hw*.8)+" "+(y0+122)+" L"+(cx-hw)+" "+(y0+74)+" C"+(cx-hb*1.05)+" "+(y0+60)+" "+(cx-hb)+" "+(y0+46)+" "+(cx-hs)+" "+(y0+30)+" Z"}));
   [-1,1].forEach(function(sg){g.appendChild(E("path",{d:"M"+(cx+sg*(hs+1))+" "+(y0+34)+" L"+(cx+sg*(hb+5+k*1.6))+" "+(y0+84),style:"fill:none;stroke:"+col+";stroke-width:"+(4+k*1.1)+";stroke-linecap:round"}))});
