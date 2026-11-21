@@ -276,7 +276,6 @@ details.card[open] > summary { margin-bottom: 12px; }
       <button class="tab" role="tab" id="tab-inicio" data-view="inicio" aria-selected="true">Inicio</button>
       <button class="tab" role="tab" id="tab-lactantes" data-view="lactantes" aria-selected="false">Recién nacido y niño</button>
       <button class="tab" role="tab" id="tab-escolar" data-view="escolar" aria-selected="false">Escolar y adolescente</button>
-      <button class="tab" role="tab" id="tab-hitos" data-view="hitos" aria-selected="false">Hitos del desarrollo</button>
       <button class="tab" role="tab" id="tab-embarazo" data-view="embarazo" aria-selected="false">Embarazadas</button>
       <button class="tab" role="tab" id="tab-req" data-view="req" aria-selected="false">Requerimientos</button>
       <button class="tab" role="tab" id="tab-r24" data-view="r24" aria-selected="false">Alimentación</button>
@@ -300,11 +299,6 @@ details.card[open] > summary { margin-bottom: 12px; }
       <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></span>
       <h3>Escolar y adolescente (5 a 19 años)</h3>
       <p>IMC/edad, talla/edad y peso/edad con curvas OMS 2007, velocidad de crecimiento entre controles, estadio de Tanner y talla blanco familiar.</p>
-    </button>
-    <button class="tile" data-go="hitos">
-      <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></span>
-      <h3>Hitos del desarrollo</h3>
-      <p>Lista de control por edad (2 meses a 5 años): social, lenguaje, cognitivo y movimiento, con edad corregida para prematuros.</p>
     </button>
     <button class="tile" data-go="embarazo">
       <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><path d="M12 8c-2.5 0-4 2-4 4.5 0 2 1 3 2 3.5V21h4v-5c1-.5 2-1.500 2-3.500C16 10 14.500 8 12 8z"/></svg></span>
@@ -730,7 +724,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   </div>
 </section>
 
-<section id="v-hitos" class="view" hidden>
+<section id="v-hitos" class="view" hidden style="display:none">
   <div class="view-head"><div><h2>Hitos del desarrollo</h2><p>Lista de control por edad (2 meses a 5 años) en cuatro áreas: social y emocional, lenguaje, cognitivo y movimiento. Es una ayuda de pesquisa para el control de salud.</p></div>
     <div class="actions"><button class="btn danger" id="hi-clear" type="button">Limpiar</button></div></div>
   <div class="split">
@@ -832,8 +826,8 @@ function copyText(text, btn) {
 }
 
 /* ---------- Navegación ---------- */
-var VIEWS = ['inicio', 'lactantes', 'escolar', 'hitos', 'embarazo', 'req', 'r24', 'frecuencia', 'dietas', 'base'];
-var MODO = window.CS61_MODO || '', MODO_V = { crec: ['lactantes', 'escolar', 'hitos'], emb: ['embarazo'] }[MODO] || null;
+var VIEWS = ['inicio', 'lactantes', 'escolar', 'embarazo', 'req', 'r24', 'frecuencia', 'dietas', 'base'];
+var MODO = window.CS61_MODO || '', MODO_V = { crec: ['lactantes', 'escolar'], emb: ['embarazo'] }[MODO] || null;
 if (MODO_V) {
   document.querySelectorAll('.tabs .tab').forEach(function (t) { if (MODO_V.indexOf(t.getAttribute('data-view')) < 0) t.hidden = true; });
   var H1 = document.querySelector('.brand h1'); if (H1) H1.textContent = MODO === 'crec' ? 'Crecimiento y desarrollo' : 'Embarazo y control prenatal';
