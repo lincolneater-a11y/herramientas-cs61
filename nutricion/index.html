@@ -455,7 +455,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   <div class="modebar" role="group" aria-label="Tipo de registro de alimentación"><button type="button" class="btn small primary" data-go="r24">Recordatorio de 24 h</button><button type="button" class="btn small " data-go="frecuencia">Frecuencia de consumo</button></div>
   <div class="view-head">
     <div><h2>Recordatorio de 24 horas</h2><p>Registre lo consumido en cada comida (en gramos o ml) y obtenga energía, macronutrientes, fibra, sodio, grasas y % de adecuación con la tabla de composición de alimentos.</p></div>
-    <div class="actions"><button class="btn" id="rc-example" type="button">Cargar ejemplo</button><button class="btn danger" id="rc-clear" type="button">Limpiar</button></div>
+    <div class="actions"><button class="btn danger" id="rc-clear" type="button">Limpiar</button></div>
   </div>
   <div class="split">
     <div class="col">
@@ -481,7 +481,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   <div class="modebar" role="group" aria-label="Tipo de registro de alimentación"><button type="button" class="btn small " data-go="r24">Recordatorio de 24 h</button><button type="button" class="btn small primary" data-go="frecuencia">Frecuencia de consumo</button></div>
   <div class="view-head">
     <div><h2>Frecuencia de consumo</h2><p>Para cada alimento indique la porción habitual y cuántas veces lo consume. Se calcula el consumo promedio diario, el aporte de nutrientes y el reparto por grupo de alimentos.</p></div>
-    <div class="actions"><button class="btn" id="fq-tpl" type="button">Cargar lista base</button><button class="btn" id="fq-example" type="button">Cargar ejemplo</button><button class="btn danger" id="fq-clear" type="button">Limpiar</button></div>
+    <div class="actions"><button class="btn" id="fq-tpl" type="button">Cargar lista base</button><button class="btn danger" id="fq-clear" type="button">Limpiar</button></div>
   </div>
   <div class="split">
     <div class="col">
@@ -732,7 +732,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 
 <section id="v-hitos" class="view" hidden>
   <div class="view-head"><div><h2>Hitos del desarrollo</h2><p>Lista de control por edad (2 meses a 5 años) en cuatro áreas: social y emocional, lenguaje, cognitivo y movimiento. Es una ayuda de pesquisa para el control de salud.</p></div>
-    <div class="actions"><button class="btn" id="hi-example" type="button">Cargar ejemplo</button><button class="btn danger" id="hi-clear" type="button">Limpiar</button></div></div>
+    <div class="actions"><button class="btn danger" id="hi-clear" type="button">Limpiar</button></div></div>
   <div class="split">
     <div class="col"><div class="card">
       <h3>1 · Edad del niño</h3>
@@ -1847,7 +1847,7 @@ function rcSummary() {
 $('rc-clear').addEventListener('click', function () {
   R24.forEach(function (m, mi) { m.items = []; rcItems(mi); }); ['rc-id', 'rc-w', 'rc-kcal', 'rc-prot', 'rc-ref'].forEach(function (id) { $(id).value = ''; }); rcCalc();
 });
-$('rc-example').addEventListener('click', function () {
+if ($('rc-example')) $('rc-example').addEventListener('click', function () {
   var ex = [[['Leche (promedio)', 200], ['Pan Francés (promedio)', 60], ['Manteca', 10]], [], [['Carne de Vaca (promedio)', 150], ['Papa', 200], ['Lechuga', 50], ['Aceite de Girasol', 10]], [['Yogur (promedio)', 200], ['Galletas Dulces (promedio)', 30]], [['Fideo Seco Crudo', 80], ['Queso 2 (promedio)', 20]], []];
   ex.forEach(function (list, mi) { R24[mi].items = []; list.forEach(function (p) { var f = byName(p[0]); if (f) R24[mi].items.push({ f: f, qty: p[1] }); }); rcItems(mi); });
   $('rc-id').value = 'Ejemplo'; $('rc-w').value = 70; $('rc-kcal').value = 2000; $('rc-prot').value = 1; rcCalc();
@@ -1904,7 +1904,7 @@ $('fq-tpl').addEventListener('click', function () {
   fqItems(); fqCalc();
 });
 $('fq-clear').addEventListener('click', function () { FQ = []; ['fq-id', 'fq-w', 'fq-kcal', 'fq-prot', 'fq-ref'].forEach(function (id) { $(id).value = ''; }); fqItems(); fqCalc(); });
-$('fq-example').addEventListener('click', function () {
+if ($('fq-example')) $('fq-example').addEventListener('click', function () {
   var ex = [['Leche (promedio)', 200, 1, 'd'], ['Pan Francés (promedio)', 60, 2, 'd'], ['Carne de Vaca (promedio)', 150, 4, 's'], ['Carne de Pollo', 150, 2, 's'], ['Papa', 150, 5, 's'], ['Lechuga', 50, 4, 's'], ['Manzana', 150, 5, 's'], ['Fideo Seco Crudo', 80, 3, 's'], ['Galletas Dulces (promedio)', 30, 1, 'd'], ['Azúcar', 10, 3, 'd'], ['Aceite de Girasol', 10, 2, 'd']];
   FQ = []; ex.forEach(function (p) { var f = byName(p[0]); if (f) FQ.push({ f: f, port: p[1], n: p[2], per: p[3] }); });
   $('fq-id').value = 'Ejemplo'; $('fq-w').value = 70; $('fq-kcal').value = 2000; $('fq-prot').value = 1; fqItems(); fqCalc();
