@@ -526,9 +526,18 @@ function acuBind(pref) {
 
 /* ---------- Navegación ---------- */
 var VIEWS = ['ecv', 'findrisc', 'excel'];
+/* Modo «solo FINDRISC» (perfil Nutrición): ?solo=findrisc oculta la supervisión cardiovascular */
+var SOLO = /[?&]solo=findrisc/.test(location.search);
+if (SOLO) {
+  VIEWS = ['findrisc', 'excel'];
+  $('v-ecv').hidden = true; $('tab-ecv').hidden = true;
+  var H1s = document.querySelector('.brand h1'); if (H1s) H1s.textContent = 'Test FINDRISC';
+  var SM = document.querySelector('.brand small'); if (SM) SM.textContent = 'Centro de Salud N.º 61 · Riesgo de diabetes tipo 2';
+  try { document.title = 'Test FINDRISC · CS 61'; } catch (e) { }
+}
 
 function show(v) {
-  if (VIEWS.indexOf(v) < 0) v = 'ecv';
+  if (VIEWS.indexOf(v) < 0) v = VIEWS[0];
   VIEWS.forEach(function (n) { $('v-' + n).hidden = (n !== v); $('tab-' + n).setAttribute('aria-selected', n === v ? 'true' : 'false'); });
   try { if (location.hash !== '#' + v) { history.replaceState(null, '', '#' + v); } } catch (e) { }
   window.scrollTo(0, 0);
