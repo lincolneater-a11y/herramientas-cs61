@@ -1,6 +1,6 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Consulta asistida CS 61</title>
+<!doctype html><html lang="es" data-ds="clinic"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Consulta asistida CS 61</title>
 <link rel="icon" type="image/png" href="../icon-192.png"><meta name="theme-color" content="#14304f">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600;700&display=swap">
+
 <style>
 /* Layout: cabecera navy; dos columnas (dictado | anamnesis) que apilan en móvil; verde azulado = IA, bordó = alerta, dorado = foco */
 :root{--bg:#f1f5f8;--surf:#fff;--ink:#14243a;--ink2:#4a5d73;--line:#d2dce5;--navy:#14304f;--teal:#0d7a85;--teal-soft:#dff1f2;--bord:#8a1f3d;--bord-soft:#f7e3e8;--gold:#a87615;--gold-soft:#f8efd9;--hf:'Source Serif 4',Georgia,serif;--bf:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif}
@@ -99,7 +99,7 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
 .cfg textarea{min-height:90px}
 .cfg .sub b{color:var(--ink)}
 .acu{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--bg)}.acu h3{margin:0 0 2px;font:700 1rem var(--hf)}.acu .blk{margin-top:10px}.acu .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;font-weight:700;font-size:.9rem}.acu textarea{min-height:90px}
-</style></head>
+</style><script src="../shared/ds.js"></script><link rel="stylesheet" href="../shared/ds.css"></head>
 <body>
 <header class="top"><div class="wrap">
   <div><h1>Consulta asistida</h1><small>Centro de Salud N.º 61 Solidaridad · notas de consulta con IA</small></div>
@@ -706,6 +706,7 @@ function ui(){
   $('rec-go').hidden=st!=='idle';$('rec-pause').hidden=st==='idle';$('rec-stop').hidden=st==='idle';
   $('rec-pause').textContent=st==='pause'?'▶ Reanudar':'⏸ Pausar';
   $('dot').className='dot'+(st==='rec'?' on':'');
+  try{if(window.CS61DS)CS61DS.hold(st==='rec')}catch(e){}
 }
 function tickf(){$('timer').textContent=fmt(acc+(st==='rec'?Date.now()-t0:0))}
 function startSR(){
