@@ -272,3 +272,7 @@ html[data-ds="home"] .c h3{font-size:1.12rem}
 .tile:hover > .tile-ico{transform:translateY(-3px) scale(1.06) rotate(-3deg)}
 @media (max-width:560px){.pico{width:64px;height:64px}.tile > .tile-ico{width:80px;height:80px}}
 @media print{.pico,.tile-ico{display:none!important}}
+
+/* ---------- 14. Introducciones a todo el ancho ---------- */
+.view-head > div:first-child{flex:1 1 420px;min-width:0}
+.view-head p{max-width:none!important;text-align:justify;hyphens:auto;-webkit-hyphens:auto}

@@ -259,6 +259,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 .dt-img svg,.dt-img img{width:100%;height:auto;border-radius:8px;display:block;aspect-ratio:4/3;object-fit:cover}
 .dt-rb h5{margin:0 0 3px;font-size:1.02rem;color:#14304f}.dt-rm{font-size:.84rem;background:#e6f2f3;border-radius:6px;padding:4px 8px;margin-bottom:6px}.dt-cols{display:grid;grid-template-columns:1fr 1.2fr;gap:0 14px}.dt-cols ul,.dt-cols ol{margin:2px 0 0;padding-left:18px}.dt-tip{margin:6px 0 0;font-size:.84rem;color:#4b5a6e}
 .dt-rc>.dt-ui{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}
+.dt-lib{max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:4px 10px}.dt-lib fieldset{border:0;margin:0 0 6px;padding:0;min-width:0}.dt-lib legend{font-weight:700;font-size:.82rem;margin:8px 0 2px;color:var(--ink-2);padding:0}.dt-lib label{display:flex;gap:8px;align-items:flex-start;padding:5px 2px;cursor:pointer;font-size:.92rem}.dt-lib label input{margin-top:3px;flex:none}.dt-lib [hidden]{display:none}#dt-lib-n:empty{display:none}
 .dt-note{font-size:.82rem;color:#4b5a6e}.dt-s{margin:12px 0 4px;color:#14304f;font-size:.95rem}.dt-ln{border-bottom:1px solid #9aa9ba;height:24px}.dt-day{margin-top:12px;font-size:.95rem}.dt-dt td{height:32px}.dt-ag{font-size:.84rem;margin:4px 0 10px;color:#14304f}
 .dt-k-dia .pb{break-before:page}
 @media(max-width:700px){.dt-rc{grid-template-columns:1fr}.dt-cols{grid-template-columns:1fr}}
@@ -530,7 +531,7 @@ details.card[open] > summary { margin-bottom: 12px; }
         <label class="check"><input type="checkbox" id="dt-da" checked> Agua, actividad y cómo me sentí</label>
         <div class="actions" style="margin-top:8px"><button class="btn primary small" id="dt-dok" type="button">Agregar diario</button></div>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><select id="dt-lib" style="flex:1;min-width:180px"></select><button class="btn small" id="dt-add-rec" type="button">Agregar receta</button></div>
+      <div id="dt-libbox" style="margin-top:8px"><details id="dt-libd"><summary class="btn small" style="display:inline-block;cursor:pointer">Elegir recetas del recetario (puede marcar varias)</summary><div style="margin-top:8px"><input type="search" id="dt-libq" placeholder="Buscar receta…" autocomplete="off" aria-label="Buscar receta" style="width:100%;margin-bottom:6px"><div id="dt-lib" class="dt-lib" role="group" aria-label="Recetas disponibles"></div><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px"><button class="btn primary small" id="dt-add-rec" type="button" disabled>Agregar recetas seleccionadas</button><button class="btn small" id="dt-lib-clr" type="button">Desmarcar todo</button><span class="note" id="dt-lib-n" aria-live="polite"></span></div></div></details></div>
       <div class="actions" style="margin-top:14px"><button class="btn primary" id="dt-print" type="button">Imprimir o guardar PDF</button><button class="btn" id="dt-reset" type="button">Volver al modelo original</button></div>
       <input type="file" id="dt-file" accept="image/*" hidden>
       <details class="card" open style="margin-top:14px;background:var(--surface-2,transparent)"><summary><b>Para el profesional</b> <small>(no se imprime)</small></summary>
@@ -2065,17 +2066,17 @@ var DIETAS = [
   lim: ['Sal gruesa, sal fina, salero en la mesa y pseudosales (de ajo, de cebolla).', 'Fiambres, embutidos, pickles, aceitunas, conservas, ahumados, mariscos.', 'Caldos y sopas concentradas, aderezos, salsas listas, condimentos en sobre, polvo de hornear.', 'Snacks, productos de copetín y comidas ultraprocesadas.', 'Quesos duros y semiduros (700 a 1500 mg de sodio cada 100 g).', 'Aguas saborizadas y minerales con sodio, gaseosas; alcohol.'],
   pau: ['Leer los rótulos: «sin sodio» tiene menos de 5 mg cada 100 g y «bajo en sodio» menos de 120 mg cada 100 g.', 'La sal se saca de a poco: el gusto se adapta en 3 a 4 semanas.', 'Cocinar con trozos chicos y agua fría para que los alimentos pierdan parte de su sodio, y tirar el agua.', 'Hacer actividad física aeróbica: 150 minutos por semana.', 'Controlar la presión con regularidad y no suspender la medicación.', 'Consultar antes de usar sales dietéticas: tienen potasio y pueden no ser adecuadas con enfermedad renal o con ciertos medicamentos.'],
   ala: ['Presión mayor a 180/110 o dolor de cabeza intenso.', 'Dolor en el pecho, falta de aire o visión borrosa.', 'Hinchazón de piernas o aumento de peso rápido.'],
-  ref: ['Cátedra de Dietoterapia (Teóricos de Hipertensión arterial 2026); dieta DASH (NHLBI); OMS (sodio); Guías Alimentarias para la Población Argentina 2016.'] },
+  ref: ['Dieta DASH (NHLBI); OMS (sodio); Guías Alimentarias para la Población Argentina 2016.'] },
 { id: 'dm2', g: 'p', ab: 'DBT 2', t: 'Diabetes tipo 2', sub: 'Plan con control de hidratos de carbono', kcal: [1600, 1200, 2600], kcalN: 'Según el estado nutricional. Con sobrepeso u obesidad suele ser un plan de 1500 a 1800 kcal por día; no conviene bajar de eso salvo que el peso se estanque. Con una pérdida del 10 % del peso mejora el control de la glucemia. Distribuir los hidratos en las 4 comidas.',
   mac: { hc: [50, 60], p: [15, 20], g: [25, 30] },
-  key: { 'Hidratos': 'No menos de 150 g por día. Sin azúcar, miel ni jugos. Los alimentos con almidón o de índice glucémico alto (papa, batata, choclo, pastas, banana, uva) se limitan: 1 a 2 veces por semana si la HbA1c es mayor de 7 % y 3 a 4 veces si es menor.', 'Proteínas': '0,8 a 1 g por kg por día (60 a 80 g con sobrepeso). Con enfermedad renal, no más de 1 g por kg.', 'Grasas': 'Hasta 30 % del VCT; saturadas hasta 10 % (menos de 7 % si hay dislipemia); sin grasas trans.', 'Fibra': '25 a 30 g por día, con predominio de fibra soluble.', 'Sodio': 'Moderar la sal (menos de 5 g por día); con HTA, régimen hiposódico.', 'Alcohol': 'No se recomienda. Si lo toma: hasta 20 g por día (un vaso de 200 cc de vino) y siempre con comida.', 'Control': 'Metas de la cátedra: HbA1c hasta 6,5 %, glucemia antes de comer menor de 120 mg/dl y 2 horas después entre 140 y 160 mg/dl.', 'Otros': 'No se aconsejan las dietas cetogénicas ni el ayuno intermitente. 4 comidas sin saltear; colaciones solo si hace actividad física o usa insulina basal con hipoglucemias.' },
+  key: { 'Hidratos': 'No menos de 150 g por día. Sin azúcar, miel ni jugos. Los alimentos con almidón o de índice glucémico alto (papa, batata, choclo, pastas, banana, uva) se limitan: 1 a 2 veces por semana si la HbA1c es mayor de 7 % y 3 a 4 veces si es menor.', 'Proteínas': '0,8 a 1 g por kg por día (60 a 80 g con sobrepeso). Con enfermedad renal, no más de 1 g por kg.', 'Grasas': 'Hasta 30 % del VCT; saturadas hasta 10 % (menos de 7 % si hay dislipemia); sin grasas trans.', 'Fibra': '25 a 30 g por día, con predominio de fibra soluble.', 'Sodio': 'Moderar la sal (menos de 5 g por día); con HTA, régimen hiposódico.', 'Alcohol': 'No se recomienda. Si lo toma: hasta 20 g por día (un vaso de 200 cc de vino) y siempre con comida.', 'Control': 'Metas de control orientativas: HbA1c hasta 6,5 %, glucemia antes de comer menor de 120 mg/dl y 2 horas después entre 140 y 160 mg/dl.', 'Otros': 'No se aconsejan las dietas cetogénicas ni el ayuno intermitente. 4 comidas sin saltear; colaciones solo si hace actividad física o usa insulina basal con hipoglucemias.' },
   obj: ['Alcanzar y mantener un peso razonable y pactado; bajar de peso si hay sobrepeso u obesidad.', 'Lograr un buen control de la glucemia, en los rangos acordados con el equipo de salud (HbA1c hasta 6,5 %).', 'Prevenir la hipoglucemia y retrasar las complicaciones (ojos, riñón, nervios y corazón).', 'Cuidar el corazón: menos grasa saturada y sal, más fibra y pescado.'],
   com: [['Desayuno', 'Leche o yogur descremado sin azúcar + 2 rebanadas de pan integral (o de salvado) con queso untable descremado o huevo + 1 fruta chica entera.'], ['Media mañana (solo si hace actividad o se lo indicaron)', '1 yogur sin azúcar o 1 fruta con 1 puñado chico de frutos secos. Combina hidrato, proteína y grasa.'], ['Almuerzo', 'Plato: ½ verduras (crudas y cocidas), ¼ proteína magra (carne, pollo, pescado, huevo), ¼ hidrato con fibra (legumbres, arroz integral, papa con cáscara hervida). Aceite crudo. Fruta o postre sin azúcar.'], ['Merienda', 'Infusión con edulcorante + 2 tostadas integrales con queso untable o ricota, o 1 fruta con yogur.'], ['Cena', 'Similar al almuerzo: tortilla de verduras, pescado con ensalada, pollo al horno con zapallo. Fruta.'], ['Colación nocturna (si usa insulina y hace hipoglucemias)', '1 yogur o 1 rebanada de pan integral con queso, según indique el equipo.']],
   si: ['Hidratos con fibra y repartidos en las 4 comidas: legumbres, cereales integrales, avena, verduras y frutas con cáscara.', 'Verduras de los grupos A y B a voluntad (acelga, zapallito, coreanito, chaucha, tomate, remolacha, zanahoria).', 'Proteínas magras: pollo sin piel, cortes magros (cuadril, nalga, bola de lomo, peceto), pescado de mar 2 a 3 veces por semana (caballa, sardina, atún, merluza).', 'Aceites crudos (oliva, girasol), palta y frutos secos en porciones medidas.', 'Agua, soda, infusiones; bebidas y gelatinas con edulcorante.', 'Cocinar al horno, a la plancha, al vapor o hervido; con hierbas y especias.'],
   lim: ['Azúcar, miel, mermeladas comunes, golosinas, helados y postres con azúcar.', 'Gaseosas y jugos comunes (también los naturales).', 'Harinas refinadas, facturas, galletitas dulces y panes blancos en exceso.', 'Grasas saturadas y trans: manteca, margarinas duras, crema, fiambres, embutidos, vísceras, carnes grasas, piel del pollo.', 'Frituras y salteados; snacks y productos de copetín.', 'Alcohol: lo mejor es no tomar.'],
   pau: ['Hacer las 4 comidas en horarios regulares y no pasar mucho tiempo sin comer.', 'Pesar o medir las porciones de hidratos y sumar fibra cruda en cada comida.', 'Elegir edulcorantes y leer los rótulos (con HTA, sin ciclamato de sodio).', 'Hacer actividad física: al menos 150 minutos por semana; avisar al equipo para ajustar la medicación o las colaciones.', 'Controlar la glucemia según indicación y revisar los pies todos los días.', 'Llevar siempre una fuente de azúcar rápida (caramelos, jugo) por si hay hipoglucemia.', 'Cocinar con colchón de verduras, caldos de verdura o rocío vegetal en lugar de freír.'],
   ala: ['Glucemias muy altas de forma repetida, mucha sed, orina en exceso.', 'Síntomas de hipoglucemia: temblor, sudor frío, confusión.', 'Heridas en los pies que no cicatrizan.', 'Vómitos o dolor abdominal con glucemias altas.'],
-  ref: ['Cátedra de Dietoterapia (Teórico de Diabetes 2026, ADA 2026); Ficha técnica del régimen diabético, Servicio de Auditoría y Alimentación, Hospital San Bernardo (invierno 2026); Sociedad Argentina de Diabetes; Guías Alimentarias para la Población Argentina 2016.'] },
+  ref: ['ADA 2026; Ficha técnica del régimen diabético, Servicio de Auditoría y Alimentación, Hospital San Bernardo (invierno 2026); Sociedad Argentina de Diabetes; Guías Alimentarias para la Población Argentina 2016.'] },
 { id: 'dg', g: 'p', ab: 'D. gestacional', t: 'Diabetes gestacional', sub: 'Plan para controlar la glucemia durante el embarazo', kcal: [2000, 1600, 2800], kcalN: 'Según el peso pregestacional y la actividad. No hacer dietas muy bajas en calorías (se produce cetosis, que no conviene en el embarazo); en obesidad se puede reducir algo el aporte, sin bajar de unas 1600 a 1800 kcal. Ajustar con la ganancia de peso y la glucemia.',
   mac: { hc: [40, 50], p: [20, 25], g: [25, 35] },
   obj: ['Mantener la glucemia en los objetivos acordados con el equipo de salud (habitualmente en ayunas menos de 95 mg/dL, 1 hora después de comer menos de 140 y 2 horas menos de 120).', 'Lograr una ganancia de peso adecuada para el IMC previo al embarazo.', 'Cubrir las necesidades del embarazo (al menos unos 175 g de hidratos de carbono por día, proteínas, hierro, calcio y ácido fólico) y evitar el ayuno prolongado.'],
@@ -2113,8 +2114,8 @@ var DIETAS = [
   lim: ['Fiambres, embutidos, achuras, vísceras, cortes grasos y piel del pollo.', 'Manteca, crema, quesos duros y grasos, helados, mayonesa y salsas comerciales.', 'Grasas trans: margarinas duras, frituras, pastelería, tapas de tarta y empanadas, galletitas rellenas.', 'Azúcar, gaseosas, jugos, dulces; alcohol.', 'Yema: 1 a 2 por semana; usar preparaciones con clara.'],
   pau: ['Cocinar al horno, a la plancha, al vapor o hervido; sin fritura.', 'Sacar la grasa visible de la carne y la piel del pollo antes de cocinar.', 'Hacer 150 minutos de actividad física por semana (30 minutos casi todos los días).', 'No fumar y no tomar alcohol.', 'Controlar los lípidos según indicación médica.'],
   ala: ['Dolor en el pecho o falta de aire con esfuerzo.', 'Dolor abdominal intenso (riesgo de pancreatitis con triglicéridos muy altos).', 'Dolor muscular con la medicación para el colesterol.'],
-  ref: ['Cátedra de Dietoterapia (Teórico de Dislipemias 2026; enfoques AAC fase 1 y 2 y ATP III); Sociedad Argentina de Cardiología; ESC/EAS 2019; Guías Alimentarias para la Población Argentina 2016.'] },
-{ id: 'obe', g: 'p', ab: 'Obesidad', t: 'Sobrepeso y obesidad', sub: 'Plan de descenso de peso gradual (adultos)', kcal: [1500, 1200, 1800], kcalN: 'Déficit de 500 a 750 kcal respecto del gasto. Referencia de la cátedra: 1200 a 1500 kcal por día en mujeres y 1500 a 1800 en varones. No bajar de 800 kcal ni usar dietas cetogénicas.',
+  ref: ['Enfoques AAC (fases 1 y 2) y ATP III; Sociedad Argentina de Cardiología; ESC/EAS 2019; Guías Alimentarias para la Población Argentina 2016.'] },
+{ id: 'obe', g: 'p', ab: 'Obesidad', t: 'Sobrepeso y obesidad', sub: 'Plan de descenso de peso gradual (adultos)', kcal: [1500, 1200, 1800], kcalN: 'Déficit de 500 a 750 kcal respecto del gasto. Referencia habitual: 1200 a 1500 kcal por día en mujeres y 1500 a 1800 en varones. No bajar de 800 kcal ni usar dietas cetogénicas.',
   mac: { hc: [50, 60], p: [15, 20], g: [25, 30] },
   key: { 'Energía': 'Déficit de 500 a 750 kcal; no menos de 800 kcal por día.', 'Hidratos': '50 a 60 % del VCT, con fibra y de baja carga glucémica.', 'Proteínas': '15 a 18 % del VCT; solo por indicación específica, hiperproteica (hasta 30 %).', 'Grasas': 'Menos de 30 % del VCT.', 'Fibra': 'Aumentada: da volumen y saciedad.', 'Peso': 'Meta: bajar 5 a 10 % del peso inicial, en forma gradual.', 'Otros': 'Textura firme y masticación; platos con volumen y baja densidad calórica; las verduras primero en la comida.' },
   obj: ['Perder 5 a 10 % del peso inicial en 6 meses (0,5 a 1 kg por semana).', 'Mejorar la glucemia, la presión y los lípidos.', 'Preservar la masa muscular y la hidratación.', 'Aprender hábitos que se puedan sostener.'],
@@ -2123,7 +2124,7 @@ var DIETAS = [
   lim: ['Gaseosas, jugos, alcohol y bebidas azucaradas.', 'Golosinas, facturas, galletitas, snacks y comidas rápidas.', 'Frituras, fiambres, embutidos y salsas cremosas.', 'Porciones grandes: servirse en plato chico.', 'Picar entre comidas frente a la pantalla.'],
   pau: ['Comer despacio, sentado y sin pantallas.', 'No saltear comidas ni llegar con mucha hambre a la cena.', 'Caminar 30 a 60 minutos casi todos los días y sumar ejercicios de fuerza.', 'Dormir 7 a 8 horas: la falta de sueño aumenta el apetito.', 'Registrar lo que se come y pesarse una vez por semana.', 'Evitar dietas de moda, ayunos extremos y suplementos «quemagrasa».'],
   ala: ['Mareos, debilidad o palpitaciones.', 'Pérdida de más de 1 kg por semana.', 'Atracones, vómitos o culpa intensa con la comida.', 'Aparición de síntomas de diabetes o presión alta.'],
-  ref: ['Cátedra de Dietoterapia (Teórico de Regímenes hipocalóricos y Obesidad 2026); OMS; ESPEN/EASO; Guías Alimentarias para la Población Argentina 2016. En niños y adolescentes se requiere otro abordaje.'] },
+  ref: ['OMS; ESPEN/EASO; Guías Alimentarias para la Población Argentina 2016. En niños y adolescentes se requiere otro abordaje.'] },
 { id: 'cel', g: 'p', ab: 'Celiaquía', t: 'Celiaquía', sub: 'Alimentación sin gluten (sin TACC)', kcal: [2000, 1400, 3000], kcalN: 'La cantidad de energía se ajusta al peso y a la actividad; en la recuperación de la mucosa puede hacer falta más.',
   mac: { hc: [50, 55], p: [15, 20], g: [25, 30] },
   obj: ['Excluir por completo y de por vida el trigo, avena, cebada y centeno (TACC) y sus derivados.', 'Evitar la contaminación cruzada en casa y fuera de casa.', 'Corregir deficiencias de hierro, calcio, fibra y vitaminas.'],
@@ -2133,7 +2134,7 @@ var DIETAS = [
   pau: ['Revisar el listado vigente de ANMAT de alimentos libres de gluten antes de comprar.', 'Evitar la contaminación cruzada: tablas, tostadoras, cucharas, aceite de fritura y harinas compartidas.', 'Lavar muy bien los utensilios; guardar los productos sin TACC aparte y por encima de los demás.', 'Mantener los controles médicos y de laboratorio indicados.', 'Informar a todo el grupo familiar y a la escuela o el trabajo.'],
   ala: ['Diarrea, dolor abdominal, hinchazón o pérdida de peso.', 'Anemia, cansancio o aftas frecuentes.', 'En niños: falta de crecimiento.', 'Síntomas después de comer algo dudoso.'],
   ref: ['Ley 26.588 y Código Alimentario Argentino; ANMAT (alimentos libres de gluten); Ministerio de Salud de la Nación (Guía de práctica clínica de enfermedad celíaca); ESPGHAN 2020.'] },
-{ id: 'dia', g: 'p', ab: 'Diarrea', t: 'Diarrea', sub: 'Régimen astringente y blando intestinal: se avanza de a poco según tolerancia', kcal: [1800, 1200, 2600], kcalN: 'Normocalórico según el estado nutricional. En la diarrea no hay que dejar de comer: lo primero es hidratar y volver pronto a la alimentación, en 5 a 6 comidas chicas. La cátedra no fija porcentajes de macronutrientes: los valores son orientativos, con pocas grasas.',
+{ id: 'dia', g: 'p', ab: 'Diarrea', t: 'Diarrea', sub: 'Régimen astringente y blando intestinal: se avanza de a poco según tolerancia', kcal: [1800, 1200, 2600], kcalN: 'Normocalórico según el estado nutricional. En la diarrea no hay que dejar de comer: lo primero es hidratar y volver pronto a la alimentación, en 5 a 6 comidas chicas. No hay porcentajes de macronutrientes establecidos para este régimen: los valores son orientativos, con pocas grasas.',
   mac: { hc: [55, 65], p: [15, 20], g: [20, 25] },
   key: { 'Etapas': 'Líquida de excepción (24 a 48 h, si hay náuseas o vómitos) → régimen astringente (pocos días) → régimen blando intestinal → régimen normal según tolerancia.', 'Líquidos': 'Solución de rehidratación oral (lo más recomendado), té con azúcar al 5 %, mucílago de arroz con sal, caldos de verdura. Mucílago: 30 g de arroz en 1 litro de agua, 30 minutos, colar, completar el litro y agregar 1 cucharadita de sal.', 'Fibra': 'Sin estímulos mecánicos: sin fibra cruda ni legumbres. Verduras y frutas cocidas y subdivididas (pectinas de la manzana, la pera y el membrillo ayudan).', 'Lactosa': 'Leche de bajo contenido en lactosa o sin lactosa; quesos frescos; yogur según tolerancia.', 'Grasas': 'Solo como condimento; sin frituras, salteados ni estofados.', 'Bebidas': 'Agua, té oscuro, mate cocido en saquito, tilo, manzanilla. Sin café, mate cebado, chocolate, gaseosas ni alcohol.', 'Otros': 'Condimentos suaves (sal, perejil, laurel, orégano, nuez moscada); sin ají, pimienta ni comino; poco limón y vinagre. Si la diarrea es crónica y sin diagnóstico: sin azúcar (con edulcorantes).' },
   obj: ['Reponer el agua y los electrolitos perdidos.', 'Dejar el intestino en reposo relativo: poca estimulación mecánica, química y térmica.', 'Avanzar de a poco desde el régimen astringente hasta el normal, según tolerancia.', 'Evitar la desnutrición y encontrar la causa si la diarrea dura.'],
@@ -2142,8 +2143,8 @@ var DIETAS = [
   lim: ['Frituras, salteados, estofados, embutidos, fiambres, vísceras y comidas grasas.', 'Legumbres, verduras crudas, repollo, coliflor, apio, pepino y pimiento.', 'Frutas cítricas, frutos secos y frutas secas.', 'Pan integral, salvado, facturas, galletitas dulces o rellenas.', 'Leche entera, helados, café, mate cebado, chocolate, gaseosas y alcohol.', 'Miel, mermelada de naranja o ciruela, dulce de leche y dulce de cayote.', 'Ají, pimienta y comino.'],
   pau: ['Tomar líquidos en sorbos frecuentes durante todo el día, aunque no haya sed.', 'Hacer 5 a 6 comidas chicas, tibias; evitar los líquidos fríos en ayunas.', 'Cocinar bien las carnes y los huevos y lavarse las manos antes de comer.', 'Reincorporar las verduras crudas, la fibra y la leche al final, de a poco y viendo cómo se tolera.', 'No tomar antidiarreicos ni antibióticos sin indicación médica.', 'Los bebés, los adultos mayores y las embarazadas se deshidratan más rápido: consultar antes.'],
   ala: ['Diarrea de más de 3 días, o que dura más de un mes.', 'Sangre o moco en las heces, o fiebre alta.', 'Sed intensa, boca seca, orina escasa y oscura, mareos o decaimiento (deshidratación).', 'Vómitos que no dejan tomar líquidos.', 'Pérdida de peso o dolor abdominal fuerte.'],
-  ref: ['Cátedra de Dietoterapia (Teórico N.º 4 Régimen blando intestinal y diarreas, 2026); OMS (rehidratación oral); Guías Alimentarias para la Población Argentina 2016. En niños pequeños el manejo lo define el pediatra.'] },
-{ id: 'est', g: 'p', ab: 'Constipación', t: 'Constipación', sub: 'Dieta rica en fibra y en líquidos', kcal: [1800, 1400, 2600], kcalN: 'Según el estado nutricional. Lo central es la fibra (25 a 30 g por día) y el agua (2 a 3 litros), aumentando de a poco para evitar hinchazón. La cátedra no fija porcentajes de macronutrientes: los valores son orientativos.',
+  ref: ['OMS (rehidratación oral); Guías Alimentarias para la Población Argentina 2016. En niños pequeños el manejo lo define el pediatra.'] },
+{ id: 'est', g: 'p', ab: 'Constipación', t: 'Constipación', sub: 'Dieta rica en fibra y en líquidos', kcal: [1800, 1400, 2600], kcalN: 'Según el estado nutricional. Lo central es la fibra (25 a 30 g por día) y el agua (2 a 3 litros), aumentando de a poco para evitar hinchazón. No hay porcentajes de macronutrientes establecidos para este régimen: los valores son orientativos.',
   mac: { hc: [50, 60], p: [15, 20], g: [25, 30] },
   key: { 'Fibra': '25 a 30 g por día, aumentando de a poco; mezcla de fibra soluble e insoluble. Salvado de trigo (insoluble) o de avena (soluble) por cucharaditas probando tolerancia.', 'Líquidos': '2 a 3 litros por día. El agua fría en ayunas estimula el reflejo gastrocólico.', 'Frutas': 'Con cáscara y con el hollejo de los cítricos: kiwi, naranja, mandarina, ciruela, higo, uva, frutilla, melón, sandía y ananá. La compota de ciruelas desecadas tiene efecto laxante (fibra y sorbitol).', 'Legumbres': 'Muy ricas en fibra, pero dan gases: empezar de a poco, remojarlas y tirar el agua.', 'Otros': 'Semillas de lino y chía bien hidratadas; lácteos con prebióticos; actividad física; horario regular para ir al baño.' },
   obj: ['Normalizar el tránsito intestinal y la consistencia de las heces.', 'Llegar de a poco a 25 a 30 g de fibra por día.', 'Asegurar el consumo de líquidos y el movimiento diario.', 'Evitar el uso habitual de laxantes sin indicación.'],
@@ -2152,7 +2153,7 @@ var DIETAS = [
   lim: ['Harinas y panes refinados, facturas, galletitas de agua y snacks.', 'Banana verde, membrillo y manzana pelada (astringentes).', 'Comidas rápidas, fiambres y platos muy grasos.', 'Postergar las ganas de ir al baño.', 'Laxantes y purgantes sin indicación médica.'],
   pau: ['Subir la fibra de a poco, en 2 a 3 semanas, para evitar gases y dolor.', 'Tomar agua con cada comida y entre ellas; los líquidos fríos en ayunas ayudan.', 'Caminar o hacer actividad física todos los días.', 'Ir al baño a la misma hora, sobre todo después del desayuno, sin apuro.', 'Las semillas de lino se muelen y se toman con bastante agua.', 'Con diabetes, hipertensión u otra patología, consultar antes de agregar suplementos de fibra.'],
   ala: ['Sangre en las heces o heces negras.', 'Pérdida de peso sin motivo o cambio brusco del tránsito después de los 50 años.', 'Dolor abdominal fuerte, vómitos o abdomen muy hinchado.', 'Más de una semana sin evacuar.'],
-  ref: ['Cátedra de Dietoterapia (Teórico de Constipación y Enfermedad diverticular, 2026); Guías Alimentarias para la Población Argentina 2016.'] },
+  ref: ['Guías Alimentarias para la Población Argentina 2016.'] },
 { id: 'ant', g: 'p', ab: 'Antiinflamatoria', t: 'Dieta antiinflamatoria', sub: 'Patrón mediterráneo: vegetales, pescado azul, aceite de oliva y poco ultraprocesado', kcal: [1900, 1400, 2600], kcalN: 'Según el estado nutricional. Es un patrón de alimentación saludable, de tipo mediterráneo; no reemplaza el tratamiento médico de enfermedades inflamatorias (artritis, enfermedad inflamatoria intestinal). En un brote de enfermedad intestinal la fibra se ajusta con el equipo tratante.',
   mac: { hc: [45, 55], p: [15, 20], g: [30, 35] },
   key: { 'Grasas': 'Aceite de oliva extra virgen como grasa principal; pescado azul 2 a 3 veces por semana (omega 3); frutos secos, unos 30 g por día; saturadas por debajo de 10 %.', 'Fibra': 'Más de 25 g por día, con verduras, frutas, legumbres y cereales integrales.', 'Carnes': 'Rojas magras 1 a 2 veces por semana; sin procesadas (fiambres, embutidos).', 'Azúcares': 'Sin bebidas azucaradas ni dulces frecuentes; la fruta, entera.', 'Alcohol': 'Mejor no tomar.', 'Otros': 'Especias y hierbas (cúrcuma con pimienta, jengibre, ajo, romero) en la cocina diaria; actividad física regular.' },
@@ -2162,7 +2163,7 @@ var DIETAS = [
   lim: ['Ultraprocesados, snacks, galletitas y facturas.', 'Gaseosas, jugos y bebidas azucaradas; golosinas y postres con azúcar.', 'Fiambres, embutidos y carnes procesadas; carnes rojas grasas.', 'Frituras, margarinas duras y grasas trans.', 'Harinas refinadas en exceso.', 'Alcohol.'],
   pau: ['Cocinar al horno, a la plancha, al vapor o hervido, con aceite de oliva crudo.', 'Ocupar la mitad del plato con verduras en el almuerzo y la cena.', 'Sumar actividad física: 150 minutos por semana.', 'Dormir bien y manejar el estrés: también influyen en la inflamación.', 'Consultar antes de tomar suplementos de cúrcuma, omega 3 o hierbas: pueden interactuar con medicamentos (por ejemplo, anticoagulantes).', 'Es un cambio de hábitos a largo plazo: los resultados se ven en semanas o meses.'],
   ala: ['Dolor, hinchazón o rigidez articular que aumenta.', 'Diarrea con sangre, fiebre o pérdida de peso sin motivo.', 'Fiebre o cansancio persistentes.', 'Cualquier síntoma nuevo en el pecho o falta de aire.'],
-  ref: ['Cátedra de Dietoterapia (patrón de Dieta Mediterránea en los Teóricos de Hipertensión y de Dislipemia, 2026); Guías Alimentarias para la Población Argentina 2016. La evidencia de una «dieta antiinflamatoria» como tratamiento específico es limitada.'] },
+  ref: ['Patrón de dieta mediterránea; Guías Alimentarias para la Población Argentina 2016. La evidencia de una «dieta antiinflamatoria» como tratamiento específico es limitada.'] },
 ];
 
 var RECETAS = [
@@ -2679,7 +2680,7 @@ function dtRecHTML(r) {
     + '<div class="dt-rm"><b>Rinde:</b> ' + esc(r.rinde) + ' · <b>Cada porción equivale a:</b> ' + esc(r.eq) + '</div>'
     + '<div class="dt-cols"><div><b>Ingredientes (medidas caseras)</b>' + dtL(ing) + '</div><div><b>Preparación</b><ol>' + r.pas.map(function (x) { return '<li>' + esc(dtSS(x)) + '</li>'; }).join('') + '</ol></div></div>'
     + (r.tip ? '<p class="dt-tip"><b>Consejo:</b> ' + esc(dtSS(r.tip)) + '</p>' : '') + '</div>'
-    + '<div class="dt-ui" contenteditable="false"><button type="button" class="btn small" data-img="1">Cambiar foto</button> <button type="button" class="btn small danger" data-rrm="1">Quitar receta</button></div></article>';
+    + '<div class="dt-ui" contenteditable="false">'+DT_MVB+'<button type="button" class="btn small" data-img="1">Cambiar foto</button> <button type="button" class="btn small danger" data-rrm="1">Quitar receta</button></div></article>';
 }
 var DT_DCOL = { dm2: 'Glucemia', hta: 'Sal agregada (sí / no)', cel: 'Síntomas', emb: 'Náuseas / acidez', cmp: 'Cómo lo aceptó', obe: 'Hambre (1 a 5)', may: 'Apetito (1 a 5)' };
 function dtDiarioHTML(o) {
@@ -2757,14 +2758,35 @@ function dtRecs() {
   L = RECETAS.filter(function (r) { var ap = r.ap || [r.m]; return pids.length ? pids.every(function (i) { return ap.indexOf(i) >= 0; }) : r.m === DT.base.id; });
   return L.map(function (r, i) { return { r: r, i: i, p: ids.indexOf(r.m) >= 0 ? 0 : 1 }; }).sort(function (a, b) { return a.p - b.p || a.i - b.i; }).map(function (x) { return x.r; });
 }
+var DT_SEL = {}, DT_SEQ = 0;
+function dtNorm(s) { return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+function dtLibCount() { var n = Object.keys(DT_SEL).length, b = $('dt-add-rec'), c = $('dt-lib-n'); if (b) { b.disabled = !n; b.textContent = n > 1 ? 'Agregar ' + n + ' recetas seleccionadas' : (n === 1 ? 'Agregar 1 receta seleccionada' : 'Agregar recetas seleccionadas'); } if (c) c.textContent = n ? '' : 'Marque una o más recetas.'; }
+function dtLibFilter() {
+  var q = dtNorm(($('dt-libq') || {}).value || '').trim();
+  document.querySelectorAll('#dt-lib label').forEach(function (l) { l.hidden = !!q && dtNorm(l.textContent).indexOf(q) < 0; });
+  document.querySelectorAll('#dt-lib fieldset').forEach(function (f) { f.hidden = !f.querySelector('label:not([hidden])'); });
+  dtLibCount();
+}
 function dtLib() {
-  var apt = dtRecs(), ids = apt.map(function (r) { return r.id; }), H = '<option value="">Agregar receta de la biblioteca…</option>';
-  H += '<optgroup label="Aptas para este plan (' + apt.length + ')">' + apt.map(function (r) { return '<option value="' + r.id + '">' + esc(r.t) + '</option>'; }).join('') + '</optgroup>';
+  var apt = dtRecs(), ids = apt.map(function (r) { return r.id; });
+  function item(r) { return '<label><input type="checkbox" value="' + r.id + '"' + (DT_SEL[r.id] ? ' checked' : '') + '><span>' + esc(r.t) + '</span></label>'; }
+  var H = '<fieldset><legend>Aptas para este plan (' + apt.length + ')</legend>' + apt.map(item).join('') + '</fieldset>';
   DIETAS.forEach(function (d) {
     var l = RECETAS.filter(function (r) { return r.m === d.id && ids.indexOf(r.id) < 0; });
-    if (l.length) H += '<optgroup label="Otras: ' + esc(d.t) + '">' + l.map(function (r) { return '<option value="' + r.id + '">' + esc(r.t) + '</option>'; }).join('') + '</optgroup>';
+    if (l.length) H += '<fieldset><legend>Otras: ' + esc(d.t) + '</legend>' + l.map(item).join('') + '</fieldset>';
   });
-  $('dt-lib').innerHTML = H;
+  $('dt-lib').innerHTML = H; dtLibFilter();
+}
+var DT_MVB = '<button type="button" class="btn small" data-rmv="-1" title="Subir receta" aria-label="Subir receta">↑ Subir</button> <button type="button" class="btn small" data-rmv="1" title="Bajar receta" aria-label="Bajar receta">↓ Bajar</button> ';
+function dtRcUI() {
+  document.querySelectorAll('#dt-view .dt-bd').forEach(function (bd) {
+    var L = [].filter.call(bd.children, function (c) { return c.classList && c.classList.contains('dt-rc'); });
+    L.forEach(function (a, i) {
+      var ui = [].filter.call(a.children, function (c) { return c.classList.contains('dt-ui'); })[0]; if (!ui) return;
+      if (!ui.querySelector('[data-rmv]')) ui.insertAdjacentHTML('afterbegin', DT_MVB);
+      ui.querySelector('[data-rmv="-1"]').disabled = i === 0; ui.querySelector('[data-rmv="1"]').disabled = i === L.length - 1;
+    });
+  });
 }
 function dtBuild(D) {
   var port = D.id === 'cel' && !DT.combo.length;
@@ -2817,7 +2839,7 @@ function dtPro() {
     var l = ds.filter(function (d) { return d.key && d.key[p]; }); if (!l.length) return;
     T += '<tr><td><b>' + p + '</b></td><td>' + l.map(function (d) { return (ds.length > 1 ? '<b>' + esc(d.ab || d.t) + ':</b> ' : '') + esc(d.key[p]); }).join('<br>') + '</td></tr>';
   });
-  if (T) H += '<p style="margin:10px 0 4px"><b>Pautas de la cátedra' + (ds.length > 1 ? ' por patología (se cumple la más estricta)' : '') + '</b></p><div class="tw"><table class="tbl"><tbody>' + T + '</tbody></table></div>';
+  if (T) H += '<p style="margin:10px 0 4px"><b>Pautas' + (ds.length > 1 ? ' por patología (se cumple la más estricta)' : '') + '</b></p><div class="tw"><table class="tbl"><tbody>' + T + '</tbody></table></div>';
   var nr = dtRecs().length; H += '<p class="note"><small>Recetas aptas para este plan en la biblioteca: ' + nr + (nr < 10 ? ' (todavía son pocas para esta combinación)' : '') + '. En la hoja salen las 3 primeras; agregue más con «Agregar receta».</small></p>';
   $('dt-pro').innerHTML = H;
 }
@@ -2833,7 +2855,7 @@ function dtRender() {
       + '<h4 contenteditable="true" data-ed="bt">' + esc(b.t) + '</h4><div class="dt-bd" contenteditable="true" data-ed="bh">' + b.h + '</div></section>';
   });
   H += '<div class="dt-foot" contenteditable="true">Material orientativo; no reemplaza la consulta individual. Fuentes: ' + esc(D.ref.join(' ')) + '</div>';
-  $('dt-view').innerHTML = H;
+  $('dt-view').innerHTML = H; dtRcUI();
 }
 function dtBlk(el) { var s = el.closest('.dt-blk'); if (!s) return null; var id = +s.getAttribute('data-b'); return DT.blocks.filter(function (b) { return b.id === id; })[0]; }
 function dtSync(el) {
@@ -2855,18 +2877,22 @@ function dtPrint() {
   ['m', 'p'].forEach(function (g) { $('dt-chips-' + g).innerHTML = DIETAS.filter(function (d) { return d.g === g; }).map(function (d) { return '<button type="button" data-dt="' + d.id + '" aria-pressed="false">' + esc(d.t) + '</button>'; }).join(''); });
   $('dt-chips-c').innerHTML = DIETAS.filter(function (d) { return d.g === 'p'; }).map(function (d) { return '<button type="button" data-cb="' + d.id + '" aria-pressed="false">' + esc(d.ab || d.t) + '</button>'; }).join('');
   var root = $('v-dietas');
+  root.addEventListener('change', function (e) { var c = e.target; if (c && c.type === 'checkbox' && c.closest('#dt-lib')) { if (c.checked) DT_SEL[c.value] = ++DT_SEQ; else delete DT_SEL[c.value]; dtLibCount(); } });
+  root.addEventListener('input', function (e) { if (e.target && e.target.id === 'dt-libq') dtLibFilter(); });
   root.addEventListener('click', function (e) {
     var t = e.target.closest('button'); if (!t) return;
     if (t.hasAttribute('data-dt')) { dtLoad(t.getAttribute('data-dt')); return; }
     if (t.hasAttribute('data-cb')) { dtToggleCombo(t.getAttribute('data-cb')); return; }
     if (t.hasAttribute('data-mv')) { var b = dtBlk(t); if (b) dtMove(b.id, +t.getAttribute('data-mv')); return; }
     if (t.hasAttribute('data-brm')) { var b2 = dtBlk(t); if (b2 && window.confirm('¿Quitar el bloque «' + b2.t + '»?')) { dtSaveAll(); DT.blocks = DT.blocks.filter(function (x) { return x !== b2; }); DT.dirty = true; dtRender(); } return; }
-    if (t.hasAttribute('data-rrm')) { var a = t.closest('.dt-rc'); if (a) { a.parentNode.removeChild(a); dtSaveAll(); } return; }
+    if (t.hasAttribute('data-rrm')) { var a = t.closest('.dt-rc'); if (a) { a.parentNode.removeChild(a); dtSaveAll(); dtRcUI(); } return; }
     if (t.hasAttribute('data-img')) { DT_IMG = t.closest('.dt-rc').querySelector('.dt-img'); $('dt-file').value = ''; $('dt-file').click(); return; }
     if (t.id === 'dt-add-txt') { dtAddBlock({ k: 'txt', t: 'Nuevo bloque', h: '<p>Escriba aquí…</p>' }); return; }
-    if (t.id === 'dt-add-rec') { var rid = $('dt-lib').value; if (!rid) return; var r = RECETAS.filter(function (x) { return x.id === rid; })[0]; dtSaveAll(); var rb = DT.blocks.filter(function (x) { return x.k === 'rec'; })[0];
+    if (t.hasAttribute('data-rmv')) { var ar = t.closest('.dt-rc'); if (ar) { var dd = +t.getAttribute('data-rmv'), sb = dd < 0 ? ar.previousElementSibling : ar.nextElementSibling; if (sb && sb.classList.contains('dt-rc')) { if (dd < 0) ar.parentNode.insertBefore(ar, sb); else ar.parentNode.insertBefore(sb, ar); dtSaveAll(); dtRcUI(); if (ar.scrollIntoView) ar.scrollIntoView({ block: 'nearest' }); } } return; }
+    if (t.id === 'dt-lib-clr') { DT_SEL = {}; dtLib(); return; }
+    if (t.id === 'dt-add-rec') { var sel = RECETAS.filter(function (x) { return DT_SEL[x.id]; }).sort(function (a, b) { return DT_SEL[a.id] - DT_SEL[b.id]; }); if (!sel.length) return; dtSaveAll(); var rb = DT.blocks.filter(function (x) { return x.k === 'rec'; })[0];
       if (!rb) { rb = { id: ++DT_UID, k: 'rec', t: 'Recetario', h: '<p class="dt-note">Medidas: 1 taza = 200 ml · 1 cucharada sopera = 15 ml · 1 cucharadita = 5 ml.</p>' }; DT.blocks.push(rb); }
-      rb.h += dtRecHTML(r); DT.dirty = true; dtRender(); var el = document.querySelector('[data-b="' + rb.id + '"] .dt-rc:last-child'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); return; }
+      sel.forEach(function (r) { rb.h += dtRecHTML(r); }); DT_SEL = {}; DT.dirty = true; dtRender(); dtLib(); var all = document.querySelectorAll('[data-b="' + rb.id + '"] .dt-rc'), el = all[all.length - sel.length]; if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); return; }
     if (t.id === 'dt-add-dia') { $('dt-dform').hidden = !$('dt-dform').hidden; return; }
     if (t.id === 'dt-dok') { var n = Math.max(1, Math.min(14, parseInt($('dt-dn').value, 10) || 3)); dtAddBlock({ k: 'dia', t: 'Mi diario nutricional', h: dtDiarioHTML({ dias: n, metas: $('dt-dm').checked, dudas: $('dt-dd').checked, agua: $('dt-da').checked }) }); $('dt-dform').hidden = true; return; }
     if (t.id === 'dt-reset') { if (window.confirm('¿Volver al modelo original? Se pierden los cambios.')) dtLoad(DT.base.id, true); return; }
