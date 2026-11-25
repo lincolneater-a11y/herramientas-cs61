@@ -41,3 +41,7 @@ WebP con fondo transparente, 384×384 px, en `assets/icons/`. Un mismo archivo s
 | rosco-diabetes | Rosco de la diabetes | Hub recursos/ |
 
 Los juegos (ruleta, plato, diabetes, lactancia, rosco) conservan su propio diseño interno; el ícono se usa en el hub de Recursos.
+
+- laboratorio-bioquimica.webp: tarjeta del perfil «Bioquímica / laboratorio» (inicio).
+- laboratorio-buscar.webp: herramienta «Laboratorio» (consulta y calificación), inicio y título.
+- laboratorio-carga.webp: «Laboratorio · Carga de resultados» (bioquímica), inicio y título.
