@@ -1,0 +1,368 @@
+<!doctype html><html lang="es" data-ds="clinic"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Laboratorio · CS 61</title>
+<style>
+:root{--bg:#f1f5f8;--s:#fff;--ink:#14243a;--ink2:#4a5d73;--line:#d2dce5;--hdr:#14304f;--teal:#0d7a85;--tealsoft:#e2f1f3;--gold:#a87615;--goldsoft:#fbf1d8;--bord:#8a1f3d;--bordsoft:#fbeaee;--ok:#1f7a3d;--oksoft:#e3f3e8;--lo:#1b5fa8;--losoft:#e4eefb;--crit:#a3122b}
+@media (prefers-color-scheme:dark){:root{--bg:#0c1722;--s:#13222f;--ink:#e6eef5;--ink2:#9fb2c4;--line:#2a4259;--hdr:#0a2038;--teal:#4fc1c9;--tealsoft:#12353b;--gold:#e0b25a;--goldsoft:#3a2f12;--bord:#e58ba3;--bordsoft:#3a1a25;--ok:#6fcf8d;--oksoft:#143325;--lo:#7db4ee;--losoft:#12294a;--crit:#ff8fa0}}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.hdr{background:var(--hdr);color:#fff;padding:12px 16px}.hdr-in{max-width:1100px;margin:0 auto}.brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.brand img{width:48px;height:48px;border-radius:50%;background:#fff}.brand h1{margin:0;font-size:1.1rem}.brand small{color:#b8cadb}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 48px}h2{margin:0 0 4px}.sub{color:var(--ink2);margin:0}
+.card{background:var(--s);border:1px solid var(--line);border-radius:12px;padding:16px}.card+.card{margin-top:14px}.card h3{margin:0 0 6px;font-size:1.02rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}label.field{display:flex;flex-direction:column;gap:4px;font-size:.86rem;font-weight:600}
+input[type=date],input[type=number],input[type=text],input[type=password],select,textarea{width:100%;padding:8px 10px;background:var(--s);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit}
+textarea{min-height:110px;resize:vertical}
+input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--teal);outline-offset:1px}
+.check{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:.92rem}
+.btn{background:var(--s);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.btn.danger{color:var(--bord)}.btn:disabled{opacity:.55;cursor:default}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.note{font-size:.84rem;color:var(--ink2);background:var(--tealsoft);border-radius:8px;padding:8px 10px}
+.warnb{background:var(--goldsoft);border:1px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:.86rem;margin-top:12px}
+.alert{border-radius:8px;padding:8px 10px;font-size:.86rem;margin-top:10px;background:var(--tealsoft)}.alert.warn{background:var(--goldsoft);border:1px solid var(--gold)}
+.age{font-size:1.05rem;font-weight:800;color:var(--teal)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:14px;align-items:start}@media(max-width:960px){.split{grid-template-columns:1fr}}
+.stick{position:sticky;top:10px}@media(max-width:960px){.stick{position:static}}
+details.gr{border:1px solid var(--line);border-radius:10px;margin:10px 0;background:var(--s)}details.gr>summary{cursor:pointer;padding:10px 12px;font-weight:800;list-style:none;display:flex;align-items:center;gap:8px}details.gr>summary::-webkit-details-marker{display:none}details.gr>summary:before{content:"▸";color:var(--teal);transition:transform .15s}details.gr[open]>summary:before{transform:rotate(90deg)}
+.cnt{margin-left:auto;font-size:.78rem;font-weight:700;color:var(--ink2)}.cnt.bad{color:var(--bord)}
+.lr{display:grid;grid-template-columns:minmax(160px,1.3fr) 130px minmax(0,1.7fr);gap:6px 12px;align-items:start;padding:9px 12px;border-top:1px solid var(--line)}@media(max-width:700px){.lr{grid-template-columns:1fr 120px}.lr .lo{grid-column:1/-1}}
+.lr .ln b{display:block;font-size:.92rem}.lr .ln small{color:var(--ink2)}
+.lr input[type=text]{text-align:right;font-weight:700}
+.lv .calc{display:block;text-align:right;font-weight:800;padding:8px 4px}
+.bd{display:inline-block;border-radius:999px;padding:1px 10px;font-size:.78rem;font-weight:800;border:1px solid transparent}
+.st-normal{background:var(--oksoft);color:var(--ok);border-color:var(--ok)}.st-bajo{background:var(--losoft);color:var(--lo);border-color:var(--lo)}.st-alto{background:var(--bordsoft);color:var(--bord);border-color:var(--bord)}
+.st-critbajo,.st-crithigh{background:var(--crit);color:#fff}.st-sinrango{background:var(--bg);color:var(--ink2);border-color:var(--line)}
+.ll{display:block;font-size:.84rem;margin-top:2px}.lrg,.lp{display:block;color:var(--ink2);font-size:.8rem}
+.lk{background:none;border:0;color:var(--teal);font:inherit;font-size:.8rem;font-weight:700;padding:0;cursor:pointer;text-decoration:underline}
+.own{display:flex;gap:6px;align-items:center;margin-top:4px;font-size:.8rem}.own input{width:84px;padding:4px 6px}
+.lr.hasv{background:color-mix(in srgb,var(--tealsoft) 35%,transparent)}
+.sumli{margin:6px 0;padding:8px 10px;border-radius:8px;border-left:5px solid var(--line);background:var(--bg);font-size:.88rem}.sumli.alto{border-color:var(--bord);background:var(--bordsoft)}.sumli.bajo{border-color:var(--lo);background:var(--losoft)}.sumli.crit{border-color:var(--crit);background:var(--bordsoft);font-weight:700}
+.kpis{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 8px}.kpi{flex:1 1 80px;border:1px solid var(--line);border-radius:10px;padding:6px 8px;text-align:center}.kpi b{display:block;font-size:1.3rem}.kpi small{color:var(--ink2)}
+.fl{margin:6px 0;padding:0;list-style:none;font-size:.88rem}.fl li{display:flex;gap:8px;align-items:center;padding:4px 0;border-top:1px solid var(--line)}.fl li span{flex:1;word-break:break-all}
+.hv{margin:8px 0 0;padding:0;list-style:none;font-size:.86rem}.hv li{padding:6px 0;border-top:1px solid var(--line)}
+.org{font-size:.72rem;font-weight:800;border-radius:6px;padding:0 6px;background:var(--tealsoft);color:var(--teal)}.org.bq{background:var(--goldsoft);color:var(--gold)}
+.pt{width:100%;border-collapse:collapse;font-size:12px}.pt th,.pt td{border:1px solid #999;padding:3px 6px;text-align:left}
+#lb-pa{display:none}
+@media print{body.pv>*:not(#lb-pa){display:none!important}body.pv #lb-pa{display:block!important;color:#000;background:#fff;font-size:12px}body.pv #lb-pa h1{font-size:18px;margin:0}.ph{display:flex;gap:10px;align-items:center;border-bottom:2px solid #a87615;padding-bottom:6px}.ph img{width:44px;height:44px}}
+</style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><style>.sw-tool{order:99;margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;font-family:inherit}.sw-tool:hover,.sw-tool:focus-visible{background:rgba(255,255,255,.14);outline:2px solid #e0b25a;outline-offset:2px}@media print{.sw-tool{display:none!important}}@media(max-width:520px){.sw-tool{padding:5px 9px;font-size:.74rem}}</style><script src="../shared/ds.js"></script><link rel="stylesheet" href="../shared/ds.css"></head><body>
+<header class="hdr"><div class="hdr-in"><div class="brand"><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1 id="lb-h1">Laboratorio</h1><small id="lb-h1s">Centro de Salud N.º 61 · Valores de laboratorio con calificación y archivos</small></div></div></div></header>
+<main>
+<div class="pico-row"><img class="pico" src="../assets/icons/clinica-diabetologia-nefrologia.webp" alt="" width="384" height="384" decoding="async"><h2 id="lb-h2">Valores de laboratorio de la persona</h2></div>
+<p class="sub" id="lb-sub">Cargue los valores del informe (uno por uno o pegando el texto) y la herramienta indica si cada uno está <b>bajo</b>, <b>normal</b> o <b>alto</b>, calcula índices (HOMA-IR, LDL, filtrado glomerular, saturación de transferrina) y compara con el estudio anterior. Se calcula en este navegador; sólo se guarda en la planilla compartida si usted pulsa «Guardar».</p>
+<div class="warnb"><b>Rangos orientativos.</b> Son de referencia general (adulto, niño donde están bien definidos, embarazo) y no reemplazan el rango que imprime el laboratorio: si el informe trae su propio rango, cárguelo en «Rango del laboratorio» de cada valor y tendrá prioridad. La interpretación es siempre clínica.</div>
+
+<div class="split">
+<div>
+ <div class="card" id="lb-acc" hidden>
+  <h3>Acceso del laboratorio</h3>
+  <p class="sub" style="font-size:.86rem">Ingrese el código de acceso que le dio el Centro de Salud. Se guarda sólo en este equipo.</p>
+  <div class="grid" style="margin-top:8px"><label class="field"><span>Código de acceso</span><input type="password" id="lb-code" autocomplete="off" maxlength="80"></label></div>
+  <div class="actions" style="margin-top:8px"><button class="btn primary" id="lb-codeok" type="button">Guardar código</button><span id="lb-codest" class="sub" style="align-self:center;font-size:.86rem"></span></div>
+ </div>
+
+ <div class="card">
+  <h3>1 · Persona y estudio</h3>
+  <div class="grid">
+   <label class="field"><span>Documento (DNI) o código</span><input type="text" id="lb-dni" maxlength="14" autocomplete="off" placeholder="DNI o CS61-0001"></label>
+   <label class="field"><span>Nombre y apellido</span><input type="text" id="lb-nom" maxlength="80" autocomplete="off"></label>
+   <label class="field"><span>Sexo</span><select id="lb-sex"><option value="">Seleccionar</option><option value="F">Mujer</option><option value="M">Varón</option></select></label>
+   <label class="field"><span>Fecha de nacimiento</span><input type="date" id="lb-dob"></label>
+   <label class="field" id="lb-agew"><span>Edad (años), si no tiene la fecha</span><input type="number" id="lb-age" min="0" max="110" step="0.1" inputmode="decimal"></label>
+   <label class="field"><span>Fecha de extracción</span><input type="date" id="lb-ctl"></label>
+   <label class="field" id="lb-labw"><span>Laboratorio</span><input type="text" id="lb-lab" maxlength="80" autocomplete="off" placeholder="Ej.: Hospital San Bernardo"></label>
+   <label class="field" id="lb-infw" hidden><span>Fecha del informe</span><input type="date" id="lb-inf"></label>
+   <label class="field" id="lb-solw" hidden><span>Profesional solicitante</span><input type="text" id="lb-sol" maxlength="80" autocomplete="off"></label>
+  </div>
+  <div id="lb-embw" style="margin-top:6px" hidden><label class="check"><input type="checkbox" id="lb-emb"> Embarazada</label><div id="lb-triw" hidden style="margin:0 0 4px 26px"><label class="field" style="max-width:220px"><span>Trimestre</span><select id="lb-tri"><option value="1">Primero</option><option value="2">Segundo</option><option value="3">Tercero</option></select></label></div></div>
+  <div class="age" id="lb-ctxinfo" style="margin-top:8px"></div>
+  <div class="actions noprint" style="margin-top:10px"><button class="btn" id="lb-find" type="button">Buscar historial</button><button class="btn danger" id="lb-clear" type="button">Limpiar</button></div>
+  <div class="alert" id="lb-msg" hidden></div>
+ </div>
+
+ <div class="card">
+  <h3>2 · Valores</h3>
+  <details class="gr" style="margin-top:6px"><summary>Pegar el texto del informe</summary>
+   <div style="padding:0 12px 12px"><p class="sub" style="font-size:.86rem">Pegue el texto copiado del informe (una línea por estudio, por ejemplo «Glucemia 92 mg/dl»). Se completan los valores que se reconocen; revíselos antes de guardar.</p><textarea id="lb-paste" placeholder="Glucemia 92 mg/dl&#10;Colesterol total 215 mg/dl&#10;HDL 45&#10;…"></textarea><div class="actions" style="margin-top:8px"><button class="btn primary" id="lb-pgo" type="button">Completar valores</button></div><div class="alert" id="lb-pmsg" hidden></div></div>
+  </details>
+  <div id="lb-rows"></div>
+  <label class="field" style="margin-top:12px"><span>Observaciones</span><textarea id="lb-obs" maxlength="1500" style="min-height:70px"></textarea></label>
+ </div>
+
+ <div class="card">
+  <h3>3 · Archivos del informe (PDF o foto)</h3>
+  <p class="sub" style="font-size:.86rem">Hasta 3 archivos de 5 MB (PDF, JPG o PNG). Se envían a la carpeta de Drive del centro sólo al pulsar «Guardar»; la persona debe haber dado su consentimiento.</p>
+  <div class="actions" style="margin-top:8px"><input type="file" id="lb-file" accept="application/pdf,image/jpeg,image/png" multiple></div>
+  <ul class="fl" id="lb-flist"></ul>
+ </div>
+</div>
+
+<div class="stick">
+ <div class="card">
+  <h3>Resumen</h3>
+  <div id="lb-res"><p class="sub">Cargue al menos un valor.</p></div>
+  <div class="actions noprint" style="margin-top:10px"><button class="btn" id="lb-copy" type="button">Copiar resumen</button><button class="btn" id="lb-print" type="button">Imprimir</button></div>
+ </div>
+ <div class="card noprint">
+  <h3>Guardar</h3>
+  <label class="check" id="lb-consw" hidden><input type="checkbox" id="lb-cons"> El paciente o el equipo de salud autorizó registrar estos datos en la planilla compartida del centro.</label>
+  <div class="actions" style="margin-top:6px"><button class="btn primary" id="lb-save" type="button">Guardar en la planilla</button></div>
+  <p class="sub" style="font-size:.82rem;margin-top:8px">Necesita la planilla compartida configurada. El DNI y el nombre se guardan sólo en la hoja «Pacientes»; los valores quedan con el código.</p>
+ </div>
+ <div class="card noprint"><h3>Historial</h3><div id="lb-hist"><p class="sub" style="font-size:.86rem">Busque a la persona por DNI para ver los estudios guardados.</p></div></div>
+</div>
+</div>
+</main>
+<div id="lb-pa"></div>
+<script src="lab-data.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (i) { return document.getElementById(i); };
+  var BQ = /[?&]modo=bioquimica/.test(location.search);
+  var VAL = {}, OWN = {}, PREV = {}, HIST = [], FILES = [], BUSY = false, CODE = '', OK = {};
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var todayISO = function () { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
+  var fD = function (iso) { return iso ? new Date(iso + 'T00:00:00').toLocaleDateString('es-AR') : ''; };
+  var get = function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  var parseN = function (s) { s = String(s || '').trim().replace(',', '.'); if (s === '') return null; var v = parseFloat(s); return isNaN(v) ? null : v; };
+  var safeUrl = function (u) { return /^https:\/\/(drive|docs)\.google\.com\//.test(u || '') ? u : ''; };
+
+  /* ---------- modo bioquímica ---------- */
+  if (BQ) {
+    $('lb-h1').textContent = 'Laboratorio · Carga de resultados'; $('lb-h1s').textContent = 'Centro de Salud N.º 61 · Para bioquímicas y bioquímicos';
+    $('lb-h2').textContent = 'Cargar resultados de un paciente';
+    $('lb-sub').innerHTML = 'Ingrese los resultados del paciente con el <b>rango de referencia de su laboratorio</b> (queda guardado junto al valor y es el que se usa para calificarlo). Puede adjuntar el informe en PDF. Esta pantalla sólo guarda y verifica cargas: no muestra los valores de otros laboratorios.';
+    var wb = document.querySelector('.warnb'); if (wb) wb.innerHTML = '<b>Importante:</b> los datos de salud son confidenciales. Use el código de acceso sólo en equipos del laboratorio y verifique el DNI antes de guardar. Las marcas de «bajo / normal / alto» usan el rango que usted cargue en cada valor; si no lo carga, se usa un rango orientativo general.';
+    $('lb-acc').hidden = false; $('lb-infw').hidden = false; $('lb-solw').hidden = false; $('lb-consw').hidden = false;
+    $('lb-find').textContent = 'Verificar cargas anteriores'; $('lb-save').textContent = 'Guardar resultados'; document.title = 'Laboratorio · Carga de resultados · CS 61';
+    $('lb-hist').innerHTML = '<p class="sub" style="font-size:.86rem">Aquí aparecen las cargas ya registradas del paciente (fecha y laboratorio).</p>';
+  }
+
+  /* ---------- configuración de la planilla ---------- */
+  var cfgUrl = '';
+  try { fetch('../config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (c) { if (c && /^https:\/\/script\.google\.com\//.test(c.url || '')) cfgUrl = c.url; }).catch(function () { }); } catch (e) { }
+  function cfg() {
+    var c = get('cs61_plcv'); if (!(c && c.url && c.key)) c = get('cs61_pl'); if (!(c && c.url && c.key)) c = get('cs61_cons_api');
+    if (c && c.url && c.key) return c;
+    var l = get('cs61_labk'); if (l && l.key) { var u = cfgUrl || l.url || ''; if (u) return { url: u, key: l.key, prof: l.prof || '' }; }
+    return null;
+  }
+  function post(c, body) { return fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ k: c.key }, body)) }).then(function (r) { return r.json(); }); }
+  var ERR = { clave: 'La planilla rechazó la clave o el código de acceso.', faltan_hojas: 'La planilla no tiene la hoja «Pacientes». Use la planilla «Registro compartido CS61».', sin_dni: 'Falta el DNI (o un código existente).', sin_consentimiento: 'Falta el consentimiento: es obligatorio para registrar a una persona nueva.', datos_largos: 'Hay demasiados datos para guardar.', sin_estudio: 'No se encontró el estudio para adjuntar el archivo.', archivo: 'El archivo no es válido (PDF, JPG o PNG de hasta 5 MB).' };
+  function msg(t, warn) { var e = $('lb-msg'); e.className = 'alert' + (warn ? ' warn' : ''); e.textContent = t; e.hidden = !t; }
+  function idq() { var q = $('lb-dni').value.trim(), cod = /^CS61-\d+$/i.test(q) ? q.toUpperCase() : '', dni = q.replace(/\D/g, ''); return { cod: cod, dni: dni, ok: !!cod || dni.length >= 6 }; }
+  if (BQ) {
+    var lk = get('cs61_labk'); if (lk && lk.key) { $('lb-codest').textContent = 'Código guardado en este equipo.'; }
+    $('lb-codeok').addEventListener('click', function () { var k = $('lb-code').value.trim(); if (!k) { $('lb-codest').textContent = 'Escriba el código.'; return; } try { localStorage.setItem('cs61_labk', JSON.stringify({ key: k, url: cfgUrl })); $('lb-code').value = ''; $('lb-codest').textContent = 'Código guardado en este equipo.'; } catch (e) { $('lb-codest').textContent = 'No se pudo guardar en este navegador.'; } });
+  }
+
+  /* ---------- contexto clínico ---------- */
+  function ageNow() {
+    var dob = $('lb-dob').value, ref = $('lb-ctl').value || todayISO();
+    if (dob) { var a = (new Date(ref + 'T00:00:00') - new Date(dob + 'T00:00:00')) / (365.25 * 864e5); return a < 0 ? null : a; }
+    return parseN($('lb-age').value);
+  }
+  function ctx() { var sex = $('lb-sex').value, emb = $('lb-emb').checked && sex !== 'M'; return LAB.ctx({ sex: sex, age: ageNow(), emb: emb, tri: parseInt($('lb-tri').value, 10) || 0 }); }
+
+  /* ---------- filas ---------- */
+  var rowsH = '';
+  LAB.G.forEach(function (g, gi) {
+    rowsH += '<details class="gr" open data-g="' + gi + '"><summary>' + esc(g) + '<span class="cnt" data-cnt="' + gi + '"></span></summary>';
+    LAB.T.forEach(function (t) {
+      if (t.g !== gi) return;
+      rowsH += '<div class="lr" data-r="' + t.id + '"><div class="ln"><b>' + esc(t.n) + '</b><small>' + esc(t.u) + '</small></div><div class="lv">' +
+        (t.calc ? '<span class="calc" data-c="' + t.id + '">—</span>' : '<input type="text" inputmode="decimal" autocomplete="off" data-v="' + t.id + '" aria-label="' + esc(t.n) + '">') +
+        '</div><div class="lo"><span class="bd" data-bd hidden></span><span class="ll" data-ll></span><small class="lrg" data-rg></small><small class="lp" data-pv></small>' +
+        (t.calc ? '' : '<button class="lk" type="button" data-own="' + t.id + '">Rango del laboratorio</button><div class="own" data-ow="' + t.id + '" hidden><input type="text" inputmode="decimal" data-lo="' + t.id + '" placeholder="mín." aria-label="Mínimo del laboratorio"> – <input type="text" inputmode="decimal" data-hi="' + t.id + '" placeholder="máx." aria-label="Máximo del laboratorio"></div>') +
+        '</div></div>';
+    });
+    rowsH += '</details>';
+  });
+  $('lb-rows').innerHTML = rowsH;
+  if (BQ) { document.querySelectorAll('[data-ow]').forEach(function (e) { e.hidden = false; }); document.querySelectorAll('[data-own]').forEach(function (e) { e.hidden = true; }); }
+
+  var R = {}; // referencias DOM por estudio
+  document.querySelectorAll('.lr').forEach(function (el) { R[el.getAttribute('data-r')] = { el: el, bd: el.querySelector('[data-bd]'), ll: el.querySelector('[data-ll]'), rg: el.querySelector('[data-rg]'), pv: el.querySelector('[data-pv]'), c: el.querySelector('[data-c]') }; });
+
+  var LAST = { items: [], c: null }; // calificaciones actuales para resumen
+  function update() {
+    var c = ctx();
+    $('lb-embw').hidden = $('lb-sex').value === 'M'; $('lb-triw').hidden = !$('lb-emb').checked || $('lb-sex').value === 'M';
+    $('lb-agew').hidden = !!$('lb-dob').value;
+    var a = ageNow(), gtxt = c.grp === 'emb' ? 'embarazo' + (c.tri ? ' (trimestre ' + c.tri + ')' : '') : c.grp === 'nino' ? 'niño o adolescente (rangos pediátricos sólo donde están bien definidos)' : 'adulto';
+    $('lb-ctxinfo').textContent = (a != null ? 'Edad: ' + (a < 2 ? Math.floor(a * 12) + ' meses' : Math.floor(a) + ' años') + ' · ' : 'Sin edad: se asume adulto · ') + 'Rangos de: ' + gtxt + (c.sex ? '' : ' · sin sexo: rango combinado');
+    var vals = {}; Object.keys(VAL).forEach(function (k) { if (VAL[k] != null && !isNaN(VAL[k])) vals[k] = VAL[k]; });
+    var dv = LAB.derived(vals, c), items = [], nIn = {};
+    LAB.T.forEach(function (t) {
+      var r = R[t.id], v = t.calc ? dv[t.id] : vals[t.id], own = OWN[t.id];
+      var e = v == null ? null : LAB.evalV(t, v, c, own);
+      if (t.calc) { r.c.textContent = v == null ? '—' : LAB.fmt(v, t.d); r.el.hidden = v == null; }
+      r.el.classList.toggle('hasv', v != null && !t.calc);
+      if (!e) {
+        r.bd.hidden = true; r.ll.textContent = ''; r.pv.textContent = '';
+        var ow = own && (own.lo != null || own.hi != null), rt = LAB.rangeTxt(t, c);
+        r.rg.textContent = ow ? 'Ref. del laboratorio: ' + LAB.ownTxt(own) : (rt != null ? 'Ref.: ' + rt : 'Sin rango pediátrico: use el del laboratorio');
+      } else {
+        r.bd.hidden = false; r.bd.className = 'bd st-' + e.st; r.bd.textContent = LAB.ST[e.st];
+        r.ll.textContent = e.lab; r.rg.textContent = e.txt ? (e.custom ? 'Ref. del laboratorio: ' : 'Ref.: ') + e.txt : '';
+        items.push({ t: t, v: v, e: e }); nIn[t.g] = (nIn[t.g] || 0) + 1;
+      }
+      var p = PREV[t.id];
+      if (p && v != null) { var d = v - p.v, ar = Math.abs(d) < Math.pow(10, -t.d) / 2 ? '=' : (d > 0 ? '↑' : '↓'); r.pv.textContent = 'Anterior: ' + LAB.fmt(p.v, t.d) + ' (' + fD(p.f) + ') ' + ar + (ar === '=' ? '' : ' ' + LAB.fmt(Math.abs(d), t.d)); }
+      else if (p) { r.pv.textContent = 'Anterior: ' + LAB.fmt(p.v, t.d) + ' (' + fD(p.f) + ')'; }
+      else if (!e) { r.pv.textContent = ''; }
+    });
+    LAB.G.forEach(function (g, gi) { var el = document.querySelector('[data-cnt="' + gi + '"]'); var n = 0, bad = 0; items.forEach(function (it) { if (it.t.g === gi) { n++; if (it.e.st !== 'normal' && it.e.st !== 'sinrango') bad++; } }); el.textContent = n ? n + ' cargados' + (bad ? ' · ' + bad + ' fuera de rango' : '') : ''; el.className = 'cnt' + (bad ? ' bad' : ''); });
+    LAST = { items: items, c: c };
+    summary();
+  }
+
+  function summary() {
+    var it = LAST.items; if (!it.length) { $('lb-res').innerHTML = '<p class="sub">Cargue al menos un valor.</p>'; return; }
+    var out = it.filter(function (x) { return x.e.st !== 'normal' && x.e.st !== 'sinrango'; }), crit = it.filter(function (x) { return x.e.st === 'critbajo' || x.e.st === 'crithigh'; }), nor = it.filter(function (x) { return x.e.st === 'normal'; });
+    var h = '<div class="kpis"><div class="kpi"><b>' + it.length + '</b><small>valores</small></div><div class="kpi"><b style="color:var(--ok)">' + nor.length + '</b><small>normales</small></div><div class="kpi"><b style="color:var(--bord)">' + out.length + '</b><small>fuera de rango</small></div></div>';
+    if (crit.length) h += '<div class="sumli crit">⚠ Valor crítico: ' + crit.map(function (x) { return esc(x.t.n); }).join(', ') + '. Requiere atención inmediata o confirmación con el laboratorio.</div>';
+    out.forEach(function (x) { h += '<div class="sumli ' + (x.e.st === 'critbajo' || x.e.st === 'crithigh' ? 'crit' : x.e.st) + '"><b>' + esc(x.t.n) + ':</b> ' + LAB.fmt(x.v, x.t.d) + ' ' + esc(x.t.u) + ' · ' + LAB.ST[x.e.st] + (x.e.lab ? ' — ' + esc(x.e.lab) : '') + '</div>'; });
+    var sr = it.filter(function (x) { return x.e.st === 'sinrango'; }); if (sr.length) h += '<div class="sumli">Sin rango de referencia en esta herramienta: ' + sr.map(function (x) { return esc(x.t.n); }).join(', ') + '. Cargue el rango del laboratorio.</div>';
+    if (!out.length && !sr.length) h += '<div class="sumli">Todos los valores cargados están dentro del rango.</div>';
+    $('lb-res').innerHTML = h;
+  }
+
+  function summaryText() {
+    var it = LAST.items, c = LAST.c; if (!it.length) return '';
+    var f = $('lb-ctl').value, lab = $('lb-lab').value.trim();
+    var line = function (x) { return x.t.n + ' ' + LAB.fmt(x.v, x.t.d) + (x.t.u ? ' ' + x.t.u : '') + ' (' + LAB.ST[x.e.st].toLowerCase() + (x.e.lab ? ': ' + x.e.lab : '') + ')'; };
+    var out = it.filter(function (x) { return x.e.st !== 'normal'; }), nor = it.filter(function (x) { return x.e.st === 'normal'; });
+    var t = 'Laboratorio' + (f ? ' del ' + fD(f) : '') + (lab ? ' (' + lab + ')' : '') + '.\n';
+    if (out.length) t += 'Fuera de rango: ' + out.map(line).join('; ') + '.\n';
+    if (nor.length) t += 'Dentro del rango: ' + nor.map(function (x) { return x.t.n + ' ' + LAB.fmt(x.v, x.t.d) + (x.t.u ? ' ' + x.t.u : ''); }).join('; ') + '.\n';
+    var ob = $('lb-obs').value.trim(); if (ob) t += 'Observaciones: ' + ob + '\n';
+    return t + 'Rangos de referencia orientativos' + (Object.keys(OWN).length ? ' (se usó el rango del laboratorio donde fue cargado)' : '') + '; interpretar con la clínica.';
+  }
+  $('lb-copy').addEventListener('click', function () { var t = summaryText(); if (!t) { msg('Cargue al menos un valor para copiar el resumen.', true); return; } var done = function () { msg('Resumen copiado.'); }; if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(done, function () { window.prompt('Copie el resumen:', t); }); } else { window.prompt('Copie el resumen:', t); } });
+  $('lb-print').addEventListener('click', function () {
+    var it = LAST.items; if (!it.length) { msg('Cargue al menos un valor para imprimir.', true); return; }
+    var nm = $('lb-nom').value.trim(), f = $('lb-ctl').value, rows = it.map(function (x) { return '<tr><td>' + esc(x.t.n) + '</td><td><b>' + LAB.fmt(x.v, x.t.d) + '</b> ' + esc(x.t.u) + '</td><td>' + esc(x.e.txt) + (x.e.custom ? ' (laboratorio)' : '') + '</td><td>' + LAB.ST[x.e.st] + (x.e.lab ? ' — ' + esc(x.e.lab) : '') + '</td></tr>'; }).join('');
+    $('lb-pa').innerHTML = '<div class="ph"><img src="../icon-192.png" alt=""><div><h1>Valores de laboratorio</h1><small>Centro de Salud N.º 61 · Solidaridad · Extracción: ' + esc(fD(f) || '—') + ($('lb-lab').value.trim() ? ' · ' + esc($('lb-lab').value.trim()) : '') + '</small></div></div><p style="margin:10px 0">' + (nm ? '<b>Nombre:</b> ' + esc(nm) + ' · ' : '') + esc($('lb-ctxinfo').textContent) + '</p><table class="pt"><thead><tr><th>Estudio</th><th>Valor</th><th>Referencia</th><th>Calificación</th></tr></thead><tbody>' + rows + '</tbody></table>' + ($('lb-obs').value.trim() ? '<p><b>Observaciones:</b> ' + esc($('lb-obs').value.trim()) + '</p>' : '') + '<p style="margin-top:12px"><small>Rangos de referencia orientativos: la interpretación es clínica y no reemplaza el informe del laboratorio.</small></p><p style="margin-top:26px"><small>Profesional / firma: ______________________________</small></p>';
+    document.body.classList.add('pv'); window.print(); setTimeout(function () { document.body.classList.remove('pv'); }, 500);
+  });
+
+  /* ---------- eventos de carga ---------- */
+  $('lb-rows').addEventListener('input', function (e) {
+    var t = e.target, id;
+    if ((id = t.getAttribute('data-v'))) { var v = parseN(t.value); if (v == null) delete VAL[id]; else VAL[id] = v; }
+    else if ((id = t.getAttribute('data-lo')) || (id = t.getAttribute('data-hi'))) {
+      var lo = parseN(document.querySelector('[data-lo="' + id + '"]').value), hi = parseN(document.querySelector('[data-hi="' + id + '"]').value);
+      if (lo == null && hi == null) delete OWN[id]; else OWN[id] = { lo: lo, hi: hi };
+    } else return;
+    update();
+  });
+  $('lb-rows').addEventListener('click', function (e) { var b = e.target.closest('[data-own]'); if (!b) return; var w = document.querySelector('[data-ow="' + b.getAttribute('data-own') + '"]'); w.hidden = !w.hidden; if (!w.hidden) w.querySelector('input').focus(); });
+  ['lb-sex', 'lb-dob', 'lb-age', 'lb-ctl', 'lb-emb', 'lb-tri'].forEach(function (i) { $(i).addEventListener('input', function () { if (i === 'lb-ctl' || i === 'lb-dob') computePrev(); update(); }); $(i).addEventListener('change', function () { if (i === 'lb-ctl' || i === 'lb-dob') computePrev(); update(); }); });
+  $('lb-obs').addEventListener('input', function () { });
+
+  function setVal(id, v) { var t = LAB.BY[id]; if (!t || t.calc) return; VAL[id] = v; var el = document.querySelector('[data-v="' + id + '"]'); if (el) el.value = String(v).replace('.', ','); }
+  function clearVals() { VAL = {}; OWN = {}; document.querySelectorAll('[data-v],[data-lo],[data-hi]').forEach(function (i) { i.value = ''; }); }
+
+  $('lb-pgo').addEventListener('click', function () {
+    var r = LAB.parse($('lb-paste').value), p = $('lb-pmsg');
+    if (!r.length) { p.className = 'alert warn'; p.textContent = 'No se reconoció ningún valor. Use una línea por estudio, por ejemplo «Glucemia 92 mg/dl».'; p.hidden = false; return; }
+    r.forEach(function (x) { setVal(x.id, x.v); });
+    p.className = 'alert'; p.textContent = 'Se completaron ' + r.length + ' valores: ' + r.map(function (x) { return LAB.BY[x.id].n; }).join(', ') + '. Revíselos contra el informe.'; p.hidden = false; update();
+  });
+
+  /* ---------- archivos ---------- */
+  function flist() {
+    $('lb-flist').innerHTML = FILES.map(function (f, i) { return '<li><span>' + esc(f.name) + ' · ' + (f.size / 1024 < 1024 ? Math.round(f.size / 1024) + ' KB' : (f.size / 1048576).toFixed(1) + ' MB') + (f.done ? ' · enviado' : '') + '</span>' + (f.url ? '<a class="lk" href="' + esc(f.url) + '" target="_blank" rel="noopener">Ver</a>' : '') + (f.done ? '' : '<button class="lk" type="button" data-rm="' + i + '">Quitar</button>') + '</li>'; }).join('');
+  }
+  $('lb-file').addEventListener('change', function () {
+    var l = Array.prototype.slice.call(this.files || []), bad = '';
+    l.forEach(function (f) {
+      if (FILES.length >= 3) { bad = 'Máximo 3 archivos por estudio.'; return; }
+      if (!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type)) { bad = 'Sólo se aceptan PDF, JPG o PNG.'; return; }
+      if (f.size > 5 * 1048576) { bad = '«' + f.name + '» pesa más de 5 MB.'; return; }
+      FILES.push({ name: f.name, type: f.type, size: f.size, file: f, url: URL.createObjectURL(f), done: false });
+    });
+    this.value = ''; msg(bad, !!bad); flist();
+  });
+  $('lb-flist').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; var f = FILES.splice(parseInt(b.getAttribute('data-rm'), 10), 1)[0]; try { URL.revokeObjectURL(f.url); } catch (x) { } flist(); });
+  function b64(file) { return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(String(r.result).split(',')[1] || ''); }; r.onerror = rej; r.readAsDataURL(file); }); }
+
+  /* ---------- historial ---------- */
+  function computePrev() {
+    PREV = {}; var f = $('lb-ctl').value;
+    HIST.slice().filter(function (h) { return h.valores && (!f || h.fecha < f); }).sort(function (a, b) { return a.fecha < b.fecha ? 1 : -1; }).forEach(function (h) { Object.keys(h.valores).forEach(function (k) { if (!PREV[k] && LAB.BY[k]) PREV[k] = { v: h.valores[k], f: h.fecha }; }); });
+  }
+  function renderHist() {
+    if (!HIST.length) { $('lb-hist').innerHTML = '<p class="sub" style="font-size:.86rem">No hay estudios guardados para esta persona.</p>'; return; }
+    $('lb-hist').innerHTML = '<ul class="hv">' + HIST.map(function (h, i) {
+      var n = h.n != null ? h.n : Object.keys(h.valores || {}).length, ar = (h.archivos || []).map(function (a, k) { var u = safeUrl(a.url); return u ? '<a class="lk" href="' + esc(u) + '" target="_blank" rel="noopener">Archivo ' + (k + 1) + '</a>' : ''; }).join(' ');
+      return '<li><b>' + esc(fD(h.fecha)) + '</b> <span class="org ' + (h.origen === 'bioquimica' ? 'bq' : '') + '">' + (h.origen === 'bioquimica' ? 'Bioquímica' : 'Profesional') + '</span>' + (h.lab ? ' · ' + esc(h.lab) : '') + ' · ' + n + ' valor(es)' + (h.prof ? ' · ' + esc(h.prof) : '') + (ar ? '<br>' + ar : '') + (h.valores && Object.keys(h.valores).length ? '<br><button class="lk" type="button" data-load="' + i + '">Cargar estos valores</button>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+  $('lb-hist').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-load]'); if (!b) return; var h = HIST[parseInt(b.getAttribute('data-load'), 10)]; if (!h) return;
+    clearVals(); Object.keys(h.valores || {}).forEach(function (k) { setVal(k, h.valores[k]); });
+    Object.keys(h.rangos || {}).forEach(function (k) { var r = h.rangos[k]; OWN[k] = { lo: r[0], hi: r[1] }; var a = document.querySelector('[data-lo="' + k + '"]'), z = document.querySelector('[data-hi="' + k + '"]'); if (a) a.value = r[0] == null ? '' : String(r[0]).replace('.', ','); if (z) z.value = r[1] == null ? '' : String(r[1]).replace('.', ','); var w = document.querySelector('[data-ow="' + k + '"]'); if (w) w.hidden = false; });
+    $('lb-ctl').value = h.fecha || $('lb-ctl').value; if (h.lab) $('lb-lab').value = h.lab; $('lb-obs').value = h.obs || '';
+    computePrev(); update(); msg('Se cargaron los valores del estudio del ' + fD(h.fecha) + '.');
+  });
+  $('lb-find').addEventListener('click', function () {
+    var c = cfg(), q = idq();
+    if (!c) { msg(BQ ? 'Guarde primero el código de acceso del laboratorio (arriba).' : 'Configure la planilla compartida en Registro cardiovascular → Excel y respaldo (o abra el enlace de configuración).', true); return; }
+    if (!q.ok) { msg('Ingrese el DNI (sólo números) o el código, por ejemplo CS61-0001.', true); return; }
+    var b = this; b.disabled = true; msg('Buscando…');
+    post(c, { labget: q.cod ? { codigo: q.cod } : { dni: q.dni } }).then(function (j) {
+      b.disabled = false;
+      if (!j || !j.ok) { msg(ERR[j && j.error] || 'La planilla no pudo responder' + (j && j.error ? ': ' + j.error : '') + '. Si es la primera vez, actualice el script (ver guía).', true); return; }
+      if (!j.codigo) { HIST = []; renderHist(); msg('No hay una persona con ese DNI o código en la planilla. Complete los datos y guarde para registrarla.', true); return; }
+      if (j.nombre && !$('lb-nom').value) $('lb-nom').value = j.nombre;
+      if (j.fnac && !$('lb-dob').value) $('lb-dob').value = j.fnac;
+      if (j.sexo && !$('lb-sex').value) $('lb-sex').value = j.sexo;
+      HIST = j.estudios || []; renderHist(); computePrev(); update();
+      msg(HIST.length ? 'Se encontraron ' + HIST.length + ' estudio(s) guardado(s) de ' + j.codigo + '.' : 'La persona está en la planilla (' + j.codigo + ') pero no tiene laboratorio guardado todavía.');
+    }).catch(function () { b.disabled = false; msg('No se pudo conectar con la planilla. Revise la conexión a internet.', true); });
+  });
+  $('lb-dni').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('lb-find').click(); });
+
+  /* ---------- guardar ---------- */
+  $('lb-save').addEventListener('click', function () {
+    if (BUSY) return;
+    var c = cfg(), q = idq(), nom = $('lb-nom').value.trim(), f = $('lb-ctl').value;
+    var valores = {}, rangos = {}; Object.keys(VAL).forEach(function (k) { if (VAL[k] != null && !isNaN(VAL[k])) valores[k] = VAL[k]; });
+    Object.keys(OWN).forEach(function (k) { var o = OWN[k]; if (valores[k] != null && (o.lo != null || o.hi != null)) rangos[k] = [o.lo, o.hi]; });
+    if (!c) { msg(BQ ? 'Guarde primero el código de acceso del laboratorio (arriba).' : 'Configure la planilla compartida en Registro cardiovascular → Excel y respaldo.', true); return; }
+    if (!q.ok) { msg('Ingrese el DNI (sólo números) o el código.', true); return; }
+    if (!f) { msg('Cargue la fecha de extracción.', true); return; }
+    if (!Object.keys(valores).length && !FILES.length) { msg('Cargue al menos un valor o adjunte un archivo.', true); return; }
+    if (BQ && !$('lb-lab').value.trim()) { msg('Indique el laboratorio que informa.', true); return; }
+    var key = q.cod || q.dni;
+    if (q.dni && !OK[key]) {
+      var ok = BQ ? $('lb-cons').checked : false;
+      if (!BQ) { try { ok = window.confirm('¿La persona dio su consentimiento para registrar sus datos y estudios en la planilla compartida del centro?\n\nEl DNI y el nombre se guardan sólo en la hoja «Pacientes».'); } catch (e) { } }
+      if (!ok) { msg(BQ ? 'Marque la autorización para registrar los datos del paciente.' : 'No se guardó: falta el consentimiento de la persona.', true); return; }
+      OK[key] = 1;
+    }
+    var rec = { id: 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), tipo: 'lab', dni: q.dni, nombre: nom, codigo: q.cod, fecha: f, fnac: $('lb-dob').value, sexo: $('lb-sex').value, emb: $('lb-emb').checked && $('lb-sex').value !== 'M' ? ($('lb-tri').value || '1') : '', lab: $('lb-lab').value.trim(), informe: $('lb-inf').value, sol: $('lb-sol').value.trim(), valores: valores, rangos: rangos, obs: $('lb-obs').value.trim(), origen: BQ ? 'bioquimica' : 'profesional', consent: true, fecha_consent: todayISO(), profesional: c.prof || '' };
+    BUSY = true; var b = this; b.disabled = true; msg('Guardando…');
+    var fail = function (t) { BUSY = false; b.disabled = false; msg(t, true); };
+    post(c, { rec: rec }).then(function (j) {
+      if (!j || !j.ok) { fail(ERR[j && j.error] || ('La planilla no pudo guardarlo' + (j && j.error ? ': ' + j.error : '') + '. Si es la primera vez, actualice el script (ver guía).')); return; }
+      var codigo = j.codigo || q.cod, pend = FILES.filter(function (x) { return !x.done; }), okN = 0;
+      var next = function (i) {
+        if (i >= pend.length) { BUSY = false; b.disabled = false; flist(); msg('Guardado en la planilla (' + codigo + ').' + (pend.length ? ' Archivos enviados: ' + okN + ' de ' + pend.length + '.' : '')); $('lb-find').click(); return Promise.resolve(); }
+        var fl = pend[i]; msg('Enviando archivo ' + (i + 1) + ' de ' + pend.length + '…');
+        return b64(fl.file).then(function (d) { return post(c, { labpdf: { codigo: codigo, fecha: f, origen: rec.origen, lab: rec.lab, nombre: fl.name, mime: fl.type, b64: d } }); }).then(function (r) {
+          if (r && r.ok) { fl.done = true; okN++; if (safeUrl(r.url)) fl.url = r.url; } else { msg('El estudio se guardó, pero un archivo no se pudo enviar: ' + (ERR[r && r.error] || (r && r.error) || 'error') + '.', true); }
+          return next(i + 1);
+        }).catch(function () { msg('El estudio se guardó, pero falló el envío de un archivo. Revise la conexión y reintente.', true); return next(i + 1); });
+      };
+      return next(0);
+    }).catch(function () { fail('No se pudo conectar con la planilla. Revise la conexión a internet y reintente.'); });
+  });
+
+  $('lb-clear').addEventListener('click', function () {
+    clearVals(); HIST = []; PREV = {}; FILES.forEach(function (f) { try { URL.revokeObjectURL(f.url); } catch (e) { } }); FILES = []; flist();
+    ['lb-dni', 'lb-nom', 'lb-dob', 'lb-age', 'lb-lab', 'lb-inf', 'lb-sol', 'lb-obs', 'lb-paste'].forEach(function (i) { $(i).value = ''; });
+    $('lb-sex').value = ''; $('lb-emb').checked = false; $('lb-cons').checked = false; $('lb-ctl').value = todayISO(); $('lb-pmsg').hidden = true; msg('');
+    $('lb-hist').innerHTML = '<p class="sub" style="font-size:.86rem">Busque a la persona por DNI para ver los estudios guardados.</p>'; update();
+  });
+
+  $('lb-ctl').value = todayISO(); update();
+})();
+</script><script>/*EMBED*/try{if(window.top!==window){var a=document.querySelector(".sw-tool");if(a)a.style.display="none"}}catch(e){}</script><script>/*CFGSYNC*/(function(){try{fetch("../config.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(c){if(!c||!c.url||!/^https:\/\/script\.google\.com\//.test(c.url))return;["cs61_pl","cs61_plcv","cs61_cons_api"].forEach(function(k){try{var o=JSON.parse(localStorage.getItem(k)||"null");if(o&&o.key&&o.url!==c.url){o.url=c.url;localStorage.setItem(k,JSON.stringify(o))}}catch(e){}})}).catch(function(){})}catch(e){}})();</script><script src="../egg.js"></script></body></html>
