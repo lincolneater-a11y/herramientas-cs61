@@ -101,6 +101,8 @@ main { max-width: 1120px; margin: 0 auto; padding-top: 22px; }
 .grid.wide { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
 .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .field > span, .lbl { font-size: .8rem; font-weight: 700; color: var(--ink-2); }
+.pt-h{margin:18px 0 6px}.pt-h + .grid,.pt-two .grid{align-items:start;row-gap:0}.pt-h + .grid > .field,.pt-two .grid > .field{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:4px;margin-bottom:12px;align-content:start}.pt-h + .grid > .field > span,.pt-two .grid > .field > span{align-self:end}.pt-h:first-of-type{margin-top:4px}.grid>.span2{grid-column:span 2}.pt-two{display:grid;grid-template-columns:2fr 3fr;gap:0 22px}@media(max-width:760px){.pt-two{grid-template-columns:1fr}}@media(max-width:520px){.grid>.span2{grid-column:auto}}
+
 .field small { color: var(--ink-2); font-size: .74rem; }
 textarea { width: 100%; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font: inherit; resize: vertical; }
 textarea:focus-visible { outline: 3px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
@@ -365,6 +367,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   <div class="card" id="lc-patient">
     <h3>1 · Paciente</h3>
     <p class="sub">Los datos de identificación son opcionales y sólo se usan en el resumen para copiar.</p>
+    <div class="lbl pt-h">Identificación</div>
     <div class="grid">
       <label class="field"><span>Código de paciente (opcional)</span><input type="text" id="lc-id" placeholder="Sin nombre ni DNI" maxlength="40" autocomplete="off"></label>
       <label class="field"><span>DNI (para buscar y guardar)</span><input type="text" id="lc-dni" maxlength="12" inputmode="numeric" autocomplete="off"><small>Con el DNI se busca al paciente y se traen sus datos y controles guardados. No aparece en el resumen; a la planilla compartida sólo se envía con consentimiento.</small></label>
@@ -372,19 +375,30 @@ details.card[open] > summary { margin-bottom: 12px; }
       <label class="field"><span>Sexo</span><select id="lc-sex"><option value="">Seleccionar</option><option value="M">Varón</option><option value="F">Mujer</option></select></label>
       <label class="field"><span>Fecha de nacimiento</span><input type="date" id="lc-dob"></label>
       <label class="field"><span>Fecha de control</span><input type="date" id="lc-ctl"></label>
+    </div>
+    <div class="lbl pt-h">Edad y situación especial</div>
+    <div class="grid">
       <label class="field"><span>Edad (años)</span><input type="number" id="lc-ageY" min="0" max="5" inputmode="numeric"><small>Se completa sola con las fechas; desde los 12 meses se registra en años, meses y días.</small></label>
       <label class="field"><span>Meses</span><input type="number" id="lc-ageM" min="0" max="11" inputmode="numeric"></label>
       <label class="field"><span>Días</span><input type="number" id="lc-ageD" min="0" max="31" inputmode="numeric"></label>
+      <label class="field span2"><span>Situación especial (opcional)</span><select id="lc-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="acon">Acondroplasia</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
+    </div>
+    <div class="lbl pt-h">Medidas de hoy</div>
+    <div class="grid">
       <label class="field"><span>Peso actual <select id="lc-wu" style="width:auto;padding:2px 6px;margin-left:6px" aria-label="Unidad del peso"><option value="g">g</option><option value="kg">kg</option></select></span><input type="number" id="lc-w" min="300" max="20000" inputmode="numeric"><small>Peso de hoy: es el que se grafica. Elija kg si le resulta más cómodo (ej.: 9,350).</small></label>
       <label class="field"><span>Longitud / talla actual (cm)</span><input type="number" id="gr-len" min="30" max="130" step="0.1" inputmode="decimal"><small>Se grafica en longitud/edad.</small></label>
       <label class="field" id="gr-pc-w"><span>Perímetro cefálico actual (cm)</span><input type="number" id="gr-pc" min="20" max="60" step="0.1" inputmode="decimal"><small>Se grafica en PC/edad.</small></label>
-      <label class="field"><span>Situación especial (opcional)</span><select id="lc-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="acon">Acondroplasia</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
+    </div>
+    <div class="pt-two"><div><div class="lbl pt-h">Control previo (peso anterior)</div>
+    <div class="grid">
+      <label class="field"><span>Peso anterior (g)</span><input type="number" id="lc-wprev" min="300" max="20000" inputmode="numeric"></label>
+      <label class="field"><span>Días desde el peso anterior</span><input type="number" id="lc-dprev" min="1" max="365" inputmode="numeric"></label>
+    </div></div><div><div class="lbl pt-h">Al nacer</div>
+    <div class="grid">
       <label class="field"><span>Peso de nacimiento (g)</span><input type="number" id="lc-pn" min="300" max="6000" inputmode="numeric"></label>
       <label class="field"><span>Longitud de nacimiento (cm)</span><input type="number" id="lc-ln" min="25" max="65" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Perímetro cefálico al nacer (cm)</span><input type="number" id="lc-pcn" min="18" max="42" step="0.1" inputmode="decimal"></label>
-      <label class="field"><span>Peso anterior (g)</span><input type="number" id="lc-wprev" min="300" max="20000" inputmode="numeric"></label>
-      <label class="field"><span>Días desde el peso anterior</span><input type="number" id="lc-dprev" min="1" max="365" inputmode="numeric"></label>
-    </div>
+    </div></div></div>
     <div style="margin:14px 0 4px;display:flex;flex-wrap:wrap;gap:6px 22px"><label class="check"><input type="checkbox" id="lc-pre"> Prematuro (nació antes de las 37 semanas)</label><label class="check"><input type="checkbox" id="lc-first"> Primera consulta del recién nacido</label></div>
     <div class="grid" id="lc-preflds" hidden style="margin-top:10px">
       <label class="field"><span>Edad gestacional (semanas)</span><input type="number" id="lc-egw" min="22" max="36" inputmode="numeric"></label>
@@ -621,6 +635,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   <div class="card">
     <h3>1 · Paciente</h3>
     <p class="sub">Los datos de identificación son opcionales y sólo se usan en el resumen para copiar.</p>
+    <div class="lbl pt-h">Identificación</div>
     <div class="grid">
       <label class="field"><span>Código de paciente (opcional)</span><input type="text" id="es-id" placeholder="Sin nombre ni DNI" maxlength="40" autocomplete="off"></label>
       <label class="field"><span>DNI (para buscar y guardar)</span><input type="text" id="es-dni" maxlength="12" inputmode="numeric" autocomplete="off"><small>Con el DNI se busca al paciente y se traen sus datos y controles guardados. No aparece en el resumen; a la planilla compartida sólo se envía con consentimiento.</small></label>
@@ -628,13 +643,19 @@ details.card[open] > summary { margin-bottom: 12px; }
       <label class="field"><span>Sexo</span><select id="es-sex"><option value="">Seleccionar</option><option value="M">Varón</option><option value="F">Mujer</option></select></label>
       <label class="field"><span>Fecha de nacimiento</span><input type="date" id="es-dob"></label>
       <label class="field"><span>Fecha de control</span><input type="date" id="es-ctl"></label>
+    </div>
+    <div class="lbl pt-h">Edad y situación especial</div>
+    <div class="grid">
       <label class="field"><span>Edad (años)</span><input type="number" id="es-ageY" min="0" max="25" inputmode="numeric"><small>Se completa sola con las fechas (años, meses y días).</small></label>
       <label class="field"><span>Meses</span><input type="number" id="es-ageM" min="0" max="11" inputmode="numeric"></label>
       <label class="field"><span>Días</span><input type="number" id="es-ageD" min="0" max="31" inputmode="numeric"></label>
+      <label class="field span2"><span>Situación especial (opcional)</span><select id="es-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="acon">Acondroplasia</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
+    </div>
+    <div class="lbl pt-h">Medidas de hoy</div>
+    <div class="grid">
       <label class="field"><span>Peso (kg)</span><input type="number" id="es-w" min="10" max="200" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Talla (cm)</span><input type="number" id="es-h" min="80" max="230" step="0.1" inputmode="decimal"></label>
       <label class="field"><span>Circunferencia de cintura (cm)</span><input type="number" id="es-wc" min="30" max="160" step="0.1" inputmode="decimal"><small>Opcional · de 2 a 19 años. Se mide en el borde superior de la cresta ilíaca y se compara por percentilos (Fernández y cols.).</small></label>
-      <label class="field"><span>Situación especial (opcional)</span><select id="es-cond"><option value="">Ninguna</option><option value="down">Síndrome de Down</option><option value="turner">Síndrome de Turner (mujeres)</option><option value="acon">Acondroplasia</option><option value="pc1">Parálisis cerebral · grupo 1 (camina solo)</option><option value="pc2">Parálisis cerebral · grupo 2 (camina con apoyo)</option><option value="pc3">Parálisis cerebral · grupo 3 (se arrastra, no camina)</option><option value="pc4">Parálisis cerebral · grupo 4 (no se desplaza, no come solo)</option><option value="pc5">Parálisis cerebral · grupo 5 (con sonda de alimentación)</option></select><small>Muestra curvas específicas y se guarda en la planilla.</small></label>
     </div>
     <div class="chips" id="es-chips"></div>
   </div>
