@@ -83,7 +83,7 @@ details.gr{border:1px solid var(--line);border-radius:10px;margin:10px 0;backgro
   <label class="field" style="margin-top:12px"><span>Observaciones</span><textarea id="lb-obs" maxlength="1500" style="min-height:70px"></textarea></label>
  </div>
 
- <div class="card">
+ <div class="card" id="lb-filecard">
   <h3>3 · Archivos del informe (PDF o foto)</h3>
   <p class="sub" style="font-size:.86rem">Hasta 3 archivos de 5 MB (PDF, JPG o PNG). Se envían a la carpeta de Drive del centro sólo al pulsar «Guardar»; la persona debe haber dado su consentimiento.</p>
   <div class="actions" style="margin-top:8px"><input type="file" id="lb-file" accept="application/pdf,image/jpeg,image/png" multiple></div>
@@ -97,7 +97,7 @@ details.gr{border:1px solid var(--line);border-radius:10px;margin:10px 0;backgro
   <div id="lb-res"><p class="sub">Cargue al menos un valor.</p></div>
   <div class="actions noprint" style="margin-top:10px"><button class="btn" id="lb-copy" type="button">Copiar resumen</button><button class="btn" id="lb-print" type="button">Imprimir</button></div>
  </div>
- <div class="card noprint">
+ <div class="card noprint" id="lb-savecard">
   <h3>Guardar</h3>
   <label class="check" id="lb-consw" hidden><input type="checkbox" id="lb-cons"> El paciente o el equipo de salud autorizó registrar estos datos en la planilla compartida del centro.</label>
   <div class="actions" style="margin-top:6px"><button class="btn primary" id="lb-save" type="button">Guardar en la planilla</button></div>
@@ -133,17 +133,24 @@ details.gr{border:1px solid var(--line);border-radius:10px;margin:10px 0;backgro
     $('lb-hist').innerHTML = '<p class="sub" style="font-size:.86rem">Aquí aparecen las cargas ya registradas del paciente (fecha y laboratorio).</p>';
   }
 
+  if (!BQ) {
+    $('lb-sub').innerHTML = 'Cargue los valores del informe (uno por uno o pegando el texto) y la herramienta indica si cada uno está <b>bajo</b>, <b>normal</b> o <b>alto</b>, calcula índices (HOMA-IR, LDL, filtrado glomerular, saturación de transferrina) y compara con el estudio anterior. Con el DNI puede <b>consultar</b> los estudios que el laboratorio cargó. Lo que escriba acá es sólo para calificar: no se guarda en ningún lado.';
+    $('lb-filecard').hidden = true;
+    var sc = $('lb-savecard'); Array.prototype.forEach.call(sc.children, function (e) { if (e.tagName !== 'H3') e.hidden = true; });
+    sc.querySelector('h3').textContent = 'Carga de resultados';
+    var nt = document.createElement('p'); nt.className = 'sub'; nt.style.fontSize = '.86rem'; nt.textContent = 'Los resultados los carga únicamente el laboratorio (perfil Bioquímica, con su código de acceso). Aquí puede buscar a la persona por DNI, ver los estudios y abrir los informes adjuntos.'; sc.appendChild(nt);
+  }
+
   /* ---------- configuración de la planilla ---------- */
   var cfgUrl = '';
   try { fetch('../config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (c) { if (c && /^https:\/\/script\.google\.com\//.test(c.url || '')) cfgUrl = c.url; }).catch(function () { }); } catch (e) { }
   function cfg() {
+    if (BQ) { var l = get('cs61_labk'); var u = cfgUrl || (l && l.url) || ''; return l && l.key && u ? { url: u, key: l.key, prof: l.prof || '' } : null; } // bioquímica: sólo con su código de laboratorio
     var c = get('cs61_plcv'); if (!(c && c.url && c.key)) c = get('cs61_pl'); if (!(c && c.url && c.key)) c = get('cs61_cons_api');
-    if (c && c.url && c.key) return c;
-    var l = get('cs61_labk'); if (l && l.key) { var u = cfgUrl || l.url || ''; if (u) return { url: u, key: l.key, prof: l.prof || '' }; }
-    return null;
+    return c && c.url && c.key ? c : null; // profesionales: sólo consulta
   }
   function post(c, body) { return fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ k: c.key }, body)) }).then(function (r) { return r.json(); }); }
-  var ERR = { clave: 'La planilla rechazó la clave o el código de acceso.', faltan_hojas: 'La planilla no tiene la hoja «Pacientes». Use la planilla «Registro compartido CS61».', sin_dni: 'Falta el DNI (o un código existente).', sin_consentimiento: 'Falta el consentimiento: es obligatorio para registrar a una persona nueva.', datos_largos: 'Hay demasiados datos para guardar.', sin_estudio: 'No se encontró el estudio para adjuntar el archivo.', archivo: 'El archivo no es válido (PDF, JPG o PNG de hasta 5 MB).' };
+  var ERR = { solo_laboratorio: 'Sólo el perfil Bioquímica, con el código de acceso del laboratorio, puede cargar resultados.', clave: 'La planilla rechazó la clave o el código de acceso.', faltan_hojas: 'La planilla no tiene la hoja «Pacientes». Use la planilla «Registro compartido CS61».', sin_dni: 'Falta el DNI (o un código existente).', sin_consentimiento: 'Falta el consentimiento: es obligatorio para registrar a una persona nueva.', datos_largos: 'Hay demasiados datos para guardar.', sin_estudio: 'No se encontró el estudio para adjuntar el archivo.', archivo: 'El archivo no es válido (PDF, JPG o PNG de hasta 5 MB).' };
   function msg(t, warn) { var e = $('lb-msg'); e.className = 'alert' + (warn ? ' warn' : ''); e.textContent = t; e.hidden = !t; }
   function idq() { var q = $('lb-dni').value.trim(), cod = /^CS61-\d+$/i.test(q) ? q.toUpperCase() : '', dni = q.replace(/\D/g, ''); return { cod: cod, dni: dni, ok: !!cod || dni.length >= 6 }; }
   if (BQ) {
@@ -304,7 +311,7 @@ details.gr{border:1px solid var(--line);border-radius:10px;margin:10px 0;backgro
   });
   $('lb-find').addEventListener('click', function () {
     var c = cfg(), q = idq();
-    if (!c) { msg(BQ ? 'Guarde primero el código de acceso del laboratorio (arriba).' : 'Configure la planilla compartida en Registro cardiovascular → Excel y respaldo (o abra el enlace de configuración).', true); return; }
+    if (!c) { msg(BQ ? 'Guarde primero el código de acceso del laboratorio (arriba).' : 'Para consultar estudios guardados hace falta la planilla compartida configurada en este equipo (Registro cardiovascular → Excel y respaldo).', true); return; }
     if (!q.ok) { msg('Ingrese el DNI (sólo números) o el código, por ejemplo CS61-0001.', true); return; }
     var b = this; b.disabled = true; msg('Buscando…');
     post(c, { labget: q.cod ? { codigo: q.cod } : { dni: q.dni } }).then(function (j) {
