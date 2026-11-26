@@ -86,13 +86,15 @@ var MAP={
  lab:{'lb-dni':'dni','lb-nom':'nom','lb-sex':'sex','lb-dob':'dob'},
  vac:{'v-dni':'dni','v-nom':'nom','v-dob':'dob'},
  cv:{'ec-doc':'dni','ec-nombre':'nom'},
- iodi:{'d-dob':'dob'}
+ iodi:{'d-dob':'dob'},
+ calc:{'nom':'nom'}
 };
 var W=[
  {id:'antro',t:'Antropometría y crecimiento',src:function(){var m=ageM();return '../crecimiento/#'+(m!==null&&m<60?'lactantes':'escolar')},open:true},
  {id:'fam',t:'Familia y familiograma',native:true},
  {id:'adol',t:'Psicoemocional y sexualidad (historia del adolescente)',native:true},
  {id:'clap',t:'Ficha del adolescente (CLAP): hábitos, examen e impresión',native:true},
+ {id:'calc',t:'Antropometría ampliada: IMC, siluetas y cintura-talla',src:function(){return '../calculadora/'},note:'Escolar, adolescente y adulto'},
  {id:'lab',t:'Laboratorio',src:function(){return '../laboratorio/'}},
  {id:'vac',t:'Calendario de vacunación',src:function(){return '../vacunas/'}},
  {id:'cv',t:'Registro cardiovascular (ECV y FINDRISC)',src:function(){return '../registro/'},note:'Desde los 10 años'},
@@ -150,7 +152,7 @@ function status(){
  set('antro',m===null?'Falta la fecha de nacimiento':(m<60?'Recién nacido y niño':'Escolar y adolescente'),m===null?'off':'');
  set('adol',m!==null&&m<120?'Desde los 10 años':'Historia del adolescente',m!==null&&m<120?'off':'');
  set('lab','Referencias por edad y sexo','');set('vac','Según el calendario','');
- set('cv',old?'Corresponde':'Desde los 10 años',old?'':'off');set('asist','Dictado y resumen','');
+ set('cv',old?'Corresponde':'Desde los 10 años',old?'':'off');set('asist','Dictado y resumen','');set('calc','Escolar, adolescente y adulto','');
  set('iodi',young?'Corresponde':'De 0 a 5 años',young?'':'off');
  ['iodi','cv'].forEach(function(id){var w=$('w-'+id);w&&w.classList.toggle('dim',id==='iodi'?!young:!old)});
 }
@@ -242,6 +244,7 @@ function loadAdol(){
 function clearAdol(){AD.psico={};AD.sexo={};AD.obsP='';AD.obsS='';AD.loadedFor='';FAM.p=[];FAM.obs='';CL.v={};CL.obs='';if($('ad-body'))drawAdol();if($('fam-body'))drawFam();if($('cl-body'))drawCl();alerts();summary(true)}
 function saveAdol(){
  var sx=AD.tab==='sexo',m=$('ad-msg'),cod=adolCode();
+ if(!canEdit('adol')){m.textContent=roMsg('adol');return}
  if(!cod){m.textContent='Falta el código del paciente: use «Buscar en la planilla» o escríbalo arriba.';return}
  if(!cfg()){m.textContent='Falta configurar la planilla.';return}
  var rec={tipo:'adol',seccion:sx?'sexo':'psico',codigo:cod,fecha:new Date().toISOString().slice(0,10),datos:sx?AD.sexo:AD.psico,obs:sx?AD.obsS:AD.obsP,prof:(cfg().prof||''),id:'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)};
@@ -262,6 +265,7 @@ function alerts(){
 
 /* ---------- guardado genérico de secciones (familia, CLAP) ---------- */
 function saveSec(sec,datos,obs,m){
+ if(sec==='clap'&&!canEdit('clap')){m.textContent=roMsg('clap');return}
  var cod=adolCode();
  if(!cod){m.textContent='Falta el código del paciente: use «Buscar en la planilla» o escríbalo arriba.';return}
  if(!cfg()){m.textContent='Falta configurar la planilla.';return}
@@ -487,6 +491,56 @@ function fallback(t,done){var x=document.createElement('textarea');x.value=t;doc
 setInterval(function(){if($('res').getAttribute('data-ready'))summary(false)},2000);
 
 
+
+/* ---------- perfil: permisos visuales (sin clave) ---------- */
+var PERF_N={nutricion:'Nutrición',enfermeria:'Enfermería',aps:'Agente sanitario (APS)',pediatria:'Medicina · Pediatría',clinica:'Medicina · Clínica',gineco:'Medicina · Ginecología y obstetricia',medicina:'Medicina · Otra especialidad',bioquimica:'Bioquímica / laboratorio',otro:'Otro perfil'};
+var MED=['pediatria','medicina','gineco','clinica','enfermeria'];
+var EDIT={adol:MED,clap:MED,tanner:MED,lab:['bioquimica']};
+function perfil(){try{return localStorage.getItem('cs61_perfil')||''}catch(e){return ''}}
+function canEdit(k){var p=perfil();return !p||(EDIT[k]||[]).indexOf(p)>-1}
+function roMsg(k){var p=perfil();return 'Su perfil ('+(PERF_N[p]||p)+') ve este apartado sin editarlo.'+(k==='lab'?' El laboratorio lo carga el perfil de bioquímica.':'')}
+function roNative(id,bodyId){
+ var b=$(bodyId);if(!b||canEdit(id))return;
+ if(!b.querySelector('.ro-note')){var n=document.createElement('div');n.className='lock ro-note';n.style.cssText='background:var(--s);border-color:var(--line)';n.innerHTML='<b>Solo lectura.</b> '+esc(roMsg(id));b.insertBefore(n,b.firstChild)}
+ b.querySelectorAll('input,select,textarea,button').forEach(function(e){if(e.id==='big-open')return;e.disabled=true});
+}
+function roFrames(){
+ var fa=document.querySelector('#b-antro iframe');
+ if(fa&&!canEdit('tanner')){try{var d=fa.contentDocument,c=d.getElementById('es-tancard');if(c){c.setAttribute('inert','');c.style.opacity='.6';if(!c.querySelector('.ro-note')){var n=d.createElement('p');n.className='ro-note';n.style.cssText='margin:0 0 8px;padding:6px 10px;border-radius:8px;background:#eef2f7;font-size:.85rem;font-weight:700';n.textContent='Solo lectura. '+roMsg('tanner');c.insertBefore(n,c.firstChild)}}}catch(e){}}
+ var fl=document.querySelector('#b-lab iframe');
+ if(fl&&!canEdit('lab')){try{var dl=fl.contentDocument;dl.querySelectorAll('input,select,textarea,button').forEach(function(e){if(e.closest('#lb-acc')||e.id==='lb-print'||e.id==='lb-copy')return;e.disabled=true});
+  if(!dl.getElementById('ro-lab')){var m=dl.createElement('p');m.id='ro-lab';m.style.cssText='margin:8px 0;padding:8px 12px;border-radius:8px;background:#eef2f7;font-weight:700';m.textContent='Solo lectura. '+roMsg('lab');var h=dl.querySelector('main,.wrap')||dl.body;h.insertBefore(m,h.firstChild)}}catch(e){}}
+ ['adol','clap'].forEach(function(k){roNative(k,k==='adol'?'ad-body':'cl-body')});
+}
+function perfBar(){
+ var w=$('wins'),bar=document.createElement('div');bar.className='row';bar.style.cssText='gap:8px;margin:0 0 10px;align-items:center;font-size:.86rem';
+ bar.innerHTML='<span>Perfil: <b id="pf-n"></b></span><select id="pf-sel" aria-label="Cambiar de perfil"><option value="">Sin perfil (todo editable)</option>'+Object.keys(PERF_N).map(function(k){return '<option value="'+k+'">'+esc(PERF_N[k])+'</option>'}).join('')+'</select><span class="msg">Solo ordena lo que se puede editar en pantalla; no es una protección con clave.</span>';
+ w.parentNode.insertBefore(bar,w);
+ var sel=$('pf-sel');sel.value=perfil();$('pf-n').textContent=PERF_N[perfil()]||'sin elegir';
+ sel.addEventListener('change',function(){try{if(sel.value)localStorage.setItem('cs61_perfil',sel.value);else localStorage.removeItem('cs61_perfil')}catch(e){}$('pf-n').textContent=PERF_N[sel.value]||'sin elegir';
+  if($('ad-body'))drawAdol();if($('cl-body'))drawCl();if($('fam-body'))drawFam();document.querySelectorAll('.wb iframe').forEach(function(f){try{f.contentWindow.location.reload()}catch(e){}})});
+}
+var _dA=drawAdol,_dC=drawCl;
+drawAdol=function(){_dA();roNative('adol','ad-body')};drawCl=function(){_dC();roNative('clap','cl-body')};
+setInterval(roFrames,1500);
+
+/* ---------- ventana de antropometría ampliada (calculadora) ---------- */
+var CS={last:''};
+function calcSync(){
+ var fc=document.querySelector('#b-calc iframe'),fa=document.querySelector('#b-antro iframe');if(!fc)return;
+ try{
+  var d=fc.contentDocument,a=fa?fa.contentDocument:null,m=ageM();if(!d.getElementById('peso'))return;
+  var ped=m!==null&&m<216,btn=d.getElementById(ped?'tP':'tA');if(btn&&btn.getAttribute('aria-pressed')!=='true')btn.click();
+  setv(d,'sexo',P.sex==='M'?'m':P.sex==='F'?'f':'');
+  if(m!==null){if(ped){setv(d,'ea',String(Math.floor(m/12)));setv(d,'em',String(m%12))}else setv(d,'edad',String(Math.floor(m/12)))}
+  var w='',h='',c='';
+  if(a){var g=function(i){var e=a.getElementById(i);return e?e.value:''};w=g('es-w')||g('lc-w');h=g('es-h')||g('lc-h');c=g('es-wc')}
+  var key=[P.sex,m,w,h,c].join('|');
+  if(key!==CS.last){CS.last=key;if(h)setv(d,'met','t');setv(d,'peso',w);setv(d,'talla',h);setv(d,'cint',c);if(w&&h){var b=d.getElementById('calc');if(b)b.click()}}
+ }catch(e){}
+}
+setInterval(calcSync,1500);
+
 /* ---------- vista ampliada de antropometría ---------- */
 function openBig(){
  var fr=document.querySelector('#b-antro iframe');
@@ -507,7 +561,7 @@ function openBig(){
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.id==='big-open')openBig();if(t&&t.id==='big-x'){var dl=$('big');dl.close?dl.close():dl.removeAttribute('open')}if(t&&t.id==='big-p'){try{$('big-f').contentWindow.print()}catch(x){}}});
 
 /* ---------- inicio ---------- */
-build();writeForm();status();summary(true);
+build();perfBar();writeForm();status();summary(true);
 W.forEach(function(w){var a=$('a-'+w.id);if(a)a.href=w.src()});
 toggle('antro',true);
 if(P.cod||P.dni)setTimeout(applyP,600);
