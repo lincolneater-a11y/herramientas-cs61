@@ -38,6 +38,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-vis
 .res textarea{min-height:110px;font-size:.84rem;line-height:1.45}.res .lh{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-weight:800;font-size:.86rem}.res .lh span{flex:1}
 .note{font-size:.84rem;color:var(--ink2);background:var(--tealsoft);border-radius:8px;padding:8px 10px}
 .sw-tool{margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap}
+dialog#big{width:97vw;max-width:1600px;height:94vh;border:0;border-radius:16px;padding:0;background:var(--s);color:var(--ink)}dialog#big::backdrop{background:rgba(10,25,40,.6)}#big .bh{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}#big .bh h2{margin:0;font-size:1.1rem;flex:1}#big iframe{display:block;width:100%;height:calc(94vh - 62px);border:0}
 @media print{.rail,.res,.pt,.wh a,.tabs2{display:none!important}}
 </style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><script src="../shared/ds.js"></script><link rel="stylesheet" href="../shared/ds.css"></head><body>
 <header class="hdr"><div class="hdr-in"><div class="brand"><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Legajo del paciente · Pediatría</h1><small>Centro de Salud N.º 61 · Todas las herramientas en una sola pantalla</small></div><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a></div></div></header>
@@ -64,6 +65,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-vis
  <aside class="card res" aria-label="Resumen para Acuario" style="padding:0"><div class="hd"><h3>Para pegar en Acuario</h3><small style="opacity:.85">Se arma con lo cargado en las ventanas</small></div><div class="bd" id="res"></div></aside>
 </div>
 </main>
+<dialog id="big" aria-label="Antropometría ampliada"><div class="bh"><h2 id="big-t">Antropometría y crecimiento</h2><button class="btn small" id="big-p" type="button">Imprimir</button><button class="btn small primary" id="big-x" type="button">Cerrar</button></div><iframe id="big-f" title="Datos ampliados"></iframe></dialog>
 <script>
 (function(){
 'use strict';
@@ -88,7 +90,9 @@ var MAP={
 };
 var W=[
  {id:'antro',t:'Antropometría y crecimiento',src:function(){var m=ageM();return '../crecimiento/#'+(m!==null&&m<60?'lactantes':'escolar')},open:true},
+ {id:'fam',t:'Familia y familiograma',native:true},
  {id:'adol',t:'Psicoemocional y sexualidad (historia del adolescente)',native:true},
+ {id:'clap',t:'Ficha del adolescente (CLAP): hábitos, examen e impresión',native:true},
  {id:'lab',t:'Laboratorio',src:function(){return '../laboratorio/'}},
  {id:'vac',t:'Calendario de vacunación',src:function(){return '../vacunas/'}},
  {id:'cv',t:'Registro cardiovascular (ECV y FINDRISC)',src:function(){return '../registro/'},note:'Desde los 10 años'},
@@ -99,7 +103,7 @@ var CSSINJ='.hdr,header.top,.sw-tool,.pico{display:none!important}body{backgroun
 function build(){
  var h='',r='';
  W.forEach(function(w){
-  h+='<section class="win" id="w-'+w.id+'"><div class="wh"><button type="button" class="wt" aria-expanded="false" aria-controls="b-'+w.id+'" data-w="'+w.id+'">'+ICON+'<span>'+esc(w.t)+'</span></button><span class="chip off" id="c-'+w.id+'"></span>'+(w.native?'':'<a class="btn small" id="a-'+w.id+'" target="_blank" rel="noopener">Abrir aparte</a>')+'</div><div class="wb" id="b-'+w.id+'" hidden></div></section>';
+  h+='<section class="win" id="w-'+w.id+'"><div class="wh"><button type="button" class="wt" aria-expanded="false" aria-controls="b-'+w.id+'" data-w="'+w.id+'">'+ICON+'<span>'+esc(w.t)+'</span></button><span class="chip off" id="c-'+w.id+'"></span>'+(w.id==='antro'?'<button class="btn small" id="big-open" type="button">Ver en grande</button>':'')+(w.native?'':'<a class="btn small" id="a-'+w.id+'" target="_blank" rel="noopener">Abrir aparte</a>')+'</div><div class="wb" id="b-'+w.id+'" hidden></div></section>';
   r+='<a href="#w-'+w.id+'" data-r="'+w.id+'"><span class="dot" id="d-'+w.id+'"></span>'+esc(w.t.split(' (')[0])+'</a>';
  });
  $('wins').innerHTML=h;$('rail').innerHTML=r;
@@ -110,7 +114,7 @@ function winById(id){return W.filter(function(w){return w.id===id})[0]}
 function toggle(id,forceOpen){
  var w=winById(id),b=$('b-'+id),btn=document.querySelector('[data-w="'+id+'"]'),open=forceOpen?true:b.hidden;
  b.hidden=!open;btn.setAttribute('aria-expanded',String(open));
- if(open&&!b.getAttribute('data-ready')){b.setAttribute('data-ready','1');w.native?initAdol(b):mkFrame(w,b)}
+ if(open&&!b.getAttribute('data-ready')){b.setAttribute('data-ready','1');w.native?initNative(w.id,b):mkFrame(w,b)}
  if(open)$('d-'+id).classList.add('on');
 }
 function mkFrame(w,b){
@@ -144,7 +148,7 @@ function status(){
  var set=function(id,txt,cls){var e=$('c-'+id);if(!e)return;e.textContent=txt;e.className='chip '+cls};
  var young=m!==null&&m<72,old=m!==null&&m>=120;
  set('antro',m===null?'Falta la fecha de nacimiento':(m<60?'Recién nacido y niño':'Escolar y adolescente'),m===null?'off':'');
- set('adol',m!==null&&m<120?'Desde los 10 años':'Acceso por perfil',m!==null&&m<120?'off':'');
+ set('adol',m!==null&&m<120?'Desde los 10 años':'Historia del adolescente',m!==null&&m<120?'off':'');
  set('lab','Referencias por edad y sexo','');set('vac','Según el calendario','');
  set('cv',old?'Corresponde':'Desde los 10 años',old?'':'off');set('asist','Dictado y resumen','');
  set('iodi',young?'Corresponde':'De 0 a 5 años',young?'':'off');
@@ -153,7 +157,9 @@ function status(){
 function applyP(){readForm();lsSet('cs61_leg',P);status();pushAll();loadAdol();summary(true)}
 $('p-apply').addEventListener('click',function(){applyP();$('p-msg').textContent='Datos cargados en las ventanas abiertas. Las que abra después también los reciben.'});
 ['p-dob','p-sex'].forEach(function(i){$(i).addEventListener('change',function(){applyP()})});
-$('p-new').addEventListener('click',function(){P={dni:'',cod:'',nom:'',sex:'',dob:''};lsSet('cs61_leg',P);writeForm();status();clearAdol();$('p-msg').textContent='Paciente nuevo: complete los datos y toque «Cargar en todas las ventanas». Las herramientas conservan lo que ya tenían: recargue la página para vaciarlas.'});
+$('p-new').addEventListener('click',function(){P={dni:'',cod:'',nom:'',sex:'',dob:''};lsSet('cs61_leg',P);writeForm();AD.sexKeyOK=false;AD.key='';clearAdol();DIRTY={dat:false,dx:false,tto:false};status();
+ document.querySelectorAll('.wb iframe').forEach(function(fr){try{fr.contentWindow.location.reload()}catch(e){fr.src=fr.src}});
+ $('p-msg').textContent='Paciente nuevo: se vaciaron las ventanas. Complete los datos y toque «Cargar en todas las ventanas».'});
 $('p-find').addEventListener('click',function(){
  readForm();var c=cfg(),msg=$('p-msg');
  if(!c){msg.textContent='Falta configurar la planilla: abra cualquier herramienta (Inicio) y cargue la URL y la clave del centro.';return}
@@ -188,21 +194,21 @@ var SEXO=[
  {k:'emb',l:'Embarazos o hijos',o:['No','Sí','No corresponde']},
  {k:'abu',l:'Abuso o coerción sexual',o:['No','Sí','No contesta'],w:['Sí']}
 ];
-var AD={tab:'psico',psico:{},sexo:{},obsP:'',obsS:'',incP:true,incS:false,loadedFor:'',sexKeyOK:false};
-function sexKey(){try{return localStorage.getItem('cs61_sexk')||''}catch(e){return ''}}
+var AD={tab:'psico',psico:{},sexo:{},obsP:'',obsS:'',incP:true,incS:false,loadedFor:'',sexKeyOK:false,key:''};
+function sexKey(){return AD.key||''}
 function initAdol(b){
  b.innerHTML='<div class="tabs2" role="tablist"><button type="button" role="tab" id="t-psico" aria-selected="true">Situación psicoemocional</button><button type="button" role="tab" id="t-sexo" aria-selected="false">Sexualidad · acceso restringido</button></div><div id="ad-body"></div>';
  $('t-psico').addEventListener('click',function(){AD.tab='psico';drawAdol()});$('t-sexo').addEventListener('click',function(){AD.tab='sexo';drawAdol()});
  drawAdol();loadAdol();
 }
-function items(list,vals){return list.map(function(it){var v=vals[it.k]||'',warn=it.w&&it.w.indexOf(v)>-1;
- return '<div class="it'+(warn?' warn':'')+'"><label for="ad-'+it.k+'">'+esc(it.l)+'</label>'+(it.n?'<input type="number" min="5" max="25" id="ad-'+it.k+'" data-k="'+it.k+'" value="'+esc(v)+'">':'<select id="ad-'+it.k+'" data-k="'+it.k+'"><option value="">Sin dato</option>'+it.o.map(function(o){return '<option'+(o===v?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>')+'</div>'}).join('')}
+function items(list,vals,pre){pre=pre||'ad-';return list.map(function(it){var v=vals[it.k]||'',warn=it.w&&it.w.indexOf(v)>-1;
+ return '<div class="it'+(warn?' warn':'')+'"><label for="'+pre+it.k+'">'+esc(it.l)+'</label>'+(it.t?'<input type="text" maxlength="40" id="'+pre+it.k+'" data-k="'+it.k+'" value="'+esc(v)+'">':it.n?'<input type="number" min="5" max="25" id="'+pre+it.k+'" data-k="'+it.k+'" value="'+esc(v)+'">':'<select id="'+pre+it.k+'" data-k="'+it.k+'"><option value="">Sin dato</option>'+it.o.map(function(o){return '<option'+(o===v?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>')+'</div>'}).join('')}
 function drawAdol(){
  var body=$('ad-body');if(!body)return;
  $('t-psico').setAttribute('aria-selected',String(AD.tab==='psico'));$('t-sexo').setAttribute('aria-selected',String(AD.tab==='sexo'));
  var sx=AD.tab==='sexo',list=sx?SEXO:PSICO,vals=sx?AD.sexo:AD.psico,h='';
  if(sx&&!AD.sexKeyOK){
-  h='<div class="lock"><b>Sección restringida.</b> Se completa a solas con la o el adolescente y sólo la ve el equipo de adolescencia. Ingrese el código de adolescencia del centro.</div><div class="form"><div class="it"><label for="ad-key">Código de adolescencia</label><input type="text" id="ad-key" autocomplete="off" value="'+esc(sexKey())+'"></div><div class="row" style="align-items:end"><button class="btn primary" id="ad-keyok" type="button">Habilitar</button></div></div><p class="msg" id="ad-msg" style="padding:0 14px 12px"></p>';
+  h='<div class="lock"><b>Sección restringida.</b> Se completa a solas con la o el adolescente y sólo la ve el equipo de adolescencia. Ingrese el código de adolescencia del centro.</div><div class="form"><div class="it"><label for="ad-key">Código de adolescencia</label><input type="text" id="ad-key" autocomplete="off"></div><div class="row" style="align-items:end"><button class="btn primary" id="ad-keyok" type="button">Habilitar</button></div></div><p class="msg" id="ad-msg" style="padding:0 14px 12px"></p>';
   body.innerHTML=h;$('ad-keyok').addEventListener('click',checkKey);return;
  }
  h=(sx?'<div class="lock"><b>Sexualidad.</b> Complete a solas con la o el adolescente. No se incluye en el resumen para Acuario salvo que lo marque.</div>':'')+'<div class="form">'+items(list,vals)+'</div>'+
@@ -219,21 +225,21 @@ function checkKey(){
  if(!cfg()){m.textContent='Falta configurar la planilla.';return}
  m.textContent='Verificando…';
  post(k,{ping:true}).then(function(j){
-  if(j&&j.ok){try{localStorage.setItem('cs61_sexk',k)}catch(e){}AD.sexKeyOK=true;drawAdol();loadAdol()}
+  if(j&&j.ok){AD.key=k;AD.sexKeyOK=true;drawAdol();loadAdol()}
   else m.textContent='El código no coincide.';
  }).catch(function(){m.textContent='No se pudo conectar.'});
 }
 function adolCode(){return (P.cod||'').trim().toUpperCase()}
 function loadAdol(){
- var cod=adolCode();if(!cod||!cfg()||!$('ad-body')||AD.loadedFor===cod+AD.sexKeyOK)return;
+ var cod=adolCode();if(!cod||!cfg()||AD.loadedFor===cod+AD.sexKeyOK)return;
  AD.loadedFor=cod+AD.sexKeyOK;
  post(AD.sexKeyOK?sexKey():cfg().key,{adolget:{codigo:cod}}).then(function(j){
   if(!j||!j.ok)return;
-  (j.filas||[]).forEach(function(f){if(f.seccion==='sexo'){AD.sexo=f.datos||{};AD.obsS=f.obs||''}else{AD.psico=f.datos||{};AD.obsP=f.obs||''}});
-  drawAdol();alerts();summary(true);
+  (j.filas||[]).forEach(function(f){if(f.seccion==='sexo'){AD.sexo=f.datos||{};AD.obsS=f.obs||''}else if(f.seccion==='fam'){FAM.p=famParse((f.datos||{}).p);FAM.obs=f.obs||''}else if(f.seccion==='clap'){CL.v=f.datos||{};CL.obs=f.obs||''}else{AD.psico=f.datos||{};AD.obsP=f.obs||''}});
+  drawAdol();if($('fam-body'))drawFam();if($('cl-body'))drawCl();alerts();summary(true);
  }).catch(function(){});
 }
-function clearAdol(){AD.psico={};AD.sexo={};AD.obsP='';AD.obsS='';AD.loadedFor='';if($('ad-body'))drawAdol();alerts();summary(true)}
+function clearAdol(){AD.psico={};AD.sexo={};AD.obsP='';AD.obsS='';AD.loadedFor='';FAM.p=[];FAM.obs='';CL.v={};CL.obs='';if($('ad-body'))drawAdol();if($('fam-body'))drawFam();if($('cl-body'))drawCl();alerts();summary(true)}
 function saveAdol(){
  var sx=AD.tab==='sexo',m=$('ad-msg'),cod=adolCode();
  if(!cod){m.textContent='Falta el código del paciente: use «Buscar en la planilla» o escríbalo arriba.';return}
@@ -248,15 +254,203 @@ function saveAdol(){
 function alerts(){
  var a=[];PSICO.forEach(function(it){var v=AD.psico[it.k];if(it.w&&it.w.indexOf(v)>-1)a.push(it.l+': '+v)});
  if(AD.sexKeyOK)SEXO.forEach(function(it){var v=AD.sexo[it.k];if(it.w&&it.w.indexOf(v)>-1)a.push('Sexualidad: alerta')});
+ CL_ALL.forEach(function(it){var v=CL.v[it.k];if(it.w&&it.w.indexOf(v)>-1)a.push(it.l+': '+v)});
  var u=a.filter(function(x,i){return a.indexOf(x)===i});
- $('p-chips').innerHTML=u.slice(0,6).map(function(x){return '<span class="chip warn">'+esc(x)+'</span>'}).join('');
+ $('p-chips').innerHTML=u.slice(0,8).map(function(x){return '<span class="chip warn">'+esc(x)+'</span>'}).join('');
  var d=$('d-adol');if(d){d.className='dot'+(u.length?' warn':' on')}
 }
+
+/* ---------- guardado genérico de secciones (familia, CLAP) ---------- */
+function saveSec(sec,datos,obs,m){
+ var cod=adolCode();
+ if(!cod){m.textContent='Falta el código del paciente: use «Buscar en la planilla» o escríbalo arriba.';return}
+ if(!cfg()){m.textContent='Falta configurar la planilla.';return}
+ var rec={tipo:'adol',seccion:sec,codigo:cod,fecha:new Date().toISOString().slice(0,10),datos:datos,obs:obs,prof:(cfg().prof||''),id:'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)};
+ m.textContent='Guardando…';
+ post(cfg().key,{rec:rec}).then(function(j){
+  if(j&&j.ok)m.textContent='Guardado ✓ en la hoja «Adolescente»';
+  else m.textContent=j&&j.error==='clave'?'La clave no coincide.':'No se pudo guardar ('+(j&&j.error||'sin respuesta')+'). Si dice «sin_codigo» o falla siempre, actualice el Apps Script (versión de la etapa 2).';
+ }).catch(function(){m.textContent='No se pudo conectar: no se guardó.'});
+}
+function initNative(id,b){if(id==='adol')initAdol(b);else if(id==='fam')initFam(b);else if(id==='clap')initCl(b)}
+
+/* ---------- Familia: familiograma editable ---------- */
+var REL={abp:['Abuelo paterno','M',1],apa:['Abuela paterna','F',1],abm:['Abuelo materno','M',1],ama:['Abuela materna','F',1],pad:['Padre','M',2],mad:['Madre','F',2],tip:['Tío/a paterno/a','',2],tim:['Tío/a materno/a','',2],her:['Hermano/a','',3],par:['Pareja','',3],hij:['Hijo/a','',4]};
+var DIS=['Diabetes','HTA','Cardiopatía / IAM','ACV','Obesidad','Cáncer','Dislipemia','Asma','Epilepsia','Salud mental','Adicciones','Chagas','Tuberculosis','Otra'];
+var FAM={p:[],obs:'',inc:true},FSEL=-1;
+function famParse(t){if(!t)return [];return String(t).split(';').map(function(x,i){var a=x.split('|');return REL[a[0]]?{id:i+1,r:a[0],s:a[1]||'',a:a[2]||'',d:a[3]==='1',e:(a[4]?a[4].split('.').filter(String).map(Number):[])}:null}).filter(Boolean)}
+function famStr(){return FAM.p.map(function(x){return [x.r,x.s,x.a,x.d?1:0,x.e.join('.')].join('|')}).join(';')}
+function famSex(x){return REL[x.r][1]||x.s||''}
+function famName(x){var n=REL[x.r][0];if(x.r==='her'||x.r==='tip'||x.r==='tim'||x.r==='hij'){var s=famSex(x);n=x.r==='her'?(s==='M'?'Hermano':s==='F'?'Hermana':'Hermano/a'):x.r==='hij'?(s==='M'?'Hijo':s==='F'?'Hija':'Hijo/a'):x.r==='tip'?(s==='M'?'Tío paterno':s==='F'?'Tía paterna':'Tío/a paterno/a'):(s==='M'?'Tío materno':s==='F'?'Tía materna':'Tío/a materno/a')}return n}
+function famLayout(){
+ var g=function(r){return FAM.p.filter(function(x){return x.r===r})},D=110,Y=[46,170,294,418],N=[],L=[];
+ var me={me:1,x:0,y:Y[2],s:P.sex==='M'?'M':P.sex==='F'?'F':'',lbl:'Paciente',sub:ageTxt()==='Sin paciente cargado'?'':ageTxt()};
+ var her=g('her'),par=g('par')[0],hij=g('hij');
+ var xs=[];her.forEach(function(x,i){x.x=-D*(her.length-i);x.y=Y[2]});me.x=0;if(par){par.x=D;par.y=Y[2]}
+ var sibMin=her.length?her[0].x:0,c3=(sibMin+0)/2,pad=g('pad')[0],mad=g('mad')[0],gap=pad&&mad?220:0;
+ var tp=g('tip'),tm=g('tim');
+ if(pad){pad.x=c3-(mad?gap/2:0);pad.y=Y[1]}if(mad){mad.x=c3+(pad?gap/2:0);mad.y=Y[1]}
+ var px=pad?pad.x:(mad?mad.x-D:c3);
+ tp.forEach(function(x,i){x.x=px-D*(tp.length-i);x.y=Y[1]});
+ var mx=mad?mad.x:px+D;tm.forEach(function(x,i){x.x=mx+D*(i+1);x.y=Y[1]});
+ var gp=[g('abp')[0],g('apa')[0]].filter(Boolean),gm=[g('abm')[0],g('ama')[0]].filter(Boolean);
+ var patg=tp.concat(pad?[pad]:[]),matg=(mad?[mad]:[]).concat(tm);
+ var cp=patg.length?(patg[0].x+patg[patg.length-1].x)/2:null,cm=matg.length?(matg[0].x+matg[matg.length-1].x)/2:null;
+ var place=function(arr,c){if(!arr.length||c===null)return;if(arr.length===1){arr[0].x=c}else{arr[0].x=c-62;arr[1].x=c+62}arr.forEach(function(x){x.y=Y[0]})};
+ place(gp,cp);place(gm,cm);
+ var hc=par?D/2:0;hij.forEach(function(x,i){x.x=hc+(i-(hij.length-1)/2)*D;x.y=Y[3]});
+ var all=[me].concat(FAM.p.filter(function(x){return x.x!==undefined}));
+ var link=function(par2,kids,yP,yC){kids=kids.filter(Boolean);par2=par2.filter(Boolean);if(!par2.length||!kids.length)return;
+  var cx=par2.reduce(function(a,b){return a+b.x},0)/par2.length,y0=par2.length>1?yP:yP+19,yb=yC-48;
+  L.push([cx,y0,cx,yb]);var xa=Math.min.apply(null,kids.map(function(k){return k.x}).concat([cx])),xb=Math.max.apply(null,kids.map(function(k){return k.x}).concat([cx]));
+  if(xa<xb)L.push([xa,yb,xb,yb]);kids.forEach(function(k){L.push([k.x,yb,k.x,yC-19])})};
+ var cpl=function(a,b,y){if(a&&b)L.push([Math.min(a.x,b.x)+19,y,Math.max(a.x,b.x)-19,y])};
+ cpl(gp[0],gp[1],Y[0]);cpl(gm[0],gm[1],Y[0]);cpl(pad,mad,Y[1]);cpl(me,par,Y[2]);
+ link(gp,tp.concat(pad?[pad]:[]),Y[0],Y[1]);link(gm,(mad?[mad]:[]).concat(tm),Y[0],Y[1]);
+ link([pad,mad],her.concat([me]),Y[1],Y[2]);link([me,par],hij,Y[2],Y[3]);
+ return {all:all,L:L};
+}
+function famSvg(forExport){
+ var lay=famLayout(),xs=lay.all.map(function(n){return n.x}),x0=Math.min.apply(null,xs)-70,x1=Math.max.apply(null,xs)+70,w=Math.max(x1-x0,360),ys=lay.all.map(function(n){return n.y}),y1=Math.max.apply(null,ys)+70;
+ if(w>x1-x0){var d=(w-(x1-x0))/2;x0-=d}
+ var o='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+x0+' 0 '+w+' '+y1+'" width="'+w+'" height="'+y1+'" role="img" aria-label="Familiograma" style="max-width:100%;height:auto;font-family:Arial,sans-serif"><rect x="'+x0+'" y="0" width="'+w+'" height="'+y1+'" fill="#fff"/>';
+ lay.L.forEach(function(l){o+='<line x1="'+l[0]+'" y1="'+l[1]+'" x2="'+l[2]+'" y2="'+l[3]+'" stroke="#4b6079" stroke-width="2"/>'});
+ lay.all.forEach(function(n,i){
+  var s=n.me?n.s:famSex(n),dis=!n.me&&n.e&&n.e.length,fill=dis?'#fde4ea':'#fff',st=dis?'#c23a55':'#12263f',sh;
+  if(s==='M')sh='<rect x="'+(n.x-18)+'" y="'+(n.y-18)+'" width="36" height="36" fill="'+fill+'" stroke="'+st+'" stroke-width="2.4"/>';
+  else if(s==='F')sh='<circle cx="'+n.x+'" cy="'+n.y+'" r="18" fill="'+fill+'" stroke="'+st+'" stroke-width="2.4"/>';
+  else sh='<polygon points="'+n.x+','+(n.y-21)+' '+(n.x+21)+','+n.y+' '+n.x+','+(n.y+21)+' '+(n.x-21)+','+n.y+'" fill="'+fill+'" stroke="'+st+'" stroke-width="2.4"/>';
+  if(n.me)sh+=(s==='F'?'<circle cx="'+n.x+'" cy="'+n.y+'" r="23" fill="none" stroke="#c23a55" stroke-width="2"/>':'<rect x="'+(n.x-23)+'" y="'+(n.y-23)+'" width="46" height="46" fill="none" stroke="#c23a55" stroke-width="2"/>');
+  if(n.d)sh+='<line x1="'+(n.x-24)+'" y1="'+(n.y+24)+'" x2="'+(n.x+24)+'" y2="'+(n.y-24)+'" stroke="#12263f" stroke-width="2.4"/>';
+  var nm=n.me?'Paciente':famName(n),ag=n.me?'':(n.a?n.a+' a':''),ds=n.me?'':(n.e||[]).slice(0,3).map(function(k){return DIS[k]}).join(', ');
+  var click=forExport||n.me?'':' data-fi="'+FAM.p.indexOf(n)+'" style="cursor:pointer"';
+  o+='<g'+click+'>'+sh+'<text x="'+n.x+'" y="'+(n.y+(n.me?42:36))+'" text-anchor="middle" font-size="11" font-weight="700" fill="#12263f">'+esc(nm)+(ag?' · '+esc(ag):'')+(n.d?' (†)':'')+'</text>'+(ds?'<text x="'+n.x+'" y="'+(n.y+49)+'" text-anchor="middle" font-size="10" fill="#c23a55">'+esc(ds)+'</text>':'')+(n.me&&n.sub?'<text x="'+n.x+'" y="'+(n.y+55)+'" text-anchor="middle" font-size="10" fill="#4b6079">'+esc(n.sub)+'</text>':'')+'</g>';
+ });
+ return o+'</svg>';
+}
+function initFam(b){
+ b.innerHTML='<div class="lock" style="background:var(--s);border-color:var(--line)">Arme el diagrama agregando familiares. Marque enfermedades y fallecidos: se dibujan solos y pasan al resumen como antecedentes familiares.</div><div id="fam-body"></div>';
+ drawFam();
+}
+function famRow(x,i){
+ var fx=REL[x.r][1]==='',nm=famName(x);
+ return '<div class="it" data-row="'+i+'" style="display:grid;grid-template-columns:minmax(120px,1.2fr) 90px 70px auto auto;gap:8px;align-items:center"><b style="font-size:.86rem">'+esc(REL[x.r][0])+'</b>'+
+  (fx?'<select data-f="s" aria-label="Sexo de '+esc(nm)+'"><option value="">Sexo</option><option value="M"'+(x.s==='M'?' selected':'')+'>Varón</option><option value="F"'+(x.s==='F'?' selected':'')+'>Mujer</option></select>':'<span class="msg">'+(REL[x.r][1]==='M'?'Varón':'Mujer')+'</span>')+
+  '<input type="number" min="0" max="110" data-f="a" value="'+esc(x.a)+'" placeholder="Edad" aria-label="Edad de '+esc(nm)+'"><label class="row" style="gap:4px;font-weight:600;font-size:.82rem"><input type="checkbox" data-f="d"'+(x.d?' checked':'')+'> Falleció</label><button type="button" class="btn small" data-del="'+i+'" aria-label="Quitar '+esc(nm)+'">Quitar</button>'+
+  '<details style="grid-column:1/-1"><summary style="cursor:pointer;font-size:.84rem;font-weight:700">Enfermedades <span class="msg" data-cnt>'+(x.e.length?'('+x.e.length+')':'(ninguna)')+'</span></summary><div style="display:flex;flex-wrap:wrap;gap:6px 14px;padding:8px 0 2px">'+DIS.map(function(d,k){return '<label style="font-size:.82rem;display:flex;gap:4px;align-items:center"><input type="checkbox" data-dis="'+k+'"'+(x.e.indexOf(k)>-1?' checked':'')+'>'+esc(d)+'</label>'}).join('')+'</div></details></div>';
+}
+function drawFam(){
+ var body=$('fam-body');if(!body)return;
+ var opts=Object.keys(REL).map(function(k){return '<option value="'+k+'">'+esc(REL[k][0])+'</option>'}).join('');
+ body.innerHTML='<div style="padding:12px 14px 0"><div id="fam-svg" style="overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff;padding:6px"></div><p class="msg" style="margin:6px 0 0">Toque un familiar del diagrama para ir a su fila. † = falleció. Rojo = con enfermedad referida. Doble contorno = paciente.</p></div>'+
+  '<div class="row" style="padding:10px 14px;gap:8px;align-items:end"><div class="it" style="flex:1;min-width:200px"><label for="fam-add">Agregar familiar</label><select id="fam-add">'+opts+'</select></div><button class="btn primary" id="fam-addb" type="button">Agregar</button><button class="btn" id="fam-img" type="button">Descargar imagen</button></div>'+
+  '<div id="fam-list" style="padding:0 14px;display:grid;gap:8px">'+FAM.p.map(famRow).join('')+(FAM.p.length?'':'<p class="msg">Todavía no hay familiares cargados.</p>')+'</div>'+
+  '<div class="form" style="padding-top:12px"><div class="it" style="grid-column:1/-1"><label for="fam-obs">Convivientes, red de apoyo y observaciones</label><textarea id="fam-obs" rows="2" maxlength="600">'+esc(FAM.obs)+'</textarea></div></div>'+
+  '<div class="row" style="padding:0 14px 14px"><label class="row" style="gap:6px"><input type="checkbox" id="fam-inc"'+(FAM.inc?' checked':'')+'> Incluir antecedentes familiares en el resumen para Acuario</label><span style="flex:1"></span><button class="btn primary" id="fam-save" type="button">Guardar en la planilla</button></div><p class="msg" id="fam-msg" style="padding:0 14px 12px"></p>';
+ famRedraw();
+ $('fam-addb').addEventListener('click',function(){var r=$('fam-add').value;if(FAM.p.length>=24){$('fam-msg').textContent='Máximo 24 familiares.';return}FAM.p.push({id:Date.now(),r:r,s:REL[r][1],a:'',d:false,e:[]});drawFam();summary(true);var rows=$('fam-list').children;if(rows.length)rows[rows.length-1].scrollIntoView({block:'nearest'})});
+ $('fam-list').addEventListener('input',famEv);$('fam-list').addEventListener('change',famEv);
+ $('fam-list').addEventListener('click',function(e){var d=e.target.closest&&e.target.closest('[data-del]');if(d){FAM.p.splice(+d.getAttribute('data-del'),1);drawFam();summary(true)}});
+ $('fam-svg').addEventListener('click',function(e){var g=e.target.closest&&e.target.closest('[data-fi]');if(!g)return;var row=$('fam-list').querySelector('[data-row="'+g.getAttribute('data-fi')+'"]');if(row){row.scrollIntoView({block:'center'});var dt=row.querySelector('details');if(dt)dt.open=true;row.style.outline='2px solid var(--bord)';setTimeout(function(){row.style.outline=''},1400)}});
+ $('fam-obs').addEventListener('input',function(){FAM.obs=this.value;summary(true)});
+ $('fam-inc').addEventListener('change',function(){FAM.inc=this.checked;summary(true)});
+ $('fam-save').addEventListener('click',function(){saveSec('fam',{p:famStr()},FAM.obs,$('fam-msg'))});
+ $('fam-img').addEventListener('click',famDownload);
+}
+function famEv(e){
+ var row=e.target.closest&&e.target.closest('[data-row]');if(!row)return;var x=FAM.p[+row.getAttribute('data-row')];if(!x)return;
+ var f=e.target.getAttribute('data-f'),dk=e.target.getAttribute('data-dis');
+ if(f==='s')x.s=e.target.value;else if(f==='a')x.a=e.target.value;else if(f==='d')x.d=e.target.checked;
+ else if(dk!==null){var k=+dk,i=x.e.indexOf(k);if(e.target.checked&&i<0)x.e.push(k);if(!e.target.checked&&i>-1)x.e.splice(i,1);x.e.sort(function(a,b){return a-b});var c=row.querySelector('[data-cnt]');if(c)c.textContent=x.e.length?'('+x.e.length+')':'(ninguna)'}
+ famRedraw();summary(true);
+}
+function famRedraw(){var b=$('fam-svg');if(b)b.innerHTML=famSvg(false)}
+function famDownload(){
+ var svg=famSvg(true),vb=svg.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number),w=vb[2]*2,h=vb[3]*2,img=new Image();
+ img.onload=function(){var c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(img,0,0,w,h);c.toBlob(function(bl){var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='familiograma'+(P.cod?'-'+P.cod:'')+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},3000)},'image/png')};
+ img.onerror=function(){$('fam-msg').textContent='No se pudo generar la imagen en este navegador.'};
+ img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+function famLine(){
+ if(!FAM.inc||!FAM.p.length)return '';
+ var pts=[];FAM.p.forEach(function(x){if(x.e.length)pts.push(famName(x).toLowerCase()+(x.d?' (fallecido/a)':'')+(x.a?' ('+x.a+' años)':'')+': '+x.e.map(function(k){return DIS[k].replace(/^(?!HTA|ACV)./,function(c){return c.toLowerCase()}).replace('IAM','IAM')}).join(', '))});
+ return 'Antecedentes familiares: '+(pts.length?pts.join('; '):'sin enfermedades referidas')+'.'+(FAM.obs?' Convivencia y red de apoyo: '+FAM.obs:'');
+}
+
+/* ---------- Ficha del adolescente (CLAP) ---------- */
+var CL_A=[
+ {k:'esc',l:'Escolaridad',o:['Primaria en curso','Primaria completa','Secundaria en curso','Secundaria completa','Terciario o universitario','No escolarizado']},
+ {k:'asi',l:'Asiste actualmente',o:['Sí','No'],w:['No']},
+ {k:'rep',l:'Repitencia',o:['No','Sí'],w:['Sí']},
+ {k:'tra',l:'Trabaja',o:['No','Sí']},
+ {k:'con',l:'Convive con',o:['Ambos padres','Madre','Padre','Otros familiares','Pareja','Solo','Institución']},
+ {k:'cro',l:'Enfermedad crónica o discapacidad',o:['No','Sí'],w:['Sí']},
+ {k:'tab',l:'Tabaco',o:['No','Ocasional','Diario'],w:['Ocasional','Diario']},
+ {k:'alc',l:'Alcohol',o:['No','Ocasional','Frecuente o atracón'],w:['Frecuente o atracón']},
+ {k:'sus',l:'Otras sustancias',o:['No','Ocasional','Frecuente'],w:['Ocasional','Frecuente']},
+ {k:'afi',l:'Actividad física',o:['Sedentario','1 a 2 veces por semana','3 o más veces por semana'],w:['Sedentario']},
+ {k:'pan',l:'Pantallas por día',o:['Menos de 2 h','2 a 4 h','Más de 4 h'],w:['Más de 4 h']},
+ {k:'sue',l:'Sueño',o:['Menos de 7 h','7 a 10 h','Más de 10 h'],w:['Menos de 7 h']},
+ {k:'des',l:'Desayuna',o:['Sí','No'],w:['No']},
+ {k:'baz',l:'Bebidas azucaradas',o:['Ocasional','Diario','Varias veces al día'],w:['Varias veces al día']},
+ {k:'cha',l:'Comida rápida o ultraprocesados',o:['Ocasional','Semanal','Casi a diario'],w:['Casi a diario']},
+ {k:'odo',l:'Control odontológico en el último año',o:['Sí','No'],w:['No']}
+];
+var CL_G=[
+ {k:'mnc',l:'Edad de la menarca / espermarca (años)',n:true},
+ {k:'cic',l:'Ciclos menstruales',o:['Regulares','Irregulares','Amenorrea','No corresponde'],w:['Amenorrea']},
+ {k:'dism',l:'Dismenorrea',o:['No','Leve','Intensa'],w:['Intensa']},
+ {k:'gin',l:'Control ginecológico o urológico previo',o:['Sí','No','No corresponde']}
+];
+var CL_E=[
+ {k:'ta',l:'Tensión arterial (sist/diast, mmHg)',t:true},
+ {k:'fc',l:'Frecuencia cardíaca (lpm)',t:true},
+ {k:'pie',l:'Piel',o:['Normal','Acné','Estrías','Acantosis nigricans','Otra'],w:['Acantosis nigricans']},
+ {k:'col',l:'Columna',o:['Normal','Escoliosis','Cifosis','Otra'],w:['Escoliosis','Cifosis']},
+ {k:'tir',l:'Tiroides',o:['Normal','Aumentada','No se evaluó'],w:['Aumentada']},
+ {k:'car',l:'Cardiopulmonar',o:['Normal','Alterado'],w:['Alterado']},
+ {k:'abd',l:'Abdomen',o:['Normal','Alterado'],w:['Alterado']},
+ {k:'gen',l:'Examen genital o mamario',o:['Normal','Alterado','No se realizó'],w:['Alterado']},
+ {k:'agv',l:'Agudeza visual',o:['Normal','Alterada','No se evaluó'],w:['Alterada']},
+ {k:'den',l:'Dentición',o:['Normal','Caries','Otra'],w:['Caries']}
+];
+var CL_ALL=CL_A.concat(CL_G,CL_E);
+var CL={tab:'a',v:{},obs:'',inc:true};
+function initCl(b){
+ b.innerHTML='<div class="tabs2" role="tablist">'+[['a','Antecedentes y hábitos'],['g','Desarrollo'],['e','Examen físico'],['i','Impresión e indicaciones']].map(function(t){return '<button type="button" role="tab" data-ct="'+t[0]+'" aria-selected="'+(t[0]==='a')+'">'+t[1]+'</button>'}).join('')+'</div><div id="cl-body"></div>';
+ b.querySelectorAll('[data-ct]').forEach(function(x){x.addEventListener('click',function(){CL.tab=x.getAttribute('data-ct');drawCl()})});
+ drawCl();
+}
+function drawCl(){
+ var body=$('cl-body');if(!body)return;
+ document.querySelectorAll('[data-ct]').forEach(function(x){x.setAttribute('aria-selected',String(x.getAttribute('data-ct')===CL.tab))});
+ var h='',list=CL.tab==='a'?CL_A:CL.tab==='g'?CL_G.filter(function(it){return P.sex==='M'?it.k==='mnc'||it.k==='gin':true}).map(function(it){return it.k==='mnc'&&P.sex==='M'?{k:'mnc',l:'Edad de la espermarca (años)',n:true}:it}):CL.tab==='e'?CL_E:null;
+ if(list)h='<div class="form">'+items(list,CL.v,'cl-')+'</div>';
+ else h='<div class="form"><div class="it" style="grid-column:1/-1"><label for="cl-imp">Impresión diagnóstica</label><textarea id="cl-imp" data-k="imp" rows="3" maxlength="600">'+esc(CL.v.imp||'')+'</textarea></div><div class="it" style="grid-column:1/-1"><label for="cl-ind">Indicaciones y plan</label><textarea id="cl-ind" data-k="ind" rows="3" maxlength="600">'+esc(CL.v.ind||'')+'</textarea></div></div>';
+ h+='<div class="form" style="padding-top:0"><div class="it" style="grid-column:1/-1"><label for="cl-obs">Observaciones</label><textarea id="cl-obs" rows="2" maxlength="600">'+esc(CL.obs)+'</textarea></div></div><div class="row" style="padding:0 14px 14px"><label class="row" style="gap:6px"><input type="checkbox" id="cl-inc"'+(CL.inc?' checked':'')+'> Incluir en el resumen para Acuario</label><span style="flex:1"></span><button class="btn primary" id="cl-save" type="button">Guardar en la planilla</button></div><p class="msg" id="cl-msg" style="padding:0 14px 12px"></p>';
+ body.innerHTML=h;
+ body.querySelectorAll('[data-k]').forEach(function(e){e.addEventListener(e.tagName==='SELECT'?'change':'input',function(){var k=e.getAttribute('data-k');CL.v[k]=e.value;var it=CL_ALL.filter(function(x){return x.k===k})[0];if(it){var box=e.closest('.it');box.classList.toggle('warn',!!(it.w&&it.w.indexOf(e.value)>-1))}alerts();summary(true)})});
+ $('cl-obs').addEventListener('input',function(){CL.obs=this.value;summary(true)});
+ $('cl-inc').addEventListener('change',function(){CL.inc=this.checked;summary(true)});
+ $('cl-save').addEventListener('click',function(){var d={};Object.keys(CL.v).forEach(function(k){if(CL.v[k]!==''&&CL.v[k]!==undefined)d[k]=CL.v[k]});saveSec('clap',d,CL.obs,$('cl-msg'))});
+}
+function clLine(){
+ if(!CL.inc)return '';var gp=function(list,t){var a=[];list.forEach(function(it){var v=CL.v[it.k];if(v)a.push(it.l.replace(/\s*\(.*\)/,'').toLowerCase()+': '+(it.o?String(v).toLowerCase():v))});return a.length?t+a.join('; ')+'.':''};
+ return [gp(CL_A,'Antecedentes y hábitos (ficha del adolescente): '),gp(CL_G,'Desarrollo: '),gp(CL_E,'Examen físico: '),CL.obs?'Observaciones: '+CL.obs:''].filter(String).join(' ');
+}
+
 /* ---------- resumen para Acuario ---------- */
 var DIRTY={dat:false,dx:false,tto:false};
 function fromAntro(){
  var fr=document.querySelector('#b-antro iframe'),o={dat:'',dx:'',tto:''};
  try{var d=fr.contentDocument;['dat','dx','tto'].forEach(function(k){var e=d.querySelector('[id$="-acu-'+k+'"]');if(e)o[k]=e.value||''})}catch(e){}
+ return o;
+}
+function fromFrame(id){try{var fr=document.querySelector('#b-'+id+' iframe');return fr?fr.contentWindow:null}catch(e){return null}}
+function lastLine(t){return String(t||'').replace(/\n?Rangos de referencia[^\n]*$/,'').trim()}
+function fromCv(){
+ var o={dat:[],dx:[],tto:[]},fr=document.querySelector('#b-cv iframe');if(!fr)return o;
+ try{var d=fr.contentDocument;['dat','dx','tto'].forEach(function(k){d.querySelectorAll('[id$="-acu-'+k+'"]').forEach(function(e){var v=(e.value||'').trim();if(v&&o[k].indexOf(v)<0)o[k].push(v)})})}catch(e){}
  return o;
 }
 function psicoLine(){
@@ -273,12 +467,15 @@ function summary(force){
  if(!box.getAttribute('data-ready')){
   box.setAttribute('data-ready','1');
   box.innerHTML=['dat|Datos Comunidad Médica','dx|Diagnóstico sugerido','tto|Tratamiento'].map(function(s){var p=s.split('|');return '<div><div class="lh"><span>'+p[1]+'</span><button class="btn small" type="button" data-cp="'+p[0]+'">Copiar</button></div><textarea id="r-'+p[0]+'" aria-label="'+p[1]+'"></textarea></div>'}).join('')+
-   '<button class="btn primary" type="button" id="r-all">Copiar los tres bloques</button><p class="note">Hoy el resumen toma la antropometría y crecimiento, y la situación psicoemocional (y sexualidad si la marca). Laboratorio, vacunas y cardiovascular se suman en la etapa siguiente.</p>';
+   '<button class="btn primary" type="button" id="r-all">Copiar los tres bloques</button><p class="note">El resumen junta antropometría y crecimiento, familia, situación psicoemocional (y sexualidad si la marca), ficha CLAP, laboratorio, vacunas y cardiovascular, de las ventanas que estén abiertas. Es editable: lo que escriba a mano no se pisa.</p>';
   ['dat','dx','tto'].forEach(function(k){$('r-'+k).addEventListener('input',function(){DIRTY[k]=true})});
   box.querySelectorAll('[data-cp]').forEach(function(b){b.addEventListener('click',function(){copy($('r-'+b.getAttribute('data-cp')).value,b)})});
   $('r-all').addEventListener('click',function(){copy('DATOS COMUNIDAD MÉDICA\n'+$('r-dat').value+'\n\nDIAGNÓSTICO SUGERIDO\n'+$('r-dx').value+'\n\nTRATAMIENTO\n'+$('r-tto').value,this)});
  }
- var dat=[a.dat,psicoLine(),sexLine()].filter(String).join('\n'),dx=a.dx,tto=a.tto;
+ var lw=fromFrame('lab'),vw=fromFrame('vac'),cv=fromCv();
+ var lab=lw?lastLine(lw.__sum):'',vac=vw?String(vw.__sum||'').trim():'';if(vac.length>520)vac=vac.slice(0,vac.lastIndexOf(';',500))+'; … (ver el calendario completo en la ventana de vacunas).';
+ var imp=(CL.inc&&CL.v.imp)?'Impresión diagnóstica: '+CL.v.imp:'',ind=(CL.inc&&CL.v.ind)?CL.v.ind:'';
+ var dat=[a.dat,famLine(),psicoLine(),sexLine(),clLine(),lab,vac].concat(cv.dat).filter(String).join('\n'),dx=[a.dx,imp].concat(cv.dx).filter(String).join('\n'),tto=[a.tto,ind].concat(cv.tto).filter(String).join('\n');
  if(AD.psico.ide==='Sí'||AD.psico.int==='Sí')tto=(tto?tto+'\n':'')+'Riesgo suicida referido: realizar evaluación inmediata e interconsulta con salud mental.';
  var v={dat:dat,dx:dx,tto:tto};
  ['dat','dx','tto'].forEach(function(k){var e=$('r-'+k);if(!DIRTY[k]&&e.value!==v[k])e.value=v[k]});
@@ -289,10 +486,29 @@ function copy(t,btn){var done=function(){var o=btn.textContent;btn.textContent='
 function fallback(t,done){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(e){}x.remove();done()}
 setInterval(function(){if($('res').getAttribute('data-ready'))summary(false)},2000);
 
+
+/* ---------- vista ampliada de antropometría ---------- */
+function openBig(){
+ var fr=document.querySelector('#b-antro iframe');
+ if(!fr){toggle('antro',true);setTimeout(openBig,1800);return}
+ var d;try{d=fr.contentDocument}catch(e){return}
+ var view=d.querySelector('.view:not([hidden])'),css=[].map.call(d.querySelectorAll('style'),function(x){return x.outerHTML}).join(''),b='';
+ b+='<h2 style="margin:0 0 4px">'+esc(P.nom||'Paciente')+(P.cod?' · '+esc(P.cod):'')+'</h2><p class="sub" style="margin:0 0 12px">'+esc(ageTxt())+(P.sex?' · '+(P.sex==='F'?'mujer':'varón'):'')+'</p>';
+ var hero=d.getElementById('es-velhero');if(hero&&hero.innerHTML.trim())b+='<div style="max-width:900px">'+hero.innerHTML+'</div>';
+ var evo=d.getElementById('es-evo');if(evo)b+=evo.parentNode.outerHTML;
+ var ch=view?view.querySelectorAll('.gr-chart'):[],g='';
+ [].forEach.call(ch,function(c){var l=c.previousElementSibling;g+='<div style="min-width:0">'+(l&&l.classList.contains('lbl')?l.outerHTML:'')+c.outerHTML+'</div>'});
+ if(g)b+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(560px,1fr));gap:18px;margin-top:10px">'+g+'</div>';
+ var iv=d.querySelector('#es-vel .tw');if(iv)b+='<div class="lbl" style="margin:16px 0 4px">Detalle por intervalos</div>'+iv.outerHTML;
+ var abs=new URL('../shared/ds.css',location.href).href;
+ $('big-f').srcdoc='<!doctype html><html lang="es" data-ds="clinic"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+css+'<link rel="stylesheet" href="'+abs+'"><style>body{padding:16px 20px;background:#fff!important}svg{max-width:100%;height:auto}</style></head><body>'+b+'</body></html>';
+ var dl=$('big');if(dl.showModal)dl.showModal();else dl.setAttribute('open','');
+}
+document.addEventListener('click',function(e){var t=e.target;if(t&&t.id==='big-open')openBig();if(t&&t.id==='big-x'){var dl=$('big');dl.close?dl.close():dl.removeAttribute('open')}if(t&&t.id==='big-p'){try{$('big-f').contentWindow.print()}catch(x){}}});
+
 /* ---------- inicio ---------- */
 build();writeForm();status();summary(true);
 W.forEach(function(w){var a=$('a-'+w.id);if(a)a.href=w.src()});
-$('rail').addEventListener('click',function(){});
 toggle('antro',true);
 if(P.cod||P.dni)setTimeout(applyP,600);
 })();

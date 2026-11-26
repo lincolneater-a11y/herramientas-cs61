@@ -220,7 +220,7 @@ details.gr{border:1px solid var(--line);border-radius:10px;margin:10px 0;backgro
   }
 
   function summary() {
-    var it = LAST.items; if (!it.length) { $('lb-res').innerHTML = '<p class="sub">Cargue al menos un valor.</p>'; return; }
+    var it = LAST.items; if (!it.length) { window.__sum = ''; $('lb-res').innerHTML = '<p class="sub">Cargue al menos un valor.</p>'; return; }
     var out = it.filter(function (x) { return x.e.st !== 'normal' && x.e.st !== 'sinrango'; }), crit = it.filter(function (x) { return x.e.st === 'critbajo' || x.e.st === 'crithigh'; }), nor = it.filter(function (x) { return x.e.st === 'normal'; });
     var h = '<div class="kpis"><div class="kpi"><b>' + it.length + '</b><small>valores</small></div><div class="kpi"><b style="color:var(--ok)">' + nor.length + '</b><small>normales</small></div><div class="kpi"><b style="color:var(--bord)">' + out.length + '</b><small>fuera de rango</small></div></div>';
     if (crit.length) h += '<div class="sumli crit">⚠ Valor crítico: ' + crit.map(function (x) { return esc(x.t.n); }).join(', ') + '. Requiere atención inmediata o confirmación con el laboratorio.</div>';
@@ -228,6 +228,7 @@ details.gr{border:1px solid var(--line);border-radius:10px;margin:10px 0;backgro
     var sr = it.filter(function (x) { return x.e.st === 'sinrango'; }); if (sr.length) h += '<div class="sumli">Sin rango de referencia en esta herramienta: ' + sr.map(function (x) { return esc(x.t.n); }).join(', ') + '. Cargue el rango del laboratorio.</div>';
     if (!out.length && !sr.length) h += '<div class="sumli">Todos los valores cargados están dentro del rango.</div>';
     $('lb-res').innerHTML = h;
+    try { window.__sum = summaryText(); } catch (e) { window.__sum = ''; }
   }
 
   function summaryText() {
