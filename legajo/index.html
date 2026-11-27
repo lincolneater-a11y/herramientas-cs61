@@ -508,7 +508,7 @@ setInterval(function(){if($('res').getAttribute('data-ready'))summary(false);if(
 /* ---------- perfil: permisos visuales (sin clave) ---------- */
 var PERF_N={nutricion:'Nutrición',enfermeria:'Enfermería',aps:'Agente sanitario (APS)',pediatria:'Medicina · Pediatría',clinica:'Medicina · Clínica',gineco:'Medicina · Ginecología y obstetricia',medicina:'Medicina · Otra especialidad',bioquimica:'Bioquímica / laboratorio',otro:'Otro perfil'};
 var MED=['pediatria','medicina','gineco','clinica','enfermeria'];
-var EDIT={adol:MED,clap:MED,tanner:MED,nac:MED,cpn:MED,rsk:MED,adu:MED.concat(['nutricion']),alim:MED.concat(['nutricion']),lab:['bioquimica']};
+var EDIT={adol:MED,clap:MED,tanner:['pediatria'],nac:MED,cpn:MED,rsk:MED,adu:MED.concat(['nutricion']),alim:MED.concat(['nutricion']),lab:['bioquimica']};
 function perfil(){try{return localStorage.getItem('cs61_perfil')||''}catch(e){return ''}}
 function canEdit(k){var p=perfil();return !p||(EDIT[k]||[]).indexOf(p)>-1}
 function roMsg(k){var p=perfil();return 'Su perfil ('+(PERF_N[p]||p)+') ve este apartado sin editarlo.'+(k==='lab'?' El laboratorio lo carga el perfil de bioquímica.':'')}
@@ -787,8 +787,9 @@ function ctlLine(){
 
 /* ---------- referencia de Tanner previa ---------- */
 var TNR=['I','II','III','IV','V'];
+function tannerOK(){return perfil()==='pediatria'}
 function tannerRef(){
- var box=$('tn-ref');if(!box)return;var t=LEG.tanner||{};
+ var box=$('tn-ref');if(!box)return;box.style.display='';var bb=$('tn-ref-b');if(bb)bb.style.display=tannerOK()?'':'none';var t=LEG.tanner||{};
  var txt=(t.g||t.v)?'Tanner previo'+(t.fecha?' ('+fdt(t.fecha)+')':'')+': '+(t.g?(P.sex==='M'?'genitales ':'mamas ')+TNR[+t.g-1]:'')+(t.g&&t.v?' · ':'')+(t.v?'vello pubiano '+TNR[+t.v-1]:''):'Sin referencia de Tanner guardada.';
  $('tn-ref-t').textContent=txt;
 }

@@ -3711,7 +3711,7 @@ function esRead() {
   var dd = esDays(P.dob, P.ctl), Y = val('es-ageY'), Mo = val('es-ageM'), Dy = val('es-ageD');
   if (dd !== null && dd >= 0) P.m = dd / MD; else if (Y !== null || Mo !== null || Dy !== null) P.m = (Y || 0) * 12 + (Mo || 0) + (Dy || 0) / MD; else P.m = null;
   P.dec = null; if (dd !== null && dd >= 0) { var d1 = decYear(P.dob), d2 = decYear(P.ctl); if (d1 && d2) P.dec = d2 - d1; } else if (P.m !== null) P.dec = P.m / 12;
-  P.fh = val('es-fh'); P.mh = val('es-mh'); P.tgt = $('es-tgt').checked; P.tan = $('es-tan').value; P.vp = $('es-vp').value;
+  P.fh = val('es-fh'); P.mh = val('es-mh'); P.tgt = $('es-tgt').checked; P.tan = tnOK() ? $('es-tan').value : ''; P.vp = tnOK() ? $('es-vp').value : '';
   return P;
 }
 function esSyncAge() {
@@ -3946,7 +3946,12 @@ function tnRefBuild() {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
+/* El estadio de Tanner (dibujos y datos) sólo es visible y cargable con el perfil de Medicina · Pediatría */
+function tnOK() { try { return localStorage.getItem('cs61_perfil') === 'pediatria'; } catch (e) { return false; } }
 function tnSync(P) {
+  var card = $('es-tancard');
+  if (card) card.style.display = tnOK() ? '' : 'none';
+  if (!tnOK()) { if ($('es-tan').value) $('es-tan').value = ''; if ($('es-vp').value) $('es-vp').value = ''; return; }
   var g1 = $('tn-g1'), g2 = $('tn-g2'); if (!g1 || !g2) return;
   var sex = P.sex || '';
   if (TN_SEX === null) { g2.innerHTML = tnTiles('v'); }
