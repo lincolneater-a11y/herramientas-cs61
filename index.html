@@ -8,7 +8,7 @@
 header{background:var(--hdr);color:#fff;padding:14px 16px}.in{max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:center}
 header img{width:48px;height:48px;border-radius:50%;background:#fff}header h1{margin:0;font-size:1.1rem}header small{color:#b8cadb}
 main{max-width:900px;margin:0 auto;padding:24px 16px 48px}h2{margin:0 0 4px}p{margin:0;color:var(--ink2)}
-.g{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:20px}
+.g{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:20px}.gh{grid-column:1/-1;margin:10px 0 0;font-size:.82rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#4b6079}.c.hero{grid-column:1/-1;border:2px solid #1d6fa5}
 a.c,button.c{display:block;width:100%;text-align:left;font:inherit;background:var(--s);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:inherit;cursor:pointer}
 a.c:hover,a.c:focus-visible,button.c:hover,button.c:focus-visible{border-color:var(--teal);outline:none;box-shadow:0 0 0 3px var(--gold)}.c h3{margin:0 0 6px;font-size:1.05rem}
 button.c{border-top-color:var(--gold);display:flex;flex-direction:column;justify-content:flex-start}
@@ -36,7 +36,7 @@ button.c{border-top-color:var(--gold);display:flex;flex-direction:column;justify
 <section id="home" hidden><h2>Elija una herramienta</h2>
 <div class="bar"><span class="pill" id="pf"></span><button class="lk inst" id="inst" type="button" hidden>Instalar en este equipo</button><button class="lk" id="all" type="button">Ver todas las herramientas</button><button class="lk" id="chg" type="button">Cambiar perfil</button></div>
 <p class="hint" id="ih" hidden>Para instalarla: en Chrome o Edge, menú ⋮ → «Guardar e instalar» → «Instalar página como aplicación» (o el icono de instalar de la barra de direcciones).</p>
-<div class="g"><a class="c t-coral" data-t="registro" href="registro/"><img class="ico3d" src="assets/icons/registro-cardiovascular.webp" alt="" width="384" height="384" decoding="async"><h3>Registro cardiovascular</h3><p>Supervisión de enfermedades cardiovasculares y test FINDRISC, con estadísticas, Excel e impresión.</p><span class="go">Abrir<svg viewBox="0 0 24 24"><use href="shared/icons.svg#i-arrow-right"/></svg></span></a>
+<div class="g"><h3 class="gh" id="gh-w">Para tu trabajo</h3><h3 class="gh" id="gh-c">Para la comunidad</h3><h3 class="gh" id="gh-o">Otras herramientas</h3><a class="c t-coral" data-t="registro" href="registro/"><img class="ico3d" src="assets/icons/registro-cardiovascular.webp" alt="" width="384" height="384" decoding="async"><h3>Registro cardiovascular</h3><p>Supervisión de enfermedades cardiovasculares y test FINDRISC, con estadísticas, Excel e impresión.</p><span class="go">Abrir<svg viewBox="0 0 24 24"><use href="shared/icons.svg#i-arrow-right"/></svg></span></a>
 <a class="c t-coral" data-t="findrisc" href="registro/?solo=findrisc#findrisc"><img class="ico3d" src="assets/icons/findrisc.webp" alt="" width="384" height="384" decoding="async"><h3>Test FINDRISC</h3><p>Riesgo de desarrollar diabetes tipo 2 a 10 años, con registro, estadísticas, Excel e impresión.</p><span class="go">Abrir<svg viewBox="0 0 24 24"><use href="shared/icons.svg#i-arrow-right"/></svg></span></a>
 <a class="c t-lav" data-t="consulta" href="consulta/"><img class="ico3d" src="assets/icons/consulta-asistida.webp" alt="" width="384" height="384" decoding="async"><h3>Consulta asistida</h3><p>Grabación de la consulta con transcripción en vivo y anamnesis ordenada por IA, con el modelo de cada profesional.</p><span class="go">Abrir<svg viewBox="0 0 24 24"><use href="shared/icons.svg#i-arrow-right"/></svg></span></a>
 <a class="c t-green" data-t="nutricion" href="nutricion/"><img class="ico3d" src="assets/icons/herramientas-nutricion.webp" alt="" width="384" height="384" decoding="async"><h3>Herramientas de nutrición</h3><p>Valoración antropométrica de 0 a 19 años, embarazadas, requerimientos, alimentación y modelos de dieta.</p><span class="go">Abrir<svg viewBox="0 0 24 24"><use href="shared/icons.svg#i-arrow-right"/></svg></span></a>
@@ -54,14 +54,22 @@ button.c{border-top-color:var(--gold);display:flex;flex-direction:column;justify
 <p class="n">El perfil sólo ordena el menú: no limita el acceso. Los registros cardiovasculares quedan guardados en el navegador de cada computadora. Si se conecta la planilla compartida, el DNI y el nombre se guardan sólo en su hoja «Pacientes».</p></section></main><footer class="ft">Centro de Salud N.º 61 · B.º Solidaridad · Nodo Solidaridad, Área Operativa LV</footer>
 <script src="egg.js"></script>
 <script>(function(){
-var T={nutricion:['findrisc','consulta','nutricion','laboratorio','calculadora','vacunas','recursos'],enfermeria:['visita','registro','edadgestacional','calculadora','vacunas','recursos'],aps:['visita','desarrollo','registro','vacunas','recursos'],pediatria:['legajo','consulta','crecimiento','desarrollo','laboratorio','vacunas','registro'],clinica:['consulta','laboratorio','registro','calculadora'],gineco:['consulta','embarazo','edadgestacional','laboratorio','registro','calculadora'],medicina:['consulta','laboratorio','registro','calculadora'],bioquimica:['labbq','laboratorio'],otro:['recursos','registro']};
+var T={nutricion:['legajo','nutricion','calculadora','recursos'],enfermeria:['legajo','visita','vacunas','registro','recursos'],aps:['legajo','visita','desarrollo','recursos'],pediatria:['legajo','crecimiento','desarrollo','vacunas'],clinica:['legajo','registro','consulta','calculadora'],gineco:['legajo','embarazo','edadgestacional','calculadora'],medicina:['legajo','registro','consulta','calculadora'],bioquimica:['laboratorio','labbq','legajo'],otro:['legajo','recursos']};
+var COM=['recursos'];
 var N={nutricion:'Nutrición',enfermeria:'Enfermería',aps:'Agente sanitario (APS)',pediatria:'Medicina · Pediatría',clinica:'Medicina · Clínica, diabetología y nefrología',gineco:'Medicina · Ginecología y obstetricia',medicina:'Medicina · Otra especialidad',bioquimica:'Bioquímica / laboratorio',otro:'Otro perfil'};
 var P=window.CS61P||'',all=false,ev=null,step=1,$=function(i){return document.getElementById(i)};
 function render(){
  $('pick').hidden=!!P||step===2;$('pickm').hidden=!!P||step!==2;$('home').hidden=!P;if(!P)return;
  $('pf').textContent='Perfil: '+N[P];
- var ok=T[P];document.querySelectorAll('[data-t]').forEach(function(a){var t=a.getAttribute('data-t');a.hidden=!(all||ok.indexOf(t)>-1);a.style.order=ok.indexOf(t)<0?99:ok.indexOf(t)});
- $('all').textContent=all?'Ver sólo las de mi perfil':'Ver todas las herramientas';$('all').hidden=P==='nutricion';
+ var ok=T[P],hero=ok[0]==='legajo',gh=$('gh-w'),gc=$('gh-c'),go=$('gh-o'),nW=0,nC=0,nO=0;
+ document.querySelectorAll('[data-t]').forEach(function(a){var t=a.getAttribute('data-t'),ix=ok.indexOf(t),mine=ix>-1;a.hidden=!(all||mine);a.classList.toggle('hero',hero&&t==='legajo'&&mine);
+  if(mine&&hero&&t==='legajo'){a.style.order=0}
+  else if(mine&&COM.indexOf(t)>-1){a.style.order=300+ix;nC++}
+  else if(mine){a.style.order=100+ix;nW++}
+  else{a.style.order=500;if(all)nO++}});
+ gh.style.order=50;gh.hidden=!nW;gc.style.order=250;gc.hidden=!nC;go.style.order=450;go.hidden=!nO;
+ var lg=document.querySelector('[data-t="legajo"]');if(lg){var h3=lg.querySelector('h3'),pp=lg.querySelector('p');if(h3)h3.textContent='Historia clínica compartida';if(pp)pp.textContent=P==='bioquimica'?'Consulte los datos del paciente y los valores de laboratorio en un solo lugar.':'Un solo paciente, todas las ventanas: crecimiento, controles, embarazo, laboratorio, vacunas, cardiovascular, familia y resumen para Acuario.'}
+ $('all').textContent=all?'Ver sólo las de mi perfil':'Ver todas las herramientas';$('all').hidden=false;
  document.title='Herramientas CS 61 · '+N[P];
  /* Pediatría: la herramienta se muestra como «Desarrollo infantil IODI» */
  var dv=document.querySelector('[data-t="desarrollo"]');
