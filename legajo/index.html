@@ -30,6 +30,13 @@ input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-vis
 .wb{border-top:1px solid var(--line)}.wb iframe{display:block;width:100%;border:0;min-height:320px;background:var(--bg)}
 .wb .loading{padding:14px;color:var(--ink2)}
 .win.dim .wt{opacity:.7}
+#asist-host{height:0;overflow:visible}
+.win.hostoff{position:fixed;left:-12000px;top:0;width:900px;height:760px;overflow:hidden}
+.win.pop,.win.hostoff.pop{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9500;display:flex;flex-direction:column;border-radius:0;border:0;background:var(--bg);overflow:hidden}
+.win.pop .wb{flex:1;min-height:0;overflow:auto}.win.pop .wb iframe{height:100%!important;min-height:0}
+.win.pop .wh{background:var(--tealsoft)}.popx{display:none}.win.pop .popx{display:inline-block}.win.pop [data-pop],.win.pop .wt svg{display:none}
+#pop-bg{position:fixed;inset:0;background:var(--bg);z-index:9400;display:none}body.popped #pop-bg{display:block}body.popped{overflow:hidden}body.popped .ds-help,body.popped .ds-fab,body.popped .ds-panel{display:none!important}#big::backdrop{background:var(--bg);opacity:1}
+#cons-bar{margin:0 0 12px}#cons-bar .row{gap:10px}#cb-go{background:#c62828;border-color:#c62828;color:#fff}#cb-timer{font-variant-numeric:tabular-nums;min-width:56px;text-align:center}.rec-on #cb-timer{background:#fde8e8;color:#c62828;border-color:#c62828}
 .sub{padding:10px 14px 0}.tabs2{display:flex;gap:6px;padding:10px 14px 0;flex-wrap:wrap}.tabs2 button{border:1px solid var(--line);background:var(--s);color:var(--ink);padding:7px 12px;border-radius:999px;font:inherit;font-weight:800;font-size:.86rem;cursor:pointer;min-height:38px}.tabs2 button[aria-selected="true"]{background:var(--teal);color:#fff;border-color:var(--teal)}
 .form{padding:12px 14px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
 .it{border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--s)}.it.warn{background:var(--goldsoft);border-color:var(--gold)}.it label{display:block;font-size:.8rem;font-weight:800;color:var(--ink2);margin-bottom:4px}
@@ -38,7 +45,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-vis
 .res textarea{min-height:110px;font-size:.84rem;line-height:1.45}.res .lh{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-weight:800;font-size:.86rem}.res .lh span{flex:1}
 .note{font-size:.84rem;color:var(--ink2);background:var(--tealsoft);border-radius:8px;padding:8px 10px}
 .sw-tool{margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap}
-dialog#big{width:97vw;max-width:1600px;height:94vh;border:0;border-radius:16px;padding:0;background:var(--s);color:var(--ink)}dialog#big::backdrop{background:rgba(10,25,40,.6)}#big .bh{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}#big .bh h2{margin:0;font-size:1.1rem;flex:1}#big iframe{display:block;width:100%;height:calc(94vh - 62px);border:0}
+dialog#big{width:97vw;max-width:1600px;height:94vh;border:0;border-radius:16px;padding:0;background:var(--s);color:var(--ink)}dialog#big::backdrop{background:var(--bg)}#big .bh{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}#big .bh h2{margin:0;font-size:1.1rem;flex:1}#big iframe{display:block;width:100%;height:calc(94vh - 62px);border:0}
 @media print{.rail,.res,.pt,.wh a,.tabs2{display:none!important}}
 </style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><script src="../shared/ds.js"></script><link rel="stylesheet" href="../shared/ds.css"></head><body>
 <header class="hdr"><div class="hdr-in"><div class="brand"><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Historia clínica compartida</h1><small>Centro de Salud N.º 61 · Todas las herramientas en una sola pantalla</small></div><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a></div></div></header>
@@ -60,6 +67,18 @@ dialog#big{width:97vw;max-width:1600px;height:94vh;border:0;border-radius:16px;p
  </div>
  <p class="msg" id="p-msg" style="margin:8px 0 0">Cargue los datos una sola vez: se copian a cada herramienta. Si el DNI ya está en la planilla, «Buscar» trae el código, la fecha de nacimiento y el sexo.</p>
 </section>
+<section class="card" id="cons-bar" aria-label="Consulta grabada">
+ <div class="row"><b>Consulta grabada</b>
+  <button class="btn primary" id="cb-go" type="button">● Comenzar consulta</button>
+  <button class="btn" id="cb-pause" type="button" hidden>⏸ Pausar</button>
+  <button class="btn primary" id="cb-stop" type="button" hidden>■ Terminar</button>
+  <span class="chip off" id="cb-timer">00:00</span>
+  <button class="btn" id="cb-note" type="button" disabled>Generar nota</button>
+  <button class="btn" id="cb-acu" type="button" disabled>Preparar para Acuario</button>
+  <button class="btn small" id="cb-view" type="button">Ver transcripción y nota</button></div>
+ <p class="msg" id="cb-msg" style="margin:8px 0 0">Comience la consulta, termine cuando acabe, genere la nota y prepárela para Acuario: el resumen aparece a la derecha, junto con lo demás del legajo.</p>
+</section>
+<div id="asist-host"></div><div id="pop-bg"></div>
 <div class="lay">
  <nav class="card rail" aria-label="Ventanas del legajo"><h3>Ventanas</h3><div id="rail"></div></nav>
  <div class="wins" id="wins"></div>
@@ -109,17 +128,19 @@ var W=[
  {id:'lab',t:'Laboratorio',src:function(){return '../laboratorio/'}},
  {id:'vac',t:'Calendario de vacunación',src:function(){return '../vacunas/'}},
  {id:'cv',t:'Registro cardiovascular (ECV y FINDRISC)',src:function(){return '../registro/'},note:'Desde los 10 años',g:'epa'},
- {id:'asist',t:'Consulta asistida',src:function(){return '../consulta/'}},
+ {id:'asist',t:'Consulta asistida',src:function(){return '../consulta/'},top:true},
  {id:'iodi',t:'Desarrollo infantil (IODI)',src:function(){return '../desarrollo/?v=iodi'},note:'De 0 a 5 años',g:'n'}
 ];
 var CSSINJ='.hdr,header.top,.sw-tool,.pico{display:none!important}body{background:transparent!important}main,.wrap{max-width:none!important;padding-top:8px!important}';
 function build(){
- var h='',r='';
+ var h='',r='',th='';
  W.forEach(function(w){
-  h+='<section class="win" id="w-'+w.id+'"><div class="wh"><button type="button" class="wt" aria-expanded="false" aria-controls="b-'+w.id+'" data-w="'+w.id+'">'+ICON+'<span>'+esc(w.t)+'</span></button><span class="chip off" id="c-'+w.id+'"></span>'+(w.id==='antro'?'<button class="btn small" id="big-open" type="button">Ver en grande</button>':'')+(w.native?'':'<a class="btn small" id="a-'+w.id+'" target="_blank" rel="noopener">Abrir aparte</a>')+'</div><div class="wb" id="b-'+w.id+'" hidden></div></section>';
+  var sec='<section class="win'+(w.top?' hostoff':'')+'" id="w-'+w.id+'"><div class="wh"><button type="button" class="wt" aria-expanded="false" aria-controls="b-'+w.id+'" data-w="'+w.id+'">'+ICON+'<span>'+esc(w.t)+'</span></button><span class="chip off" id="c-'+w.id+'"></span>'+(w.id==='antro'?'<button class="btn small" id="big-open" type="button">Ver en grande</button>':'')+'<button class="btn small" type="button" data-pop="'+w.id+'">Abrir aparte</button><button class="btn small primary popx" type="button" data-popx="'+w.id+'">✕ Cerrar y volver al legajo</button></div><div class="wb" id="b-'+w.id+'" hidden></div></section>';
+  if(w.top){th+=sec;return}
+  h+=sec;
   r+='<a href="#w-'+w.id+'" data-r="'+w.id+'"><span class="dot" id="d-'+w.id+'"></span>'+esc(w.t.split(' (')[0])+'</a>';
  });
- $('wins').innerHTML=h;$('rail').innerHTML=r;
+ $('wins').innerHTML=h;$('rail').innerHTML=r;$('asist-host').innerHTML=th;
  document.querySelectorAll('.wt').forEach(function(b){b.addEventListener('click',function(){toggle(b.getAttribute('data-w'))})});
  document.querySelectorAll('[data-r]').forEach(function(a){a.addEventListener('click',function(){toggle(a.getAttribute('data-r'),true)})});
 }
@@ -128,11 +149,11 @@ function toggle(id,forceOpen){
  var w=winById(id),b=$('b-'+id),btn=document.querySelector('[data-w="'+id+'"]'),open=forceOpen?true:b.hidden;
  b.hidden=!open;btn.setAttribute('aria-expanded',String(open));
  if(open&&!b.getAttribute('data-ready')){b.setAttribute('data-ready','1');w.native?initNative(w.id,b):mkFrame(w,b)}
- if(open)$('d-'+id).classList.add('on');
+ if(open&&$('d-'+id))$('d-'+id).classList.add('on');
 }
 function mkFrame(w,b){
  b.innerHTML='<p class="loading">Cargando…</p>';
- var fr=document.createElement('iframe');fr.title=w.t;fr.src=w.src();fr.setAttribute('loading','lazy');b.appendChild(fr);
+ var fr=document.createElement('iframe');fr.title=w.t;fr.src=w.src();if(!w.top)fr.setAttribute('loading','lazy');b.appendChild(fr);
  fr.addEventListener('load',function(){
   b.querySelector('.loading')&&b.querySelector('.loading').remove();
   try{var d=fr.contentDocument,s=d.createElement('style');s.textContent=CSSINJ;d.head.appendChild(s)}catch(e){}
@@ -173,7 +194,8 @@ function applyP(){readForm();if(P.emb==='1'&&!P.sex){P.sex='F';$('p-sex').value=
 $('p-apply').addEventListener('click',function(){applyP();$('p-msg').textContent='Datos cargados en las ventanas abiertas. Las que abra después también los reciben.'});
 ['p-dob','p-sex','p-emb'].forEach(function(i){$(i).addEventListener('change',function(){applyP()})});
 $('p-new').addEventListener('click',function(){P={dni:'',cod:'',nom:'',sex:'',dob:''};lsSet('cs61_leg',P);writeForm();AD.sexKeyOK=false;AD.key='';clearAdol();LEG=legInit();P.emb='';HISTR=[];CTL_TODAY=false;['nac','alim','cpn','rsk','adu'].forEach(function(k){if($(LID[k]+'-body'))drawLeg(k)});if($('ctl-body'))drawCtl();tannerRef();DIRTY={dat:false,dx:false,tto:false};status();
- document.querySelectorAll('.wb iframe').forEach(function(fr){try{fr.contentWindow.location.reload()}catch(e){fr.src=fr.src}});
+ document.querySelectorAll('.wb iframe').forEach(function(fr){if(fr.closest('#w-asist'))return;try{fr.contentWindow.location.reload()}catch(e){fr.src=fr.src}});
+ var cd0=cFrame();if(cd0&&cd0.getElementById('rec-stop').hidden){var cc=cd0.getElementById('clr');cc.click();cc.click()}
  $('p-msg').textContent='Paciente nuevo: se vaciaron las ventanas. Complete los datos y toque «Cargar en todas las ventanas».'});
 $('p-find').addEventListener('click',function(){
  readForm();var c=cfg(),msg=$('p-msg');
@@ -484,7 +506,7 @@ function summary(force){
  if(!box.getAttribute('data-ready')){
   box.setAttribute('data-ready','1');
   box.innerHTML=['dat|Datos Comunidad Médica','dx|Diagnóstico sugerido','tto|Tratamiento'].map(function(s){var p=s.split('|');return '<div><div class="lh"><span>'+p[1]+'</span><button class="btn small" type="button" data-cp="'+p[0]+'">Copiar</button></div><textarea id="r-'+p[0]+'" aria-label="'+p[1]+'"></textarea></div>'}).join('')+
-   '<button class="btn primary" type="button" id="r-all">Copiar los tres bloques</button><p class="note">El resumen junta antropometría y crecimiento, familia, situación psicoemocional (y sexualidad si la marca), ficha CLAP, laboratorio, vacunas y cardiovascular, de las ventanas que estén abiertas. Es editable: lo que escriba a mano no se pisa.</p>';
+   '<button class="btn primary" type="button" id="r-all">Copiar los tres bloques</button><p class="note">El resumen junta la consulta grabada (si la preparó), antropometría y crecimiento, familia, situación psicoemocional (y sexualidad si la marca), ficha CLAP, laboratorio, vacunas y cardiovascular, de las ventanas que estén abiertas. Es editable: lo que escriba a mano no se pisa.</p>';
   ['dat','dx','tto'].forEach(function(k){$('r-'+k).addEventListener('input',function(){DIRTY[k]=true})});
   box.querySelectorAll('[data-cp]').forEach(function(b){b.addEventListener('click',function(){copy($('r-'+b.getAttribute('data-cp')).value,b)})});
   $('r-all').addEventListener('click',function(){copy('DATOS COMUNIDAD MÉDICA\n'+$('r-dat').value+'\n\nDIAGNÓSTICO SUGERIDO\n'+$('r-dx').value+'\n\nTRATAMIENTO\n'+$('r-tto').value,this)});
@@ -493,6 +515,7 @@ function summary(force){
  var lab=lw?lastLine(lw.__sum):'',vac=vw?String(vw.__sum||'').trim():'';if(vac.length>520)vac=vac.slice(0,vac.lastIndexOf(';',500))+'; … (ver el calendario completo en la ventana de vacunas).';
  var imp=(CL.inc&&CL.v.imp)?'Impresión diagnóstica: '+CL.v.imp:'',ind=(CL.inc&&CL.v.ind)?CL.v.ind:'';
  var dat=[a.dat,aduAntro(),legLine('adu'),embLine(),legLine('cpn'),legLine('rsk'),legLine('nac'),legLine('alim'),(curGroup()==='p'||curGroup()==='a')?'':ctlLine(),famLine(),psicoLine(),sexLine(),clLine(),lab,vac].concat(cv.dat).filter(String).join('\n'),dx=[a.dx,imp].concat(cv.dx).filter(String).join('\n'),tto=[a.tto,ind].concat(cv.tto).filter(String).join('\n');
+ var ca=consAcu();if(ca.dat)dat=dat+(dat?'\n':'')+ca.dat;if(ca.dx)dx=dx+(dx?'\n':'')+ca.dx;if(ca.tto)tto=tto+(tto?'\n':'')+ca.tto;
  if(AD.psico.ide==='Sí'||AD.psico.int==='Sí')tto=(tto?tto+'\n':'')+'Riesgo suicida referido: realizar evaluación inmediata e interconsulta con salud mental.';
  var v={dat:dat,dx:dx,tto:tto};
  ['dat','dx','tto'].forEach(function(k){var e=$('r-'+k);if(!DIRTY[k]&&e.value!==v[k])e.value=v[k]});
@@ -849,10 +872,47 @@ function openBig(){
 }
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.id==='big-open')openBig();if(t&&t.id==='big-x'){var dl=$('big');dl.close?dl.close():dl.removeAttribute('open')}if(t&&t.id==='big-p'){try{$('big-f').contentWindow.print()}catch(x){}}});
 
+/* ---------- ventanas emergentes (Abrir aparte) ---------- */
+var POP='';
+function popOpen(id){toggle(id,true);var s=$('w-'+id);if(!s)return;closePop(true);s.classList.add('pop');document.body.classList.add('popped');POP=id;var x=s.querySelector('.popx');if(x)x.focus()}
+function closePop(quiet){if(!POP)return;var s=$('w-'+POP);if(s)s.classList.remove('pop');document.body.classList.remove('popped');POP='';if(!quiet){try{summary(false)}catch(e){}}}
+document.addEventListener('click',function(e){var t=e.target&&e.target.closest?e.target.closest('[data-pop],[data-popx],#pop-bg'):null;if(!t)return;if(t.id==='pop-bg'||t.hasAttribute('data-popx'))closePop();else popOpen(t.getAttribute('data-pop'))});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&POP)closePop()});
+
+/* ---------- consulta grabada (barra superior) ---------- */
+function cFrame(){try{var fr=document.querySelector('#b-asist iframe');var d=fr&&fr.contentDocument;return d&&d.getElementById('rec-go')?d:null}catch(e){return null}}
+function cEnsure(cb){toggle('asist',true);var n=0;(function w(){var d=cFrame();if(d)return cb(d);if(++n>60){$('cb-msg').textContent='No se pudo abrir la consulta asistida. Reintente.';return}setTimeout(w,250)})()}
+function cVal(d,id){var e=d&&d.getElementById(id);return e?String(e.value||'').trim():''}
+function consAcu(){var d=cFrame();return d?{dat:cVal(d,'acu-dat'),dx:cVal(d,'acu-dx'),tto:cVal(d,'acu-tto')}:{dat:'',dx:'',tto:''}}
+function cbSync(){
+ var d=cFrame(),on=false;
+ if(d){
+  var rec=!d.getElementById('rec-stop').hidden,pausa=/Reanudar/.test(d.getElementById('rec-pause').textContent);on=rec;
+  $('cb-go').hidden=rec;$('cb-pause').hidden=!rec;$('cb-stop').hidden=!rec;$('cb-pause').textContent=pausa?'▶ Reanudar':'⏸ Pausar';
+  $('cb-timer').textContent=d.getElementById('timer').textContent||'00:00';
+  var tx=cVal(d,'tx'),busy=d.getElementById('go').disabled,flds=[].map.call(d.querySelectorAll('#fields textarea'),function(x){return x.value}).join('').trim();
+  $('cb-note').disabled=rec||busy||tx.length<20;$('cb-acu').disabled=rec||d.getElementById('acu-go').disabled||flds.length<20;
+  var m=(d.getElementById('stat2').textContent||'').trim()||(d.getElementById('stat').textContent||'').trim();
+  if(/^Grabando/.test(m))m='Grabando… Puede seguir cargando en las demás ventanas: la grabación continúa.';
+  if(m)$('cb-msg').textContent=m;
+  var ac=consAcu();if(ac.dat||ac.dx||ac.tto)$('cb-view').textContent='Ver transcripción y nota ✓';
+ }
+ $('cons-bar').classList.toggle('rec-on',on);
+}
+setInterval(cbSync,500);
+$('cb-go').addEventListener('click',function(){cEnsure(function(d){
+ var r=d.getElementById('redact');if(r&&!r.value.trim()){var t=[P.nom||$('p-nom').value,P.dni||$('p-dni').value].map(function(x){return String(x||'').trim()}).filter(String).join(', ');if(t)r.value=t}
+ d.getElementById('rec-go').click();cbSync()})});
+$('cb-pause').addEventListener('click',function(){var d=cFrame();if(d)d.getElementById('rec-pause').click();cbSync()});
+$('cb-stop').addEventListener('click',function(){var d=cFrame();if(d)d.getElementById('rec-stop').click();cbSync()});
+$('cb-note').addEventListener('click',function(){var d=cFrame();if(d)d.getElementById('go').click();cbSync()});
+$('cb-acu').addEventListener('click',function(){var d=cFrame();if(d)d.getElementById('acu-go').click();cbSync()});
+$('cb-view').addEventListener('click',function(){popOpen('asist')});
+
 /* ---------- inicio ---------- */
 build();perfBar();(function(){var w=$('w-antro');if(w){var d=document.createElement('div');d.id='tn-ref';d.className='row';d.style.cssText='gap:8px;padding:6px 14px;font-size:.86rem;align-items:center;border-top:1px solid var(--line)';d.innerHTML='<b id="tn-ref-t"></b><button class="btn small" id="tn-ref-b" type="button">Guardar Tanner actual como referencia</button><span class="msg" id="tn-ref-m"></span>';w.appendChild(d);$('tn-ref-b').addEventListener('click',tannerSave)}})();tannerRef();writeForm();status();summary(true);
 W.forEach(function(w){var a=$('a-'+w.id);if(a)a.href=w.src()});
-toggle('antro',true);
+toggle('antro',true);setTimeout(function(){toggle('asist',true)},1200);
 if(P.cod||P.dni)setTimeout(applyP,600);
 })();
 </script></body></html>
