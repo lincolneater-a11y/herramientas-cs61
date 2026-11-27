@@ -1214,6 +1214,7 @@ function gaugeHTML(pct, r, c) {
 
 function renderLact() {
   var out = calcLact(); LAST = out;
+  ['lc-req', 'lc-rec', 'lc-res'].forEach(function (id) { var e = $(id); if (e) e.style.display = nutOK() ? '' : 'none'; });
   var P = out.P, kg = out.kg, R = out.req;
   if (typeof cfNoteRender === 'function') cfNoteRender();
   $('lc-chips').innerHTML = out.chips.map(function (c) { return '<span class="chip">' + c + '</span>'; }).join('');
@@ -1323,7 +1324,7 @@ function lcSummary(out) {
   L.push('Evaluación nutricional de lactante' + (id ? ' · ' + id : ''));
   L.push('Edad: ' + Math.floor(P.chron / MD) + ' m ' + Math.round(P.chron - Math.floor(P.chron / MD) * MD) + ' d' + (P.pre && P.egOk ? ' · prematuro de ' + Math.floor(P.egd / 7) + ' SG' : '') + ' · peso ' + fmt(P.w, 0) + ' g' + (P.sex ? ' · ' + (P.sex === 'M' ? 'varón' : 'mujer') : ''));
   L.push('Referencia: ' + (out.useRef === 'pre' ? 'prematuro (' + (out.stage === 'trans' ? 'transición' : 'crecimiento') + ')' : 'lactante de término (' + (out.chosen ? out.chosen.n : '') + ')'));
-  L.push('Requerimiento: ' + fmt(R.kcal.ref, 0) + ' kcal/d (' + fmt(R.kcal.perRef, 0) + ' kcal/kg) · proteínas ' + fmt(R.prot.ref, 1) + ' g/d (' + fmt(R.prot.perRef, 2) + ' g/kg)');
+  if (nutOK()) L.push('Requerimiento: ' + fmt(R.kcal.ref, 0) + ' kcal/d (' + fmt(R.kcal.perRef, 0) + ' kcal/kg) · proteínas ' + fmt(R.prot.ref, 1) + ' g/d (' + fmt(R.prot.perRef, 2) + ' g/kg)');
   L.push('Alimentación:');
   S.forEach(function (s) {
     var nm = s.kind === 'form' ? F[s.fid].name + (F[s.fid].f === 'p' ? ' al ' + fmt(s.dil, 1) + ' %' : '') : s.kind === 'lh' ? LH[s.lh].name : 'Fuente propia';
@@ -1331,7 +1332,7 @@ function lcSummary(out) {
   });
   if (CF.length) { L.push('Alimentación complementaria:'); CF.forEach(function (c) { L.push('- ' + c.f.n + ': ' + fmt(c.q || 0, 0) + ' g/ml × ' + (c.n || 0) + ' veces/d · ' + (sdMacro(c.f) ? 's/d' : fmt(kcalOf(c.f, (c.q || 0) * (c.n || 0)), 0) + ' kcal')); }); }
   if (V) {
-    L.push('Aporte: ' + fmt(V.kcal, 0) + ' kcal (' + fmt(V.kcal / R.kcal.ref * 100, 0) + ' % de adecuación) · proteínas ' + fmt(V.prot, 1) + ' g (' + fmt(V.prot / R.prot.ref * 100, 0) + ' %) · volumen ' + fmt(V.vol / kg, 0) + ' ml/kg/d');
+    if (!nutOK()) L.push('Aporte: ' + fmt(V.kcal, 0) + ' kcal · proteínas ' + fmt(V.prot, 1) + ' g · volumen ' + fmt(V.vol / kg, 0) + ' ml/kg/d'); else L.push('Aporte: ' + fmt(V.kcal, 0) + ' kcal (' + fmt(V.kcal / R.kcal.ref * 100, 0) + ' % de adecuación) · proteínas ' + fmt(V.prot, 1) + ' g (' + fmt(V.prot / R.prot.ref * 100, 0) + ' %) · volumen ' + fmt(V.vol / kg, 0) + ' ml/kg/d');
   }
   var cl = capCalc().L; if (cl.length) { L.push('Capacidad gástrica:'); cl.forEach(function (x) { L.push('- ' + x); }); }
   return L.join('\n');
