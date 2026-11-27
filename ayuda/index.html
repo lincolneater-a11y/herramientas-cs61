@@ -1,0 +1,93 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ayuda y manual de usuario · CS 61</title>
+<link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><meta name="theme-color" content="#14304f">
+<style>
+:root{--navy:#14304f;--teal:#0e7c86;--org:#f28c28;--ink:#12263f;--mut:#4b6079;--line:#d3dee6;--soft:#eef4f7}
+*{box-sizing:border-box}body{margin:0;font-family:Calibri,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:#f6f9fb;line-height:1.55}
+header{background:linear-gradient(135deg,#14304f,#0e7c86);color:#fff;padding:18px 20px}header>div{max-width:980px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}header>div>img{width:54px;height:54px;border-radius:50%;background:#fff}
+header h1{margin:0;font-size:1.35rem}header small{opacity:.9}header a.back{margin-left:auto;color:#fff;border:1px solid rgba(255,255,255,.5);padding:7px 13px;border-radius:9px;text-decoration:none;font-weight:700;font-size:.9rem}
+main{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+.man{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#fff;border:2px solid var(--teal);border-radius:14px;padding:14px 16px;margin-bottom:14px}.man b{font-size:1.05rem}.man p{margin:2px 0 0;color:var(--mut);font-size:.92rem}
+.btn{display:inline-block;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;padding:10px 16px;border-radius:10px;border:0;cursor:pointer;font-size:.95rem}.btn.alt{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
+input[type=search]{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:1rem;margin:4px 0 14px}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0}summary{cursor:pointer;padding:13px 16px;font-weight:800;color:var(--navy);list-style:none;display:flex;justify-content:space-between;gap:10px}summary::after{content:"+";font-size:1.3rem;line-height:1;color:var(--teal)}details[open] summary::after{content:"−"}
+details>div{padding:0 16px 14px}h3{margin:14px 0 4px;font-size:1rem;color:var(--teal)}ul,ol{margin:4px 0 8px;padding-left:22px}li{margin:3px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:6px 0}th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}th{background:var(--soft)}
+.note{background:#fff4e6;border-left:4px solid var(--org);padding:9px 12px;border-radius:6px;margin:8px 0;font-size:.93rem}
+mark{background:#ffe08a}.empty{display:none;padding:14px;text-align:center;color:var(--mut)}
+@media print{header a.back,.man .btn,input[type=search]{display:none}details{break-inside:avoid}details>div{display:block}}
+</style></head><body>
+<header><div><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div style="display:block"><h1>Ayuda y manual de usuario</h1><small>Herramientas del Centro de Salud N.º 61</small></div><a class="back" href="../">Volver a las herramientas</a></div></header>
+<main>
+<div class="man"><div style="flex:1;min-width:240px"><b>Manual de usuario completo</b><p>Con capturas de pantalla, paso a paso por herramienta, la historia clínica compartida, los perfiles y las preguntas frecuentes.</p></div><a class="btn" href="manual-usuario.pdf" download>Descargar el manual (PDF)</a></div>
+<label for="q" style="font-weight:700">Buscar en la ayuda</label><input type="search" id="q" placeholder="Por ejemplo: laboratorio, embarazo, perfil, guardar" autocomplete="off">
+<p class="empty" id="none">No hay resultados. Pruebe con otra palabra o descargue el manual completo.</p>
+<div id="list">
+<details open><summary>Empezar en tres pasos</summary><div>
+<ol><li><b>Elija su profesión</b> la primera vez (Nutrición, Enfermería, Agente sanitario, Medicina u Otro perfil). Puede cambiarla con «Cambiar perfil».</li>
+<li><b>Abra la Historia clínica compartida</b> si va a atender a una persona: carga los datos una sola vez y se copian a todas las ventanas.</li>
+<li><b>Use las herramientas de «Para tu trabajo»</b> cuando necesite algo suelto (una calculadora, el calendario de vacunas, la visita domiciliaria). «Ver todas las herramientas» muestra el resto.</li></ol>
+<p class="note">Los resultados orientan: no reemplazan el criterio profesional. El diagnóstico y el plan los define y valida el profesional.</p></div></details>
+
+<details><summary>Historia clínica compartida: cómo se usa</summary><div>
+<ol><li>Escriba el <b>DNI</b> y toque <b>«Buscar en la planilla»</b>: trae el código, el nombre, la fecha de nacimiento y el sexo. Si la persona es nueva, complete los datos a mano.</li>
+<li>Si es una embarazada, marque <b>«Paciente embarazada»</b>.</li>
+<li>Toque <b>«Cargar en todas las ventanas»</b>. Las ventanas se abren a pedido desde la lista de la izquierda.</li>
+<li>Cargue lo que corresponda en cada ventana y guarde con <b>«Guardar en la planilla»</b>.</li>
+<li>A la derecha, <b>«Para pegar en Acuario»</b> arma solo los tres bloques (datos de la comunidad médica, diagnóstico sugerido y tratamiento). Puede editarlos y copiarlos.</li>
+<li>Para atender a otra persona toque <b>«Paciente nuevo»</b>: vacía todas las ventanas.</li></ol>
+<h3>Las ventanas cambian según la edad</h3>
+<table><tr><th>Grupo</th><th>Ventanas</th></tr>
+<tr><td>0 a 5 años</td><td>Antropometría y crecimiento (curvas OMS), controles de salud (cronograma 2025), recién nacido, alimentación, familia, desarrollo (IODI), vacunas, laboratorio.</td></tr>
+<tr><td>6 a 19 años</td><td>Antropometría y crecimiento con Tanner, controles, familia y familiograma, psicoemocional y sexualidad, ficha del adolescente (CLAP), antropometría ampliada, vacunas, cardiovascular, laboratorio.</td></tr>
+<tr><td>Embarazada</td><td>Valoración nutricional y ganancia de peso, control prenatal por trimestre, antecedentes obstétricos y riesgo, familia, vacunas, laboratorio. Nutrición suma los requerimientos.</td></tr>
+<tr><td>Adultos (20 años o más)</td><td>Antropometría ampliada, antecedentes, hábitos y prevención, familia, cardiovascular y FINDRISC, vacunas, laboratorio. Nutrición suma los requerimientos.</td></tr></table>
+<p class="note">Si todavía no cargó la fecha de nacimiento, se ven todas las ventanas.</p></div></details>
+
+<details><summary>Qué puede hacer cada perfil</summary><div>
+<table><tr><th>Apartado</th><th>Quién lo edita</th><th>Los demás</th></tr>
+<tr><td>Antropometría y crecimiento, vacunas, controles, familia</td><td>Todos</td><td>—</td></tr>
+<tr><td>Psicoemocional, sexualidad, ficha CLAP, Tanner, recién nacido, control prenatal, riesgo obstétrico</td><td>Medicina, ginecología, clínica y enfermería</td><td>Lo ven sin editar</td></tr>
+<tr><td>Alimentación y antecedentes del adulto</td><td>Nutrición y los perfiles de medicina y enfermería</td><td>Lo ven sin editar</td></tr>
+<tr><td>Requerimientos de macro y micronutrientes</td><td>Solo nutrición</td><td>No aparece</td></tr>
+<tr><td>Laboratorio (carga)</td><td>Solo bioquímica, con su código de acceso</td><td>Ven los resultados cargados</td></tr></table>
+<p class="note">Estos permisos ordenan la pantalla según el perfil elegido, pero no son una clave: la sexualidad y la carga de laboratorio sí piden un código propio.</p>
+<p>Si un apartado está en solo lectura, arriba aparece un aviso con el motivo. Para cambiar de perfil use el selector «Perfil» de la historia clínica o «Cambiar perfil» en el inicio.</p></div></details>
+
+<details><summary>Laboratorio: ver los resultados del paciente</summary><div>
+<p>Con cualquier perfil que no sea bioquímica, al abrir la ventana de laboratorio se busca solo a la persona y se muestra el estudio más reciente, con rangos y alertas. Los estudios anteriores se abren con «Cargar estos valores». Los valores fuera de rango pasan al resumen para Acuario.</p>
+<p>Si no aparece nada: confirme que el DNI o el código sean correctos, que la planilla esté configurada en este equipo y que el laboratorio ya haya cargado el estudio.</p></div></details>
+
+<details><summary>Antropometría, Tanner y velocidad de crecimiento</summary><div>
+<ul><li>Apenas se carga al paciente se ven las <b>curvas y los controles anteriores</b> de la planilla, sin necesidad de ingresar el peso y la talla de hoy.</li>
+<li>Al cargar la medida actual, se suma sola a las curvas y a la tabla «Controles registrados».</li>
+<li>El botón <b>«Ver en grande»</b> abre los datos, la tabla y los gráficos ampliados, y permite imprimir.</li>
+<li>La <b>velocidad de crecimiento</b> se calcula con el control de hace aproximadamente un año; si todavía no hay medida de hoy usa el último control guardado.</li>
+<li><b>Tanner:</b> se elige el estadio en las ilustraciones de mama o genitales y de vello pubiano. «Guardar Tanner actual como referencia» deja el estadio registrado para compararlo en la próxima consulta.</li></ul></div></details>
+
+<details><summary>Embarazo y control prenatal</summary><div>
+<ul><li>Cargue la <b>FUM</b> o la edad gestacional por ecografía, talla y peso pregestacional: se calculan el IMC inicial, la ganancia esperada y las curvas.</li>
+<li>En <b>Control prenatal por trimestre</b> marque laboratorio, ecografías, prueba de tolerancia a la glucosa (24 a 28 semanas), estreptococo B (35 a 37), anti-D si el Rh es negativo, vacunas y suplementos. La ventana avisa qué corresponde o está pendiente según las semanas.</li>
+<li>Controles: mensuales hasta la semana 36 y semanales después, con un mínimo de 8.</li></ul></div></details>
+
+<details><summary>Guardar y conectar con la planilla</summary><div>
+<ul><li>La primera vez, abra el enlace de configuración que le dio el centro: la conexión a la planilla queda guardada en este equipo.</li>
+<li>Sin conexión, las herramientas siguen calculando, pero «Guardar» y «Buscar en la planilla» no funcionan.</li>
+<li>Los datos de la historia clínica se guardan en las hojas <b>Controles</b>, <b>Legajo</b> y <b>Adolescente</b> de la planilla compartida.</li></ul></div></details>
+
+<details><summary>Problemas frecuentes</summary><div>
+<ul><li><b>«No se pudo guardar»:</b> revise internet y que el administrador haya actualizado el script de la planilla a la versión más reciente.</li>
+<li><b>«La clave no coincide»:</b> la clave del equipo no es la de esta planilla; vuelva a abrir el enlace de configuración.</li>
+<li><b>No veo una ventana:</b> las ventanas dependen de la edad, del embarazo y del perfil. Revise la fecha de nacimiento y el selector de perfil.</li>
+<li><b>Los datos de otro paciente siguen en pantalla:</b> toque «Paciente nuevo».</li>
+<li><b>El micrófono no funciona (consulta asistida):</b> permita el micrófono en el navegador; use Chrome o Edge.</li>
+<li><b>Quiero instalarla como aplicación:</b> en Chrome o Edge, menú ⋮ → «Guardar e instalar» → «Instalar página como aplicación».</li></ul></div></details>
+
+<details><summary>Datos y privacidad</summary><div>
+<p>El DNI y el nombre se guardan únicamente en la hoja «Pacientes», con consentimiento de la persona. Las demás hojas usan solo el código del paciente. Los apartados de sexualidad y de carga de laboratorio tienen códigos de acceso propios. No comparta las claves por mensajes ni capturas de pantalla.</p></div></details>
+</div>
+<p style="margin-top:18px;color:var(--mut);font-size:.9rem">Herramientas digitales del CS N.º 61 · Autor: Miranda Romero, Ulises. ¿No encuentra lo que busca? Consulte el manual completo o hable con la jefatura del centro.</p>
+</main>
+<script>
+(function(){var q=document.getElementById('q'),L=document.getElementById('list'),N=document.getElementById('none');
+q.addEventListener('input',function(){var t=q.value.trim().toLowerCase(),n=0;L.querySelectorAll('details').forEach(function(d){var m=!t||d.textContent.toLowerCase().indexOf(t)>-1;d.style.display=m?'':'none';if(t&&m){d.open=true;n++}else if(!t){d.open=d===L.querySelector('details')}});N.style.display=t&&!n?'block':'none'})})();
+</script></body></html>

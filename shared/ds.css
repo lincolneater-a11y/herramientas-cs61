@@ -97,7 +97,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]):not([data-ds="game"]) body::before{opacity:.55}}
 :focus-visible{outline:3px solid color-mix(in srgb,var(--teal) 70%,#fff);outline-offset:2px;border-radius:6px}
 ::selection{background:color-mix(in srgb,var(--teal) 30%,transparent)}
-@media print{body::before{display:none}.ds-fab,.ds-panel{display:none!important}}
+@media print{body::before{display:none}.ds-fab,.ds-panel,.ds-help{display:none!important}}
 
 /* ---------- 4. Encabezado institucional ---------- */
 body > header,body > .hdr,.hdr,.bar-top{
@@ -204,6 +204,7 @@ html[data-ds="game"] .menu>*:hover,html[data-ds="game"] .opts button:hover:not(:
   display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1565b8,#0a8f93);box-shadow:0 10px 22px -8px rgba(11,61,120,.7),0 0 0 3px rgba(255,255,255,.55);
   transition:transform .2s var(--ds-ease)}
 .ds-fab:hover{transform:scale(1.08) rotate(8deg)}
+.ds-help{position:fixed;right:14px;bottom:70px;z-index:9000;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#14304f;background:#fff;box-shadow:0 10px 22px -8px rgba(11,61,120,.55),0 0 0 3px rgba(21,101,184,.35);text-decoration:none;transition:transform .2s var(--ds-ease)}.ds-help:hover{transform:scale(1.08)}.ds-help:focus-visible{outline:3px solid #f28c28;outline-offset:3px}
 .ds-fab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .ds-panel{position:fixed;right:14px;bottom:70px;z-index:9001;width:min(340px,calc(100vw - 28px));max-height:calc(100vh - 100px);overflow:auto;
   background:var(--s);color:var(--ink);border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 48px -16px rgba(0,0,0,.45);padding:16px 16px 14px;

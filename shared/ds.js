@@ -239,6 +239,11 @@
         '<small>' + hint + '</small>' + (vol ? '<input type="range" min="0" max="1" step="0.05" data-v="' + vol + '" aria-label="Volumen: ' + label + '">' : '') + '</div>';
     }
     document.body.appendChild(fab); document.body.appendChild(p);
+    if (!/\/ayuda\/?(index\.html)?$/.test(location.pathname) && !document.getElementById('ds-help')) {
+      var hp = document.createElement('a'); hp.className = 'ds-help'; hp.id = 'ds-help'; hp.href = BASE + 'ayuda/'; hp.setAttribute('aria-label', 'Ayuda y manual de usuario'); hp.title = 'Ayuda y manual de usuario';
+      hp.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.4a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.3-2.8 4"/><circle cx="12" cy="17.6" r=".6" fill="currentColor"/></svg>';
+      document.body.appendChild(hp);
+    }
     function paint() {
       p.querySelectorAll('[data-th]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-th') === D.theme ? 'true' : 'false'); });
       p.querySelectorAll('[data-k]').forEach(function (i) { i.checked = !!D[i.getAttribute('data-k')]; });
