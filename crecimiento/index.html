@@ -724,8 +724,23 @@ details.card[open] > summary { margin-bottom: 12px; }
     <div id="es-mat" style="margin-top:12px"></div>
   </div>
 
+  <div id="es-nut" hidden>
+  <div class="card" id="es-req"><h3>6 · Requerimientos</h3>
+    <p class="sub">Energía, macronutrientes, fibra, agua y micronutrientes para 5 a 19 años, con el peso y la talla cargados. Es una estimación de referencia: se ajusta con la evolución del peso y la talla.</p>
+    <div class="grid">
+      <label class="field"><span>Nivel de actividad física</span><select id="es-pa"></select></label>
+      <label class="field"><span>Fórmula de energía</span><select id="es-eq"><option value="sch_wh">Schofield con peso y talla (OMS/FAO/UNU)</option><option value="sch_w">OMS/FAO/UNU 1985 (sólo peso)</option><option value="iom">IOM 2002 (energía estimada, EER)</option></select></label>
+    </div>
+    <div id="es-req-body" style="margin-top:12px"></div>
+  </div>
+  <div class="card" id="es-rec"><h3>6 b · Recuperación nutricional (delgadez)</h3>
+    <label class="field" style="max-width:380px"><span>Ajuste por recuperación</span><select id="es-recup"><option value="auto">Automático según el estado nutricional</option><option value="on">Aplicar siempre</option><option value="off">No aplicar</option></select></label>
+    <div id="es-rec-body" style="margin-top:10px"></div>
+  </div>
+  </div>
+
   <div class="card">
-    <h3>6 · Resumen para Acuario</h3>
+    <h3>7 · Resumen para Acuario</h3>
     <p class="sub">Se arma solo con los datos cargados (valoración, velocidad, Tanner y talla blanco familiar). Revíselo y edítelo antes de copiar.</p>
     <div id="es-acu"></div>
   </div>
@@ -3757,7 +3772,88 @@ function esChart(P, k, pts) {
   var pp = []; pts.forEach(function (p) { var v = k === 'b' ? p.b : (k === 'h' ? p.h : p.w); if (v && (k !== 'wc' || (p.m >= 60 && p.m <= 228))) pp.push([p.m / 12, v]); });
   return lineChart({ band: band, x0: 5, x1: x1, xs: (k === 'w' || k === 'wc') ? 1 : 2, y0: cfg[0], y1: cfg[1], ys: cfg[2], xl: 'Edad (años)', yl: { b: 'IMC (kg/m²)', h: 'Talla (cm)', w: 'Peso (kg)', wc: 'Peso (kg)' }[k], series: series, pts: pp, rpad: 32, aria: (k === 'wc' ? 'Curva SAP 2013 ' : 'Curva OMS 2007 ') + (ZMODE ? 'en puntaje Z ' : '') + 'de ' + ES_META[k].n.toLowerCase() + ' con los puntos del paciente' });
 }
-function esRender() { esRender0(); try { esAcu(); } catch (e) { } try { condRender('es'); } catch (e) { } }
+/* ---- Requerimientos y recuperación nutricional, 5 a 19 años (sólo perfil Nutrición) ---- */
+var esReqCopy = [];
+function nutOK() { try { return localStorage.getItem('cs61_perfil') === 'nutricion'; } catch (e) { return false; } }
+var ES_MIC = [
+  { n: 'Calcio', u: 'mg', v: function (A) { return A < 9 ? 1000 : 1300; } },
+  { n: 'Hierro', u: 'mg', v: function (A, sx) { return A < 9 ? 10 : (A < 14 ? 8 : (sx === 'M' ? 11 : 15)); } },
+  { n: 'Zinc', u: 'mg', v: function (A, sx) { return A < 9 ? 5 : (A < 14 ? 8 : (sx === 'M' ? 11 : 9)); } },
+  { n: 'Magnesio', u: 'mg', v: function (A, sx) { return A < 9 ? 130 : (A < 14 ? 240 : (sx === 'M' ? 410 : 360)); } },
+  { n: 'Vitamina A', u: 'µg ER', v: function (A, sx) { return A < 9 ? 400 : (A < 14 ? 600 : (sx === 'M' ? 900 : 700)); } },
+  { n: 'Vitamina C', u: 'mg', v: function (A, sx) { return A < 9 ? 25 : (A < 14 ? 45 : (sx === 'M' ? 75 : 65)); } },
+  { n: 'Vitamina D', u: 'µg', v: function () { return 15; } },
+  { n: 'Folato', u: 'µg EFD', v: function (A) { return A < 9 ? 200 : (A < 14 ? 300 : 400); } },
+  { n: 'Vitamina B12', u: 'µg', v: function (A) { return A < 9 ? 1.2 : (A < 14 ? 1.8 : 2.4); } }
+];
+function esReqCalc(P) {
+  if (!P.sex || P.m === null || P.m < 60 || P.m > 228 || !P.w || !P.h) return null;
+  var A = P.m / 12, W = P.w, Hm = P.h / 100, sx = P.sex, pn = RQ_NAF_P[+$('es-pa').value] || RQ_NAF_P[1], dep = rqDep(A);
+  var rw = rqRow(RQ_SWH[sx], A), b1 = rw[1] * W + rw[2] * Hm + rw[3], r2 = rqRow(RQ_SW[sx], A), b2 = r2[1] * W + r2[2], pi = sx === 'M' ? pn[2] : pn[3];
+  var eer = sx === 'M' ? 88.5 - 61.9 * A + pi * (26.7 * W + 903 * Hm) + dep : 135.3 - 30.8 * A + pi * (10 * W + 934 * Hm) + dep;
+  var M = { sch_wh: { n: 'Schofield con peso y talla', bmr: b1, get: b1 * pn[1] + dep, f: 'GER × NAF ' + String(pn[1]).replace('.', ',') + ' + ' + dep + ' kcal de crecimiento' },
+    sch_w: { n: 'OMS/FAO/UNU 1985 (sólo peso)', bmr: b2, get: b2 * pn[1] + dep, f: 'GER × NAF ' + String(pn[1]).replace('.', ',') + ' + ' + dep + ' kcal de crecimiento' },
+    iom: { n: 'IOM 2002 (EER)', bmr: null, get: eer, f: 'ecuación EER con coeficiente de actividad ' + String(pi).replace('.', ',') } };
+  var ch = M[$('es-eq').value] || M.sch_wh;
+  return { A: A, W: W, Hm: Hm, sx: sx, ch: ch, M: M, kcal: ch.get, pn: pn };
+}
+function esReqRender() {
+  var box = $('es-nut'); if (!box) return;
+  esReqCopy = [];
+  var on = nutOK(); box.hidden = !on;
+  if (!on) return;
+  var pa = $('es-pa'); if (!pa.options.length) { pa.innerHTML = RQ_NAF_P.map(function (o, i) { return '<option value="' + i + '">' + o[0] + ' (NAF ' + String(o[1]).replace('.', ',') + ')</option>'; }).join(''); pa.value = '1'; }
+  var P = esRead(), R = esReqCalc(P), body = $('es-req-body'), rec = $('es-rec-body');
+  if (!R) { body.innerHTML = '<div class="empty"><p>Complete sexo, edad (5 a 19 años), peso y talla para calcular los requerimientos.</p></div>'; rec.innerHTML = '<p class="muted">Complete sexo, edad, peso y talla para evaluar si corresponde un plan de recuperación.</p>'; return; }
+  var A = R.A, W = R.W, kcal = R.kcal, mp = [15, 30, 55], rda = A < 14 ? 0.95 : 0.85;
+  var pG = kcal * mp[0] / 100 / 4, fG = kcal * mp[1] / 100 / 9, cG = kcal * mp[2] / 100 / 4, fib = kcal / 1000 * 14, agua = W < 10 ? 100 * W : (W <= 20 ? 1000 + 50 * (W - 10) : 1500 + 20 * (W - 20));
+  var h = '<div class="kpis">' +
+    '<div class="kpi"><div class="l">Gasto energético basal</div><div class="v">' + (R.ch.bmr ? fmt(R.ch.bmr, 0) : '—') + ' <small>kcal/d</small></div><div class="s">' + esc(R.ch.n) + '</div></div>' +
+    '<div class="kpi" style="border-color:var(--teal)"><div class="l">Energía</div><div class="v">' + fmt(kcal, 0) + ' <small>kcal/d</small></div><div class="s">' + fmt(kcal / W, 0) + ' kcal/kg · ' + esc(R.ch.f) + '</div></div>' +
+    '<div class="kpi"><div class="l">Proteínas</div><div class="v">' + fmt(pG, 0) + ' <small>g/d</small></div><div class="s">' + fmt(pG / W, 2) + ' g/kg · RDA ' + String(rda).replace('.', ',') + ' g/kg</div></div>' +
+    '<div class="kpi"><div class="l">Agua</div><div class="v">' + fmt(agua, 0) + ' <small>ml/d</small></div><div class="s">Holliday-Segar (agua de referencia)</div></div></div>';
+  h += '<h4 style="margin:16px 0 6px">Distribución de macronutrientes propuesta</h4><div class="tw"><table class="tbl"><thead><tr><th>Nutriente</th><th class="num">% del VCT</th><th class="num">kcal</th><th class="num">g/d</th><th class="num">g/kg</th></tr></thead><tbody>' +
+    '<tr><td>Proteínas</td><td class="num">' + mp[0] + '</td><td class="num">' + fmt(pG * 4, 0) + '</td><td class="num">' + fmt(pG, 0) + '</td><td class="num">' + fmt(pG / W, 2) + '</td></tr>' +
+    '<tr><td>Grasas</td><td class="num">' + mp[1] + '</td><td class="num">' + fmt(fG * 9, 0) + '</td><td class="num">' + fmt(fG, 0) + '</td><td class="num">' + fmt(fG / W, 2) + '</td></tr>' +
+    '<tr><td>Hidratos de carbono</td><td class="num">' + mp[2] + '</td><td class="num">' + fmt(cG * 4, 0) + '</td><td class="num">' + fmt(cG, 0) + '</td><td class="num">' + fmt(cG / W, 2) + '</td></tr></tbody></table></div>' +
+    '<div class="note" style="margin-top:8px">Fibra: al menos ' + fmt(fib, 0) + ' g/d (14 g cada 1.000 kcal). Los porcentajes están dentro de los rangos aceptables de macronutrientes (IOM 2002).</div>';
+  var mic = ES_MIC.map(function (m) { return [m.n, m.v(A, R.sx), m.u]; });
+  h += '<h4 style="margin:16px 0 6px">Micronutrientes (RDA, IOM)</h4><div class="tw"><table class="tbl"><thead><tr><th>Nutriente</th><th class="num">Recomendación diaria</th></tr></thead><tbody>' +
+    mic.map(function (m) { return '<tr><td>' + m[0] + '</td><td class="num">' + fmt(m[1], m[1] < 10 && m[1] % 1 ? 1 : 0) + ' ' + m[2] + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+    '<p class="note" style="margin-top:8px">RDA del IOM (Food and Nutrition Board): 4 a 8, 9 a 13 y 14 a 18 años; a los 19 años se usa la franja de 14 a 18. ER: equivalentes de retinol; EFD: equivalentes de folato dietético.</p>';
+  h += '<h4 style="margin:16px 0 6px">Comparación de fórmulas</h4><div class="tw"><table class="tbl"><thead><tr><th>Fórmula</th><th class="num">Gasto basal</th><th class="num">Energía</th><th class="num">kcal/kg</th></tr></thead><tbody>' +
+    Object.keys(R.M).map(function (k) { var m = R.M[k]; return '<tr><td>' + esc(m.n) + (m === R.ch ? ' <span class="badge info">usada</span>' : '') + '</td><td class="num">' + (m.bmr ? fmt(m.bmr, 0) : '—') + '</td><td class="num">' + fmt(m.get, 0) + '</td><td class="num">' + fmt(m.get / W, 0) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+  body.innerHTML = h;
+  esReqCopy = ['Requerimientos (' + R.ch.n + ', NAF ' + String(R.pn[1]).replace('.', ',') + '): ' + fmt(kcal, 0) + ' kcal/d (' + fmt(kcal / W, 0) + ' kcal/kg) · proteínas ' + fmt(pG, 0) + ' g (' + fmt(pG / W, 2) + ' g/kg) · grasas ' + fmt(fG, 0) + ' g · hidratos ' + fmt(cG, 0) + ' g · fibra ≥ ' + fmt(fib, 0) + ' g · agua ' + fmt(agua, 0) + ' ml.'];
+  // ---- recuperación nutricional
+  var imc = W / (R.Hm * R.Hm), zb = w07Z(R.sx, 'b', P.m, imc), zh = w07Z(R.sx, 'h', P.m, P.h), lm = w07LMS(R.sx, 'b', P.m), mode = $('es-recup').value;
+  if (zb === null || !lm) { rec.innerHTML = '<p class="muted">No hay referencia para esta edad.</p>'; return; }
+  var sev = zb < -3, thin = zb < -2, need = thin, apply = mode === 'on' || (mode === 'auto' && need);
+  var cls = sev ? 'Delgadez severa' : thin ? 'Delgadez' : zb < -1 ? 'Riesgo de delgadez (−2 a −1 DE)' : 'Sin déficit de IMC';
+  var rh = '<div class="chips" style="margin:0 0 10px"><span class="chip">IMC/edad: <b>' + (zb >= 0 ? '+' : '−') + fmt(Math.abs(zb), 1) + ' DE</b></span><span class="chip">Talla/edad: <b>' + (zh === null ? '—' : (zh >= 0 ? '+' : '−') + fmt(Math.abs(zh), 1) + ' DE') + '</b></span><span class="chip">Clasificación: <b>' + cls + '</b></span></div>';
+  if (!apply) { rec.innerHTML = rh + '<div class="alert info">' + ICON_INFO + '<span>' + (need ? 'Se desactivó el ajuste.' : 'No hay delgadez (IMC/edad no es menor a −2 DE): se mantiene el requerimiento calculado arriba.') + '</span></div>'; return; }
+  var wIdeal = lm[1] * R.Hm * R.Hm, perNorm = kcal / W, theo = perNorm * wIdeal, lo = kcal * 1.1, hi = kcal * 1.5, kRec = Math.min(hi, Math.max(lo, theo)), perRec = kRec / W;
+  var mr = sev ? [18, 30, 52] : [18, 30, 52], pR = kRec * mr[0] / 100 / 4, fR = kRec * mr[1] / 100 / 9, cR = kRec * mr[2] / 100 / 4;
+  var al = '';
+  if (sev) al += '<div class="alert warn">' + ICON_WARN + '<span>Delgadez severa (IMC/edad menor a −3 DE): descartar causas orgánicas y trastornos de la conducta alimentaria, evaluar signos de gravedad y derivar según el protocolo local. Si hay ingesta muy baja sostenida, reiniciar el aporte de forma gradual por el riesgo de síndrome de realimentación.</span></div>';
+  else al += '<div class="alert info">' + ICON_INFO + '<span>En adolescentes con delgadez indague sobre restricción alimentaria, imagen corporal y actividad física excesiva antes de indicar un plan de aumento de peso.</span></div>';
+  if (theo > hi) al += '<div class="alert info">' + ICON_INFO + '<span>El valor teórico (' + fmt(theo, 0) + ' kcal/d) supera el máximo de seguridad (150 % del requerimiento); se limitó. Progresar de forma gradual.</span></div>';
+  if (zh !== null && zh < -2) al += '<div class="alert info">' + ICON_INFO + '<span>Talla baja para la edad (' + fmt(zh, 1).replace('-', '−') + ' DE): el peso de referencia es el de la mediana de IMC para la edad y la talla actual; valorar también la velocidad de crecimiento.</span></div>';
+  rh += al + '<div class="kpis">' +
+    '<div class="kpi"><div class="l">Requerimiento normal</div><div class="v">' + fmt(kcal, 0) + ' <small>kcal/d</small></div><div class="s">' + fmt(perNorm, 0) + ' kcal/kg del peso actual</div></div>' +
+    '<div class="kpi"><div class="l">Peso de referencia</div><div class="v">' + fmt(wIdeal, 1) + ' <small>kg</small></div><div class="s">mediana de IMC/edad × talla² (OMS 2007)</div></div>' +
+    '<div class="kpi" style="border-color:var(--teal)"><div class="l">Objetivo de recuperación</div><div class="v">' + fmt(kRec, 0) + ' <small>kcal/d</small></div><div class="s">' + fmt(perRec, 0) + ' kcal/kg · +' + fmt(kRec - kcal, 0) + ' kcal sobre lo normal (' + fmt(kRec / kcal * 100, 0) + ' %)</div></div>' +
+    '<div class="kpi"><div class="l">Proteínas</div><div class="v">' + fmt(pR, 0) + ' <small>g/d</small></div><div class="s">' + fmt(pR / W, 1) + ' g/kg del peso actual</div></div></div>' +
+    '<h4 style="margin:16px 0 6px">Distribución porcentual propuesta</h4><div class="tw"><table class="tbl"><thead><tr><th>Nutriente</th><th class="num">% del VCT</th><th class="num">kcal</th><th class="num">g/d</th><th class="num">g/kg</th></tr></thead><tbody>' +
+    '<tr><td>Proteínas</td><td class="num">' + mr[0] + '</td><td class="num">' + fmt(pR * 4, 0) + '</td><td class="num">' + fmt(pR, 0) + '</td><td class="num">' + fmt(pR / W, 1) + '</td></tr>' +
+    '<tr><td>Grasas</td><td class="num">' + mr[1] + '</td><td class="num">' + fmt(fR * 9, 0) + '</td><td class="num">' + fmt(fR, 0) + '</td><td class="num">' + fmt(fR / W, 1) + '</td></tr>' +
+    '<tr><td>Hidratos de carbono</td><td class="num">' + mr[2] + '</td><td class="num">' + fmt(cR * 4, 0) + '</td><td class="num">' + fmt(cR, 0) + '</td><td class="num">' + fmt(cR / W, 1) + '</td></tr></tbody></table></div>' +
+    '<div class="note" style="margin-top:8px">Fórmula: (kcal/kg normales × peso de referencia), con un mínimo de 110 % y un máximo de 150 % del requerimiento normal. Controlar el peso cada 1 a 2 semanas, reevaluar el IMC/edad y reforzar con alimentos de alta densidad nutricional; suplementar según laboratorio y criterio clínico.</div>';
+  rec.innerHTML = rh;
+  esReqCopy.push('Recuperación nutricional (' + cls + ', IMC/edad ' + (zb >= 0 ? '+' : '−') + fmt(Math.abs(zb), 1) + ' DE): objetivo ' + fmt(kRec, 0) + ' kcal/d (' + fmt(perRec, 0) + ' kcal/kg, ' + fmt(kRec / kcal * 100, 0) + ' % del requerimiento) · proteínas ' + fmt(pR, 0) + ' g (' + fmt(pR / W, 1) + ' g/kg) · peso de referencia ' + fmt(wIdeal, 1) + ' kg.');
+}
+(function () { ['es-pa', 'es-eq', 'es-recup'].forEach(function (id) { var e = $(id); if (e) e.addEventListener('change', function () { try { esReqRender(); esAcu(); } catch (x) { } }); }); })();
+function esRender() { esRender0(); try { esReqRender(); } catch (e) { } try { esAcu(); } catch (e) { } try { condRender('es'); } catch (e) { } }
 function esRender0() {
   var out = $('es-out'), P = esRead(), L = [], T = '', H = '';
   try { tnSync(P); } catch (e) { }
@@ -4065,7 +4161,7 @@ function esAcu() {
   if (P.h) { zt.h = w07Z(P.sex, 'h', P.m, P.h); }
   if (P.w && P.m <= 120) { zt.w = w07Z(P.sex, 'w', P.m, P.w); }
   ['b', 'h', 'w'].forEach(function (k) { if (zt[k] !== null && zt[k] !== undefined) cl[k] = esClass(k, zt[k])[1]; });
-  var vAc = esVelAcu || (esVelCopy.length ? esVelCopy[esVelCopy.length - 1] : ''), dat = ['Control de crecimiento (escolar y adolescente), referencia OMS 2007.'].concat(ES_COPY.slice(1), vAc ? [vAc] : [], esTanAcu ? [esTanAcu] : [], esMatCopy.filter(function (l) { return !/^Tanner/.test(l); })).join('\n');
+  var vAc = esVelAcu || (esVelCopy.length ? esVelCopy[esVelCopy.length - 1] : ''), dat = ['Control de crecimiento (escolar y adolescente), referencia OMS 2007.'].concat(ES_COPY.slice(1), vAc ? [vAc] : [], esTanAcu ? [esTanAcu] : [], esReqCopy, esMatCopy.filter(function (l) { return !/^Tanner/.test(l); })).join('\n');
   var dxL = [], cod = ['Z001 (control de salud de rutina del niño)'];
   var zs = function (k) { return ' (Z ' + (zt[k] >= 0 ? '+' : '−') + fmt(Math.abs(zt[k]), 2) + ')'; };
   if (cl.b) {
