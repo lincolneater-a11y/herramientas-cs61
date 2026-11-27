@@ -75,7 +75,8 @@ dialog#big{width:100vw;max-width:100vw;height:100vh;max-height:100vh;border:0;bo
   <span class="chip off" id="cb-timer">00:00</span>
   <button class="btn" id="cb-note" type="button" disabled>Generar nota</button>
   <button class="btn" id="cb-acu" type="button" disabled>Preparar para Acuario</button>
-  <button class="btn small" id="cb-view" type="button">Ver transcripción y nota</button></div>
+  <button class="btn small" id="cb-view" type="button">Ver transcripción y nota</button>
+  <button class="btn small" id="cb-mic" type="button">Probar micrófono</button></div>
  <p class="msg" id="cb-msg" style="margin:8px 0 0">Comience la consulta, termine cuando acabe, genere la nota y prepárela para Acuario: el resumen aparece a la derecha, junto con lo demás del legajo.</p>
 </section>
 <div id="asist-host"></div><div id="pop-bg"></div>
@@ -932,6 +933,7 @@ $('cb-stop').addEventListener('click',function(){var d=cFrame();if(d)d.getElemen
 $('cb-note').addEventListener('click',function(){var d=cFrame();if(d)d.getElementById('go').click();cbSync()});
 $('cb-acu').addEventListener('click',function(){var d=cFrame();if(d)d.getElementById('acu-go').click();cbSync()});
 $('cb-view').addEventListener('click',function(){popOpen('asist')});
+$('cb-mic').addEventListener('click',function(){cEnsure(function(d){d.getElementById('mic-test').click()})});
 
 /* ---------- inicio ---------- */
 build();perfBar();(function(){var w=$('w-antro');if(w){var d=document.createElement('div');d.id='tn-ref';d.className='row';d.style.cssText='gap:8px;padding:6px 14px;font-size:.86rem;align-items:center;border-top:1px solid var(--line)';d.innerHTML='<b id="tn-ref-t"></b><button class="btn small" id="tn-ref-b" type="button">Guardar Tanner actual como referencia</button><span class="msg" id="tn-ref-m"></span>';w.appendChild(d);$('tn-ref-b').addEventListener('click',tannerSave)}})();tannerRef();writeForm();status();summary(true);

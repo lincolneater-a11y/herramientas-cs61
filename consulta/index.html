@@ -120,6 +120,7 @@ button.red{background:var(--bord);border-color:var(--bord);color:#fff}
       <button id="rec-stop" hidden>■ Terminar</button>
       <span class="dot" id="dot"></span><span class="timer" id="timer">00:00</span>
       <label class="chk"><input type="checkbox" id="audio"> Guardar también el audio</label>
+      <button id="mic-test" type="button">Probar micrófono</button>
     </div>
     <textarea id="tx" aria-label="Transcripción de la consulta" placeholder="Al grabar, aquí aparece lo que se dice. También puede escribir o pegar texto."></textarea>
     <div id="interim" aria-hidden="true"></div>
@@ -709,29 +710,61 @@ function ui(){
   try{if(window.CS61DS)CS61DS.hold(st==='rec')}catch(e){}
 }
 function tickf(){$('timer').textContent=fmt(acc+(st==='rec'?Date.now()-t0:0))}
+var SRS={audio:0,sound:0,speech:0,result:0,net:0,warn:0,lang:'es-AR'};
+function srMsg(t){$('stat').textContent=t}
 function startSR(){
-  rc=new SR();rc.lang='es-AR';rc.continuous=true;rc.interimResults=true;
+  rc=new SR();rc.lang=SRS.lang;rc.continuous=true;rc.interimResults=true;
+  rc.onaudiostart=function(){SRS.audio=1};
+  rc.onsoundstart=function(){SRS.sound=1};
+  rc.onspeechstart=function(){SRS.speech=1};
   rc.onresult=function(e){
+    SRS.result=1;SRS.net=0;
     var it='';
     for(var i=e.resultIndex;i<e.results.length;i++){var r=e.results[i];if(r.isFinal)append(r[0].transcript);else it+=r[0].transcript}
     $('interim').textContent=it;
   };
   rc.onerror=function(e){
-    if(e.error==='not-allowed'||e.error==='service-not-allowed'){$('stat').textContent='El navegador no tiene permiso para usar el micrófono. Habilítelo en el candado de la barra de direcciones.';stopAll(true)}
-    else if(e.error==='network'){$('stat').textContent='El servicio de voz necesita conexión a internet.'}
-    else if(e.error==='audio-capture'){$('stat').textContent='No se detecta ningún micrófono.';stopAll(true)}
+    var er=e&&e.error;
+    if(er==='not-allowed'||er==='service-not-allowed'){srMsg('El navegador no puede usar la voz. Revise: 1) el permiso del micrófono en el candado de la barra de direcciones; 2) en Edge/Windows, «Reconocimiento de voz en línea» activado en Configuración de Windows > Privacidad > Voz.');stopAll(true)}
+    else if(er==='network'){SRS.net++;
+      if(SRS.net>=3){srMsg('El servicio de transcripción no responde. Causas habituales: sin internet o red que bloquea el servicio de voz de Google, o un navegador sin ese servicio (Brave, Opera, Chromium). Use Chrome o Edge. Mientras tanto puede escribir o pegar el texto.');stopAll(true)}
+      else srMsg('El servicio de voz no responde; reintentando…')}
+    else if(er==='audio-capture'){srMsg('No se detecta ningún micrófono. Conéctelo o elija el correcto como predeterminado en el sistema.');stopAll(true)}
+    else if(er==='language-not-supported'&&SRS.lang!=='es-ES'){SRS.lang='es-ES'}
   };
-  rc.onend=function(){if(st==='rec'){try{rc.start()}catch(x){setTimeout(function(){if(st==='rec'){try{rc.start()}catch(y){}}},400)}}};
+  rc.onend=function(){if(st==='rec'){try{rc.lang=SRS.lang;rc.start()}catch(x){setTimeout(function(){if(st==='rec'){try{rc.start()}catch(y){}}},400)}}};
   try{rc.start()}catch(x){}
 }
+/* aviso si pasan segundos y no llega texto: dice dónde está el problema */
+setInterval(function(){
+  if(st!=='rec'||SRS.result)return;
+  var el=Date.now()-t0;if(el<15000||el-SRS.warn<20000&&SRS.warn)return;SRS.warn=el;
+  if(!SRS.audio)srMsg('El navegador no recibe audio del micrófono. Revise que sea el micrófono predeterminado del sistema, que no esté silenciado ni en uso por otra aplicación (Zoom, Teams, otra pestaña) y desmarque «Guardar también el audio». Pruebe «Probar micrófono».');
+  else if(!SRS.speech)srMsg('El micrófono está activo pero no se detecta voz: acerque el micrófono, suba el volumen de entrada o elija otro dispositivo. Pruebe «Probar micrófono».');
+  else srMsg('Se detecta voz pero el servicio de transcripción no devuelve texto: revise la conexión a internet o use Chrome o Edge.');
+},2000);
+/* prueba de micrófono: muestra el dispositivo y el nivel de sonido */
+$('mic-test').onclick=async function(){
+  if(st==='rec'){srMsg('Termine la grabación antes de probar el micrófono.');return}
+  var b=$('mic-test');b.disabled=true;
+  try{
+    var s=await navigator.mediaDevices.getUserMedia({audio:true}),lab=(s.getAudioTracks()[0]||{}).label||'micrófono predeterminado',AC=window.AudioContext||window.webkitAudioContext,ac=new AC(),an=ac.createAnalyser(),src=ac.createMediaStreamSource(s),buf=new Uint8Array(an.fftSize),mx=0,n=0;
+    an.fftSize=1024;src.connect(an);
+    await new Promise(function(res){var iv=setInterval(function(){an.getByteTimeDomainData(buf);var m=0;for(var i=0;i<buf.length;i++)m=Math.max(m,Math.abs(buf[i]-128));mx=Math.max(mx,m);var lv=Math.min(10,Math.round(m/6));srMsg('Hable ahora… '+lab+' · nivel '+'█'.repeat(lv)+'░'.repeat(10-lv));if(++n>=24){clearInterval(iv);res()}},250)});
+    s.getTracks().forEach(function(t){t.stop()});try{ac.close()}catch(e){}
+    srMsg(mx>10?'Micrófono correcto: '+lab+' recibe sonido. Si igual no transcribe, el problema es el servicio de voz (internet o navegador: use Chrome o Edge).':'No se detecta sonido en «'+lab+'». Elija otro micrófono como predeterminado en el sistema, suba el volumen de entrada o revise que no esté silenciado.');
+  }catch(e){srMsg('No se pudo abrir el micrófono: permita el acceso en el candado de la barra de direcciones y vuelva a probar.')}
+  b.disabled=false;
+};
 async function begin(){
-  if(!SR){$('stat').textContent='Este navegador no transcribe voz. Use Chrome o Edge en la computadora. Igual puede escribir o pegar el texto.';return}
+  if(!SR){$('stat').textContent='Este navegador no transcribe voz (Firefox y Safari no la incluyen). Use Chrome o Edge en la computadora. Igual puede escribir o pegar el texto.';return}
   if($('audio').checked){
     try{strm=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];mr=new MediaRecorder(strm);mr.ondataavailable=function(e){if(e.data.size)chunks.push(e.data)};mr.onstop=function(){audioBlob=new Blob(chunks,{type:mr.mimeType||'audio/webm'});$('audio-dl').hidden=false};mr.start(5000)}
     catch(e){$('stat').textContent='No se pudo acceder al micrófono para guardar el audio.';return}
   }
   st='rec';t0=Date.now();acc=0;audioBlob=null;$('audio-dl').hidden=true;
-  startSR();ui();tick=setInterval(tickf,500);$('stat').textContent='Grabando. Mantenga esta pestaña abierta; para usar otra herramienta abra «Otras herramientas».';
+  SRS={audio:0,sound:0,speech:0,result:0,net:0,warn:0,lang:'es-AR'};
+  startSR();ui();tick=setInterval(tickf,500);$('stat').textContent='Grabando. Mantenga esta pestaña abierta; para usar otra herramienta abra «Otras herramientas».'+((navigator.brave||/OPR\//.test(navigator.userAgent))?' Atención: este navegador (Brave u Opera) suele no transcribir; si no aparece texto use Chrome o Edge.':'');
   try{if(navigator.wakeLock)wl=await navigator.wakeLock.request('screen')}catch(e){}
 }
 function stopAll(silent){
