@@ -536,12 +536,11 @@ function roFrames(){
  ['adol','clap'].forEach(function(k){roNative(k,k==='adol'?'ad-body':'cl-body')});
 }
 function perfBar(){
- var w=$('wins'),bar=document.createElement('div');bar.className='row';bar.style.cssText='gap:8px;margin:0 0 10px;align-items:center;font-size:.86rem';
- bar.innerHTML='<b id="grp-t"></b><span>· Perfil: <b id="pf-n"></b></span><select id="pf-sel" aria-label="Cambiar de perfil"><option value="">Sin perfil (todo editable)</option>'+Object.keys(PERF_N).map(function(k){return '<option value="'+k+'">'+esc(PERF_N[k])+'</option>'}).join('')+'</select><span class="msg">Solo ordena lo que se puede editar en pantalla; no es una protección con clave.</span>';
- w.parentNode.insertBefore(bar,w);
- var sel=$('pf-sel');sel.value=perfil();$('pf-n').textContent=PERF_N[perfil()]||'sin elegir';
- sel.addEventListener('change',function(){try{if(sel.value)localStorage.setItem('cs61_perfil',sel.value);else localStorage.removeItem('cs61_perfil')}catch(e){}$('pf-n').textContent=PERF_N[sel.value]||'sin elegir';applyGroup(ageM());
-  if($('ad-body'))drawAdol();if($('cl-body'))drawCl();if($('fam-body'))drawFam();['nac','alim','cpn','rsk','adu'].forEach(function(k){if($(LID[k]+'-body'))drawLeg(k)});roFrames()});
+ var w=$('wins'),mid=document.createElement('div');mid.className='mid';mid.style.cssText='min-width:0';
+ var bar=document.createElement('div');bar.className='row';bar.id='pf-bar';bar.style.cssText='gap:8px;margin:0 0 10px;align-items:center;font-size:.86rem';
+ bar.innerHTML='<b id="grp-t"></b><span>· Perfil: <b id="pf-n"></b></span><a href="../" id="pf-chg" style="font-weight:700">'+(perfil()?'Cambiar perfil':'Elegir perfil')+'</a><span class="msg">El perfil se elige al entrar; solo ordena lo que se puede editar en pantalla.</span>';
+ w.parentNode.insertBefore(mid,w);mid.appendChild(bar);mid.appendChild(w);
+ $('pf-n').textContent=PERF_N[perfil()]||'sin elegir';
 }
 var _dA=drawAdol,_dC=drawCl;
 drawAdol=function(){_dA();roNative('adol','ad-body')};drawCl=function(){_dC();roNative('clap','cl-body')};
