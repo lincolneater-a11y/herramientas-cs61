@@ -517,14 +517,22 @@ function roNative(id,bodyId){
  if(!b.querySelector('.ro-note')){var n=document.createElement('div');n.className='lock ro-note';n.style.cssText='background:var(--s);border-color:var(--line)';n.innerHTML='<b>Solo lectura.</b> '+esc(roMsg(id));b.insertBefore(n,b.firstChild)}
  b.querySelectorAll('input,select,textarea,button').forEach(function(e){if(e.id==='big-open')return;e.disabled=true});
 }
+var LBQ={};
 function roFrames(){
  var fa=document.querySelector('#b-antro iframe');
  if(fa&&!canEdit('tanner')){try{var d=fa.contentDocument,c=d.getElementById('es-tancard');if(c){c.setAttribute('inert','');c.style.opacity='.6';if(!c.querySelector('.ro-note')){var n=d.createElement('p');n.className='ro-note';n.style.cssText='margin:0 0 8px;padding:6px 10px;border-radius:8px;background:#eef2f7;font-size:.85rem;font-weight:700';n.textContent='Solo lectura. '+roMsg('tanner');c.insertBefore(n,c.firstChild)}}}catch(e){}}
  if(fa&&canEdit('tanner')){try{var d2=fa.contentDocument,c2=d2.getElementById('es-tancard');if(c2&&c2.hasAttribute('inert')){c2.removeAttribute('inert');c2.style.opacity='';var n2=c2.querySelector('.ro-note');if(n2)n2.remove()}}catch(e){}}
  var fl0=document.querySelector('#b-lab iframe');if(fl0&&canEdit('lab')){try{if(fl0.contentDocument.getElementById('ro-lab'))fl0.contentWindow.location.reload()}catch(e){}}
  var fl=document.querySelector('#b-lab iframe');
- if(fl&&!canEdit('lab')){try{var dl=fl.contentDocument;dl.querySelectorAll('input,select,textarea,button').forEach(function(e){if(e.closest('#lb-acc')||e.id==='lb-print'||e.id==='lb-copy')return;e.disabled=true});
-  if(!dl.getElementById('ro-lab')){var m=dl.createElement('p');m.id='ro-lab';m.style.cssText='margin:8px 0;padding:8px 12px;border-radius:8px;background:#eef2f7;font-weight:700';m.textContent='Solo lectura. '+roMsg('lab');var h=dl.querySelector('main,.wrap')||dl.body;h.insertBefore(m,h.firstChild)}}catch(e){}}
+ if(fl&&!canEdit('lab')){try{var dl=fl.contentDocument;if(!dl.getElementById('lb-find'))throw 0;
+  dl.querySelectorAll('input,select,textarea,button').forEach(function(e){if(e.closest('#lb-acc')||e.closest('#lb-hist')||['lb-print','lb-copy','lb-find','lb-dni'].indexOf(e.id)>-1)return;e.disabled=true});
+  ['lb-savecard','lb-filecard'].forEach(function(id){var x=dl.getElementById(id);if(x)x.style.display='none'});
+  if(!dl.getElementById('ro-lab')){var m=dl.createElement('p');m.id='ro-lab';m.style.cssText='margin:8px 0;padding:8px 12px;border-radius:8px;background:#eef2f7;font-weight:700';m.textContent='Solo lectura: aquí se ven los resultados que cargó el laboratorio. '+roMsg('lab');var h=dl.querySelector('main,.wrap')||dl.body;h.insertBefore(m,h.firstChild)}
+  var key=(P.dni||P.cod||'').trim();
+  if(LBQ.doc!==dl){LBQ={doc:dl,find:'',load:''}}
+  if(key&&LBQ.find!==key&&cfg()){var fb=dl.getElementById('lb-find'),di=dl.getElementById('lb-dni');if(fb&&di){if(!di.value&&P.dni)setv(dl,'lb-dni',P.dni);LBQ.find=key;LBQ.t=Date.now();fb.click()}}
+  else if(key&&LBQ.find===key&&LBQ.load!==key&&Date.now()-LBQ.t>1500){var ld=dl.querySelector('#lb-hist [data-load]');if(ld){LBQ.load=key;ld.click()}else if(Date.now()-LBQ.t>6000)LBQ.load=key}
+ }catch(e){}}
  ['adol','clap'].forEach(function(k){roNative(k,k==='adol'?'ad-body':'cl-body')});
 }
 function perfBar(){
