@@ -45,7 +45,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-vis
 .res textarea{min-height:110px;font-size:.84rem;line-height:1.45}.res .lh{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-weight:800;font-size:.86rem}.res .lh span{flex:1}
 .note{font-size:.84rem;color:var(--ink2);background:var(--tealsoft);border-radius:8px;padding:8px 10px}
 .sw-tool{margin-left:auto;align-self:flex-start;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap}
-dialog#big{width:97vw;max-width:1600px;height:94vh;border:0;border-radius:16px;padding:0;background:var(--s);color:var(--ink)}dialog#big::backdrop{background:var(--bg)}#big .bh{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}#big .bh h2{margin:0;font-size:1.1rem;flex:1}#big iframe{display:block;width:100%;height:calc(94vh - 62px);border:0}
+dialog#big{width:100vw;max-width:100vw;height:100vh;max-height:100vh;border:0;border-radius:0;padding:0;background:var(--s);color:var(--ink)}dialog#big::backdrop{background:var(--bg)}#big .bh{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}#big .bh h2{margin:0;font-size:1.1rem;flex:1}#big iframe{display:block;width:100%;height:calc(94vh - 62px);border:0}
 @media print{.rail,.res,.pt,.wh a,.tabs2{display:none!important}}
 </style><link rel="icon" type="image/png" href="../icon-192.png"><link rel="apple-touch-icon" href="../icon-192.png"><script src="../shared/ds.js"></script><link rel="stylesheet" href="../shared/ds.css"></head><body>
 <header class="hdr"><div class="hdr-in"><div class="brand"><img src="../icon-192.png" alt="Logo del Centro de Salud N.º 61"><div><h1>Historia clínica compartida</h1><small>Centro de Salud N.º 61 · Todas las herramientas en una sola pantalla</small></div><a class="sw-tool" href="../" title="Volver a elegir la herramienta">⇄ Cambiar herramienta</a></div></div></header>
@@ -135,7 +135,7 @@ var CSSINJ='.hdr,header.top,.sw-tool,.pico{display:none!important}body{backgroun
 function build(){
  var h='',r='',th='';
  W.forEach(function(w){
-  var sec='<section class="win'+(w.top?' hostoff':'')+'" id="w-'+w.id+'"><div class="wh"><button type="button" class="wt" aria-expanded="false" aria-controls="b-'+w.id+'" data-w="'+w.id+'">'+ICON+'<span>'+esc(w.t)+'</span></button><span class="chip off" id="c-'+w.id+'"></span>'+(w.id==='antro'?'<button class="btn small" id="big-open" type="button">Ver en grande</button>':'')+'<button class="btn small" type="button" data-pop="'+w.id+'">Abrir aparte</button><button class="btn small primary popx" type="button" data-popx="'+w.id+'">✕ Cerrar y volver al legajo</button></div><div class="wb" id="b-'+w.id+'" hidden></div></section>';
+  var sec='<section class="win'+(w.top?' hostoff':'')+'" id="w-'+w.id+'"><div class="wh"><button type="button" class="wt" aria-expanded="false" aria-controls="b-'+w.id+'" data-w="'+w.id+'">'+ICON+'<span>'+esc(w.t)+'</span></button><span class="chip off" id="c-'+w.id+'"></span>'+(w.id==='antro'?'<button class="btn small" id="big-open" type="button">Mostrar al paciente</button>':'')+(w.id==='lab'?'<button class="btn small" id="lab-show" type="button">Mostrar al paciente</button>':'')+'<button class="btn small" type="button" data-pop="'+w.id+'">Abrir aparte</button><button class="btn small primary popx" type="button" data-popx="'+w.id+'">✕ Cerrar y volver al legajo</button></div><div class="wb" id="b-'+w.id+'" hidden></div></section>';
   if(w.top){th+=sec;return}
   h+=sec;
   r+='<a href="#w-'+w.id+'" data-r="'+w.id+'"><span class="dot" id="d-'+w.id+'"></span>'+esc(w.t.split(' (')[0])+'</a>';
@@ -854,7 +854,30 @@ function reqSync(){
 setInterval(reqSync,1500);
 
 /* ---------- vista ampliada de antropometría ---------- */
+function patientClean(h){
+ var t=document.createElement('div');t.innerHTML=h;
+ t.querySelectorAll('.alert,.vh-m,.note').forEach(function(e){e.remove()});
+ t.querySelectorAll('p,small').forEach(function(e){if(/A[uú]n no carg|Control traído de la planilla|medida de hoy|tarjeta \d/.test(e.textContent)){if(e.tagName==='SMALL'&&e.textContent.length>40)e.remove();else if(e.tagName==='P')e.remove();else e.textContent=e.textContent.replace(/\s*Control traído de la planilla\./,'')}});
+ t.querySelectorAll('small').forEach(function(e){if(/Control traído de la planilla/.test(e.textContent))e.remove()});
+ return t.innerHTML;
+}
+function openLab(){
+ var fr=document.querySelector('#b-lab iframe');
+ if(!fr){toggle('lab',true);setTimeout(openLab,1800);return}
+ var d;try{d=fr.contentDocument}catch(e){return}
+ var res=d.getElementById('lb-res'),css=[].map.call(d.querySelectorAll('style'),function(x){return x.outerHTML}).join(''),b='';
+ b+='<h2 style="margin:0 0 4px">'+esc(P.nom||'Paciente')+(P.cod?' · '+esc(P.cod):'')+'</h2><p class="sub" style="margin:0 0 12px">'+esc(ageTxt())+(P.sex?' · '+(P.sex==='F'?'mujer':'varón'):'')+'</p>';
+ var f=(d.getElementById('lb-ctl')||{}).value,lab=(d.getElementById('lb-lab')||{}).value;
+ if(f||lab)b+='<p class="sub" style="margin:0 0 10px"><b>Estudio'+(f?' del '+esc(f.split('-').reverse().join('/')):'')+'</b>'+(lab?' · '+esc(lab):'')+'</p>';
+ var ok=res&&res.querySelector('table,.kpi,.row,li');
+ b+=ok?'<div id="lb-res">'+res.innerHTML+'</div>':'<p class="sub">No hay resultados de laboratorio cargados para esta persona.</p>';
+ var abs=new URL('../shared/ds.css',location.href).href;
+ $('big-t').textContent='Resultados de laboratorio';
+ $('big-f').srcdoc='<!doctype html><html lang="es" data-ds="clinic"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+css+'<link rel="stylesheet" href="'+abs+'"><style>body{padding:16px 20px;background:#fff!important}input,select,textarea,button,.noprint{display:none!important}</style></head><body>'+b+'</body></html>';
+ var dl=$('big');if(dl.showModal)dl.showModal();else dl.setAttribute('open','');
+}
 function openBig(){
+ $('big-t').textContent='Antropometría y crecimiento';
  var fr=document.querySelector('#b-antro iframe');
  if(!fr){toggle('antro',true);setTimeout(openBig,1800);return}
  var d;try{d=fr.contentDocument}catch(e){return}
@@ -866,11 +889,12 @@ function openBig(){
  [].forEach.call(ch,function(c){var l=c.previousElementSibling;g+='<div style="min-width:0">'+(l&&l.classList.contains('lbl')?l.outerHTML:'')+c.outerHTML+'</div>'});
  if(g)b+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(560px,1fr));gap:18px;margin-top:10px">'+g+'</div>';
  var iv=d.querySelector('#es-vel .tw');if(iv)b+='<div class="lbl" style="margin:16px 0 4px">Detalle por intervalos</div>'+iv.outerHTML;
+ b=patientClean(b);
  var abs=new URL('../shared/ds.css',location.href).href;
  $('big-f').srcdoc='<!doctype html><html lang="es" data-ds="clinic"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+css+'<link rel="stylesheet" href="'+abs+'"><style>body{padding:16px 20px;background:#fff!important}svg{max-width:100%;height:auto}</style></head><body>'+b+'</body></html>';
  var dl=$('big');if(dl.showModal)dl.showModal();else dl.setAttribute('open','');
 }
-document.addEventListener('click',function(e){var t=e.target;if(t&&t.id==='big-open')openBig();if(t&&t.id==='big-x'){var dl=$('big');dl.close?dl.close():dl.removeAttribute('open')}if(t&&t.id==='big-p'){try{$('big-f').contentWindow.print()}catch(x){}}});
+document.addEventListener('click',function(e){var t=e.target;if(t&&t.id==='big-open')openBig();if(t&&t.id==='lab-show')openLab();if(t&&t.id==='big-x'){var dl=$('big');dl.close?dl.close():dl.removeAttribute('open')}if(t&&t.id==='big-p'){try{$('big-f').contentWindow.print()}catch(x){}}});
 
 /* ---------- ventanas emergentes (Abrir aparte) ---------- */
 var POP='';
