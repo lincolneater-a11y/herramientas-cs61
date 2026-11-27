@@ -1547,7 +1547,7 @@ function emCalc() {
   var eg = emEG(), h = val('em-h'), wpre = val('em-wpre'), w = val('em-w'), ctl = $('em-ctl').value, wprev = null, dprev = '';
   (function () { var c = emCtls(ctl); for (var i = c.length - 1; i >= 0; i--) { if (c[i].w) { wprev = c[i].w; dprev = c[i].d; break; } } })();
   var H = '<h3>Resultados</h3>', L = [], al = [];
-  if (!h || !wpre) { $('em-result').innerHTML = '<div class="empty"><h3>Resultados</h3><p>Complete talla y peso pregestacional para ver el estado nutricional inicial. Con el peso actual y las semanas de gestación se evalúa la ganancia de peso.</p></div>'; EM_LAST = null; return; }
+  if (!h || !wpre) { window.EM_SUM = null; $('em-result').innerHTML = '<div class="empty"><h3>Resultados</h3><p>Complete talla y peso pregestacional para ver el estado nutricional inicial. Con el peso actual y las semanas de gestación se evalúa la ganancia de peso.</p></div>'; EM_LAST = null; return; }
   var hm = h / 100, imc0 = wpre / (hm * hm), cat = IOM[0]; for (var i = 0; i < IOM.length; i++) { if (imc0 < IOM[i].max) { cat = IOM[i]; break; } }
   var catTxt = imc0 < 18.5 ? 'Bajo peso' : (imc0 < 25 ? 'Normal' : (imc0 < 30 ? 'Sobrepeso' : 'Obesidad')), badge = imc0 >= 18.5 && imc0 < 25 ? 'ok' : 'mid';
   var wmin = 18.5 * hm * hm, wmed = 22 * hm * hm, wmax = 24.9 * hm * hm;
@@ -1619,7 +1619,7 @@ function emCalc() {
   H += '<p class="note" style="margin-top:10px">Referencias: IOM 2009 (ganancia por IMC inicial), Calvo 2009 (IMC por edad gestacional), Fescina 1984 (incremento de peso) y NRC 1989. Las curvas de Calvo y Fescina se leyeron de los gráficos del cuadernillo, por lo que los puntos de corte son aproximados.</p>';
   H += '<div class="actions" style="margin-top:12px"><button class="btn primary" id="em-copy" type="button">Copiar resumen</button><button class="btn" id="em-save" type="button">Guardar en la planilla</button></div>';
   EM_REC = { eg: eg, h: h, wpre: wpre, w: w, imc0: imc0, cat: catTxt };
-  EM_LAST = L; $('em-result').innerHTML = H;
+  EM_LAST = L; window.EM_SUM = L; $('em-result').innerHTML = H;
   $('em-copy').addEventListener('click', function () {
     var head = 'Evaluación nutricional de embarazada' + ($('em-id').value.trim() ? ' · ' + $('em-id').value.trim() : '') + ' · ' + todayISO();
     var d = []; if (val('em-age') !== null) d.push('Edad ' + val('em-age') + ' años'); d.push('Talla ' + fmt(h, 1) + ' cm'); d.push('Peso pregestacional ' + oneDec(wpre) + ' kg'); if (w !== null) d.push('Peso actual ' + oneDec(w) + ' kg'); if (eg !== null) d.push('EG ' + fmt(eg, 1) + ' semanas');
