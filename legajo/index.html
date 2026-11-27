@@ -101,13 +101,14 @@ var W=[
  {id:'emb',t:'Embarazo: valoración nutricional y ganancia de peso',src:function(){return '../embarazo/#embarazo'},g:'p'},
  {id:'cpn',t:'Control prenatal por trimestre (Salta 2023)',native:true,g:'p'},
  {id:'rsk',t:'Antecedentes obstétricos y riesgo',native:true,g:'p'},
- {id:'req',t:'Requerimientos nutricionales (solo nutrición)',src:function(){return '../embarazo/#req'},g:'p',only:'nutricion'},
+ {id:'req',t:'Requerimientos nutricionales (solo nutrición)',src:function(){return '../embarazo/#req'},g:'nepa',only:'nutricion'},
+ {id:'adu',t:'Antecedentes, hábitos y prevención del adulto',native:true,g:'a'},
  {id:'adol',t:'Psicoemocional y sexualidad (historia del adolescente)',native:true,g:'e'},
  {id:'clap',t:'Ficha del adolescente (CLAP): hábitos, examen e impresión',native:true,g:'e'},
- {id:'calc',t:'Antropometría ampliada: IMC, siluetas y cintura-talla',src:function(){return '../calculadora/'},note:'Escolar, adolescente y adulto',g:'e'},
+ {id:'calc',t:'Antropometría ampliada: IMC, siluetas y cintura-talla',src:function(){return '../calculadora/'},note:'Escolar, adolescente y adulto',g:'epa'},
  {id:'lab',t:'Laboratorio',src:function(){return '../laboratorio/'}},
  {id:'vac',t:'Calendario de vacunación',src:function(){return '../vacunas/'}},
- {id:'cv',t:'Registro cardiovascular (ECV y FINDRISC)',src:function(){return '../registro/'},note:'Desde los 10 años',g:'ep'},
+ {id:'cv',t:'Registro cardiovascular (ECV y FINDRISC)',src:function(){return '../registro/'},note:'Desde los 10 años',g:'epa'},
  {id:'asist',t:'Consulta asistida',src:function(){return '../consulta/'}},
  {id:'iodi',t:'Desarrollo infantil (IODI)',src:function(){return '../desarrollo/?v=iodi'},note:'De 0 a 5 años',g:'n'}
 ];
@@ -148,7 +149,7 @@ function setv(d,id,v){var e=d.getElementById(id);if(!e||v===undefined)return;if(
 function push(fr,wid){
  var m=MAP[wid];if(!m)return;
  try{var d=fr.contentDocument;Object.keys(m).forEach(function(id){setv(d,id,P[m[id]]||'')});
-  if(wid==='emb'||wid==='req'){var ya=ageM();if(ya!==null)setv(d,wid==='emb'?'em-age':'rq-ay',String(Math.floor(ya/12)));if(wid==='req')setv(d,'rq-mom','emb')}
+  if(wid==='emb'||wid==='req'){var ya=ageM();if(ya!==null)setv(d,wid==='emb'?'em-age':'rq-ay',String(Math.floor(ya/12)));if(wid==='req')setv(d,'rq-mom',P.emb==='1'?'emb':'auto')}
   if(wid==='antro'){var mm=ageM(),v=mm!==null&&mm<60?'lactantes':'escolar';if(fr.contentWindow.location.hash!=='#'+v)fr.contentWindow.location.hash='#'+v}}catch(e){}
 }
 function pushAll(){document.querySelectorAll('.wb iframe').forEach(function(fr){var id=fr.parentNode.id.slice(2);push(fr,id)})}
@@ -164,14 +165,14 @@ function status(){
  set('adol',m!==null&&m<120?'Desde los 10 años':'Historia del adolescente',m!==null&&m<120?'off':'');
  applyGroup(m);
  set('lab','Referencias por edad y sexo','');set('vac','Según el calendario','');
- set('cv',old?'Corresponde':'Desde los 10 años',old?'':'off');set('asist','Dictado y resumen','');set('calc','Escolar, adolescente y adulto','');set('ctl','Según la edad','');set('cpn','Según las semanas','');set('rsk','Factores de riesgo','');set('emb','IMC por edad gestacional','');set('req','Solo nutrición','');set('nac','Hasta los 5 años','');set('alim','Hasta los 5 años','');
+ set('cv',old?'Corresponde':'Desde los 10 años',old?'':'off');set('asist','Dictado y resumen','');set('calc','Escolar, adolescente y adulto','');set('ctl','Según la edad','');set('cpn','Según las semanas','');set('adu','20 años o más','');set('rsk','Factores de riesgo','');set('emb','IMC por edad gestacional','');set('req','Solo nutrición','');set('nac','Hasta los 5 años','');set('alim','Hasta los 5 años','');
  set('iodi',young?'Corresponde':'De 0 a 5 años',young?'':'off');
  ['iodi','cv'].forEach(function(id){var w=$('w-'+id);w&&w.classList.toggle('dim',id==='iodi'?!young:!old)});
 }
 function applyP(){readForm();if(P.emb==='1'&&!P.sex){P.sex='F';$('p-sex').value='F'}lsSet('cs61_leg',P);status();pushAll();loadAdol();loadLeg();if($('ctl-body'))drawCtl();summary(true)}
 $('p-apply').addEventListener('click',function(){applyP();$('p-msg').textContent='Datos cargados en las ventanas abiertas. Las que abra después también los reciben.'});
 ['p-dob','p-sex','p-emb'].forEach(function(i){$(i).addEventListener('change',function(){applyP()})});
-$('p-new').addEventListener('click',function(){P={dni:'',cod:'',nom:'',sex:'',dob:''};lsSet('cs61_leg',P);writeForm();AD.sexKeyOK=false;AD.key='';clearAdol();LEG=legInit();P.emb='';HISTR=[];CTL_TODAY=false;['nac','alim','cpn','rsk'].forEach(function(k){if($(LID[k]+'-body'))drawLeg(k)});if($('ctl-body'))drawCtl();tannerRef();DIRTY={dat:false,dx:false,tto:false};status();
+$('p-new').addEventListener('click',function(){P={dni:'',cod:'',nom:'',sex:'',dob:''};lsSet('cs61_leg',P);writeForm();AD.sexKeyOK=false;AD.key='';clearAdol();LEG=legInit();P.emb='';HISTR=[];CTL_TODAY=false;['nac','alim','cpn','rsk','adu'].forEach(function(k){if($(LID[k]+'-body'))drawLeg(k)});if($('ctl-body'))drawCtl();tannerRef();DIRTY={dat:false,dx:false,tto:false};status();
  document.querySelectorAll('.wb iframe').forEach(function(fr){try{fr.contentWindow.location.reload()}catch(e){fr.src=fr.src}});
  $('p-msg').textContent='Paciente nuevo: se vaciaron las ventanas. Complete los datos y toque «Cargar en todas las ventanas».'});
 $('p-find').addEventListener('click',function(){
@@ -479,7 +480,7 @@ function sexLine(){
  return parts.length?'Salud sexual y reproductiva: '+parts.join('; ')+'.'+(AD.obsS?' '+AD.obsS:''):'';
 }
 function summary(force){
- var a=curGroup()==='p'?{dat:'',dx:'',tto:''}:fromAntro(),box=$('res');
+ var a=(curGroup()==='p'||curGroup()==='a')?{dat:'',dx:'',tto:''}:fromAntro(),box=$('res');
  if(!box.getAttribute('data-ready')){
   box.setAttribute('data-ready','1');
   box.innerHTML=['dat|Datos Comunidad Médica','dx|Diagnóstico sugerido','tto|Tratamiento'].map(function(s){var p=s.split('|');return '<div><div class="lh"><span>'+p[1]+'</span><button class="btn small" type="button" data-cp="'+p[0]+'">Copiar</button></div><textarea id="r-'+p[0]+'" aria-label="'+p[1]+'"></textarea></div>'}).join('')+
@@ -491,7 +492,7 @@ function summary(force){
  var lw=fromFrame('lab'),vw=fromFrame('vac'),cv=fromCv();
  var lab=lw?lastLine(lw.__sum):'',vac=vw?String(vw.__sum||'').trim():'';if(vac.length>520)vac=vac.slice(0,vac.lastIndexOf(';',500))+'; … (ver el calendario completo en la ventana de vacunas).';
  var imp=(CL.inc&&CL.v.imp)?'Impresión diagnóstica: '+CL.v.imp:'',ind=(CL.inc&&CL.v.ind)?CL.v.ind:'';
- var dat=[a.dat,embLine(),legLine('cpn'),legLine('rsk'),legLine('nac'),legLine('alim'),curGroup()==='p'?'':ctlLine(),famLine(),psicoLine(),sexLine(),clLine(),lab,vac].concat(cv.dat).filter(String).join('\n'),dx=[a.dx,imp].concat(cv.dx).filter(String).join('\n'),tto=[a.tto,ind].concat(cv.tto).filter(String).join('\n');
+ var dat=[a.dat,aduAntro(),legLine('adu'),embLine(),legLine('cpn'),legLine('rsk'),legLine('nac'),legLine('alim'),(curGroup()==='p'||curGroup()==='a')?'':ctlLine(),famLine(),psicoLine(),sexLine(),clLine(),lab,vac].concat(cv.dat).filter(String).join('\n'),dx=[a.dx,imp].concat(cv.dx).filter(String).join('\n'),tto=[a.tto,ind].concat(cv.tto).filter(String).join('\n');
  if(AD.psico.ide==='Sí'||AD.psico.int==='Sí')tto=(tto?tto+'\n':'')+'Riesgo suicida referido: realizar evaluación inmediata e interconsulta con salud mental.';
  var v={dat:dat,dx:dx,tto:tto};
  ['dat','dx','tto'].forEach(function(k){var e=$('r-'+k);if(!DIRTY[k]&&e.value!==v[k])e.value=v[k]});
@@ -507,7 +508,7 @@ setInterval(function(){if($('res').getAttribute('data-ready'))summary(false);if(
 /* ---------- perfil: permisos visuales (sin clave) ---------- */
 var PERF_N={nutricion:'Nutrición',enfermeria:'Enfermería',aps:'Agente sanitario (APS)',pediatria:'Medicina · Pediatría',clinica:'Medicina · Clínica',gineco:'Medicina · Ginecología y obstetricia',medicina:'Medicina · Otra especialidad',bioquimica:'Bioquímica / laboratorio',otro:'Otro perfil'};
 var MED=['pediatria','medicina','gineco','clinica','enfermeria'];
-var EDIT={adol:MED,clap:MED,tanner:MED,nac:MED,cpn:MED,rsk:MED,alim:MED.concat(['nutricion']),lab:['bioquimica']};
+var EDIT={adol:MED,clap:MED,tanner:MED,nac:MED,cpn:MED,rsk:MED,adu:MED.concat(['nutricion']),alim:MED.concat(['nutricion']),lab:['bioquimica']};
 function perfil(){try{return localStorage.getItem('cs61_perfil')||''}catch(e){return ''}}
 function canEdit(k){var p=perfil();return !p||(EDIT[k]||[]).indexOf(p)>-1}
 function roMsg(k){var p=perfil();return 'Su perfil ('+(PERF_N[p]||p)+') ve este apartado sin editarlo.'+(k==='lab'?' El laboratorio lo carga el perfil de bioquímica.':'')}
@@ -532,7 +533,7 @@ function perfBar(){
  w.parentNode.insertBefore(bar,w);
  var sel=$('pf-sel');sel.value=perfil();$('pf-n').textContent=PERF_N[perfil()]||'sin elegir';
  sel.addEventListener('change',function(){try{if(sel.value)localStorage.setItem('cs61_perfil',sel.value);else localStorage.removeItem('cs61_perfil')}catch(e){}$('pf-n').textContent=PERF_N[sel.value]||'sin elegir';applyGroup(ageM());
-  if($('ad-body'))drawAdol();if($('cl-body'))drawCl();if($('fam-body'))drawFam();['nac','alim','cpn','rsk'].forEach(function(k){if($(LID[k]+'-body'))drawLeg(k)});roFrames()});
+  if($('ad-body'))drawAdol();if($('cl-body'))drawCl();if($('fam-body'))drawFam();['nac','alim','cpn','rsk','adu'].forEach(function(k){if($(LID[k]+'-body'))drawLeg(k)});roFrames()});
 }
 var _dA=drawAdol,_dC=drawCl;
 drawAdol=function(){_dA();roNative('adol','ad-body')};drawCl=function(){_dC();roNative('clap','cl-body')};
@@ -540,11 +541,11 @@ setInterval(roFrames,1500);
 
 
 /* ---------- grupos de edad: 0 a 5 años / 6 a 19 años ---------- */
-function curGroup(){var m=ageM();return P.emb==='1'?'p':(m===null?'':(m<72?'n':'e'))}
+function curGroup(){var m=ageM();return P.emb==='1'?'p':(m===null?'':(m<72?'n':(m<240?'e':'a')))}
 function applyGroup(m){
  var g=curGroup();
  W.forEach(function(w){var show=(!w.g||!g||w.g.indexOf(g)>-1)&&(!w.only||perfil()===w.only);var sec=$('w-'+w.id),r=document.querySelector('[data-r="'+w.id+'"]');if(sec)sec.hidden=!show;if(r)r.hidden=!show});
- var t=$('grp-t');if(t)t.textContent=g==='p'?'Legajo de embarazada':g==='n'?'Legajo de 0 a 5 años':g==='e'?'Legajo de 6 a 19 años':'Legajo (cargue la fecha de nacimiento)';
+ var t=$('grp-t');if(t)t.textContent=g==='a'?'Legajo de adultos (20 años o más)':g==='p'?'Legajo de embarazada':g==='n'?'Legajo de 0 a 5 años':g==='e'?'Legajo de 6 a 19 años':'Legajo (cargue la fecha de nacimiento)';
 }
 
 /* ---------- hoja «Legajo» (nacimiento, alimentación y referencia de Tanner) ---------- */
@@ -556,7 +557,7 @@ function loadLeg(){
  post(cfg().key,{legget:{codigo:cod}}).then(function(j){
   if(!j||!j.ok)return;
   (j.filas||[]).forEach(function(f){if(f.seccion==='tanner'){LEG.tanner=f.datos||{};LEG.tanner.fecha=f.fecha||''}else if(LEG[f.seccion]!==undefined){LEG[f.seccion]=f.datos||{};LEG.obs[f.seccion]=f.obs||''}});
-  ['nac','alim','cpn','rsk'].forEach(function(k){if($(LID[k]+'-body'))drawLeg(k)});tannerRef();summary(true);
+  ['nac','alim','cpn','rsk','adu'].forEach(function(k){if($(LID[k]+'-body'))drawLeg(k)});tannerRef();summary(true);
  }).catch(function(){});
 }
 function saveLeg(sec,datos,obs,m){
@@ -598,9 +599,9 @@ var ALIM=[
  {k:'pan',l:'Pantallas por día',o:['Ninguna','Menos de 1 h','1 a 2 h','Más de 2 h'],w:['Más de 2 h']},
  {k:'apt',l:'Apetito y selectividad',o:['Sin dificultades','Selectivo','Rechazo frecuente'],w:['Rechazo frecuente']}
 ];
-var LID={nac:'nac',alim:'al',cpn:'cpn',rsk:'rsk'},LPRE={nac:'nc-',alim:'al-',cpn:'cp-',rsk:'rs-'};
-function llist(sec){return {nac:NAC,alim:ALIM,cpn:CPN,rsk:RSK}[sec]}
-function legInit(){return {nac:{},alim:{},cpn:{},rsk:{},tanner:{},obs:{nac:'',alim:'',cpn:'',rsk:''},inc:{nac:true,alim:true,cpn:true,rsk:true},loadedFor:''}}
+var LID={nac:'nac',alim:'al',cpn:'cpn',rsk:'rsk',adu:'adu'},LPRE={nac:'nc-',alim:'al-',cpn:'cp-',rsk:'rs-',adu:'au-'};
+function llist(sec){return {nac:NAC,alim:ALIM,cpn:CPN,rsk:RSK,adu:ADU}[sec]}
+function legInit(){return {nac:{},alim:{},cpn:{},rsk:{},adu:{},tanner:{},obs:{nac:'',alim:'',cpn:'',rsk:'',adu:''},inc:{nac:true,alim:true,cpn:true,rsk:true,adu:true},loadedFor:''}}
 var CPN=[
  {k:'eg',l:'Semanas de gestación (si no están en la ventana de embarazo)',n:true,mn:1,mx:43},
  {k:'rh',l:'Factor Rh',o:['Positivo','Negativo','No sabe'],w:['Negativo','No sabe']},
@@ -643,11 +644,50 @@ var RSK=[
  {k:'cro',l:'Cardiopatía, enfermedad renal u otra crónica',o:['No','Sí'],w:['Sí']},
  {k:'pla',l:'Embarazo planificado',o:['Sí','No','No sabe']}
 ];
+
+var ADU=[
+ {k:'hta',l:'Hipertensión arterial',o:['No','Sí'],w:['Sí']},
+ {k:'dm',l:'Diabetes',o:['No','Prediabetes','Tipo 2','Tipo 1'],w:['Prediabetes','Tipo 2','Tipo 1']},
+ {k:'dis',l:'Dislipemia',o:['No','Sí'],w:['Sí']},
+ {k:'erc',l:'Enfermedad renal crónica',o:['No','Sí'],w:['Sí']},
+ {k:'car',l:'Cardiopatía o ACV previo',o:['No','Sí'],w:['Sí']},
+ {k:'tir',l:'Enfermedad tiroidea',o:['No','Sí']},
+ {k:'dig',l:'Enfermedad digestiva o hepática',o:['No','Sí']},
+ {k:'can',l:'Cáncer',o:['No','Sí'],w:['Sí']},
+ {k:'sme',l:'Salud mental (depresión, ansiedad)',o:['No','Sí'],w:['Sí']},
+ {k:'tab',l:'Tabaco',o:['No','Exfumador','Actual'],w:['Actual']},
+ {k:'alc',l:'Alcohol',o:['No','Ocasional','Frecuente o atracón'],w:['Frecuente o atracón']},
+ {k:'afi',l:'Actividad física',o:['Sedentario','Algo activo','Activo'],w:['Sedentario']},
+ {k:'sue',l:'Sueño',o:['Menos de 6 h','6 a 9 h','Más de 9 h'],w:['Menos de 6 h']},
+ {k:'fv',l:'Frutas y verduras',o:['Todos los días','Algunos días','Casi nunca'],w:['Casi nunca']},
+ {k:'sal',l:'Agrega sal en la mesa',o:['No','A veces','Siempre'],w:['Siempre']},
+ {k:'azu',l:'Bebidas azucaradas',o:['Nunca','Ocasional','Diario'],w:['Diario']},
+ {k:'ult',l:'Ultraprocesados y comida rápida',o:['Ocasional','Semanal','Casi a diario'],w:['Casi a diario']},
+ {k:'ta',l:'Control de tensión arterial en el último año',o:['Sí','No'],w:['No']},
+ {k:'gli',l:'Control de glucemia en el último año',o:['Sí','No'],w:['No']},
+ {k:'pap',l:'Papanicolaou o test de HPV (mujeres 25 a 64)',o:['Al día','Pendiente','No corresponde'],w:['Pendiente']},
+ {k:'mam',l:'Mamografía (mujeres 50 a 70)',o:['Al día','Pendiente','No corresponde'],w:['Pendiente']},
+ {k:'col',l:'Sangre oculta en materia fecal (50 a 75 años)',o:['Al día','Pendiente','No corresponde'],w:['Pendiente']},
+ {k:'odo',l:'Control odontológico en el último año',o:['Sí','No'],w:['No']}
+];
+function aduDue(){
+ var m=ageM();if(m===null)return [];var a=m/12,out=[];
+ if(P.sex==='F'&&a>=25&&a<=64)out.push('Papanicolaou o test de HPV');if(P.sex==='F'&&a>=50&&a<=70)out.push('mamografía');if(a>=50&&a<=75)out.push('sangre oculta en materia fecal');
+ out.push('tensión arterial y glucemia anuales');return out;
+}
+function aduAntro(){
+ if(curGroup()!=='a')return '';
+ try{var fr=document.querySelector('#b-calc iframe');if(!fr)return '';var d=fr.contentDocument,g=function(i){var e=d.getElementById(i);return e?parseFloat(e.value):NaN},w=g('peso'),h=g('talla'),c=g('cint');
+  if(!(w>0&&h>0))return '';var imc=w/Math.pow(h/100,2),cat=imc<18.5?'bajo peso':imc<25?'normal':imc<30?'sobrepeso':imc<35?'obesidad grado 1':imc<40?'obesidad grado 2':'obesidad grado 3';
+  var t='Antropometría: peso '+w.toFixed(1).replace('.',',')+' kg, talla '+h.toFixed(1).replace('.',',')+' cm, IMC '+imc.toFixed(1).replace('.',',')+' kg/m² ('+cat+')';
+  if(c>0){var r=c/h;t+='; cintura '+c.toFixed(0)+' cm, índice cintura-talla '+r.toFixed(2).replace('.',',')+(r>=0.5?' (riesgo cardiometabólico aumentado)':' (sin riesgo aumentado)')}
+  return t+'.'}catch(e){return ''}
+}
 function initLeg(sec,b){b.innerHTML='<div id="'+LID[sec]+'-body"></div>';drawLeg(sec)}
 function drawLeg(sec){
  var id=LID[sec],body=$(id+'-body');if(!body)return;
  var list=llist(sec),vals=LEG[sec],pre=LPRE[sec];
- var h=(sec==='cpn'?'<div id="cp-due" style="padding:12px 14px 0"></div>':'')+'<div class="form">'+items(list,vals,pre)+'</div>'+
+ var h=(sec==='cpn'?'<div id="cp-due" style="padding:12px 14px 0"></div>':sec==='adu'?'<div id="au-due" style="padding:12px 14px 0"></div>':'')+'<div class="form">'+items(list,vals,pre)+'</div>'+
  '<div class="form" style="padding-top:0"><div class="it" style="grid-column:1/-1"><label for="'+id+'-obs">Observaciones</label><textarea id="'+id+'-obs" rows="2" maxlength="600">'+esc(LEG.obs[sec]||'')+'</textarea></div></div>'+
  '<div class="row" style="padding:0 14px 14px"><label class="row" style="gap:6px"><input type="checkbox" id="'+id+'-inc"'+(LEG.inc[sec]?' checked':'')+'> Incluir en el resumen para Acuario</label><span style="flex:1"></span><button class="btn primary" id="'+id+'-save" type="button">Guardar en la planilla</button></div><p class="msg" id="'+id+'-msg" style="padding:0 14px 12px"></p>';
  body.innerHTML=h;
@@ -675,6 +715,7 @@ function legWarn(sec){
   if(it.n&&v!==undefined&&v!==''){var x=parseFloat(v);if(it.w==='<37')warn=x<37;else if(it.w==='<2500')warn=x<2500;else if(it.w==='<7')warn=x<7;else if(it.w==='<4')warn=x<4;else if(it.w==='>=2')warn=x>=2;else if(it.w==='>=3')warn=x>=3}
   else if(Array.isArray(it.w))warn=it.w.indexOf(v)>-1&&!(sec==='cpn'&&v==='Pendiente'&&true&&false);
   e.closest('.it').classList.toggle('warn',warn)});
+ if(sec==='adu'){var ab=$('au-due');if(ab){var dd=aduDue();ab.innerHTML=dd.length?'<div class="lock" style="background:var(--s);border-color:var(--line)"><b>Según la edad y el sexo corresponde:</b> '+dd.map(esc).join('; ')+'.</div>':''}}
  if(sec==='cpn'){var box=$('cp-due');if(box){var eg=embEG(),due=cpnDue(),h='';
   if(eg===null)h='<div class="lock" style="background:var(--s);border-color:var(--line)">Cargue las semanas de gestación (en la ventana de embarazo o arriba) para ver qué corresponde ahora.</div>';
   else{h='<div class="lock" style="background:var(--s);border-color:var(--line)"><b>Semana '+Math.floor(eg)+'.</b> Controles mensuales hasta la semana 36 y semanales después; mínimo 8 en total'+(HISTR.length?' · controles registrados en la planilla: '+HISTR.length:'')+'.'+(due&&due.length?'<br><b>Corresponde o está pendiente:</b> '+due.map(function(x){return esc(x.t)+(x.late?' (fuera de la semana ideal)':'')}).join('; ')+'.':'<br>Sin pendientes según lo cargado.')+(LEG.cpn.rh==='Negativo'?'<br>Factor Rh negativo: gammaglobulina anti-D a las 28 semanas.':'')+'</div>'}
@@ -682,8 +723,8 @@ function legWarn(sec){
 }
 function legLine(sec){
  if(!LEG.inc[sec])return '';var list=llist(sec),vals=LEG[sec],a=[];
- list.forEach(function(it){var v=vals[it.k];if(v!==undefined&&v!==''){if(sec==='cpn'&&(v==='No corresponde'||v==='Pendiente'||v==='Hecho'||v==='Hecha'||v==='Aplicada'||v==='Colocada'||v==='Completo'||v==='Al día'))return;a.push(it.l.replace(/\s*\(.*\)/,'').toLowerCase()+': '+(it.o?String(v).toLowerCase():v))}});
- var pre={nac:'Antecedentes perinatales: ',alim:'Alimentación: ',cpn:'Control prenatal: ',rsk:'Antecedentes obstétricos y riesgo: '}[sec];
+ list.forEach(function(it){var v=vals[it.k];if(v!==undefined&&v!==''){if(sec==='cpn'&&(v==='No corresponde'||v==='Pendiente'||v==='Hecho'||v==='Hecha'||v==='Aplicada'||v==='Colocada'||v==='Completo'||v==='Al día'))return;a.push(it.l.replace(/\s*\(.*\)/,'').toLowerCase().replace('hpv','HPV')+': '+(it.o?String(v).toLowerCase():v))}});
+ var pre={nac:'Antecedentes perinatales: ',alim:'Alimentación: ',cpn:'Control prenatal: ',rsk:'Antecedentes obstétricos y riesgo: ',adu:'Antecedentes, hábitos y prevención: '}[sec];
  if(sec==='cpn'){var due=cpnDue(),eg=embEG();var extra=(eg!==null?'semana '+Math.floor(eg)+'. ':'')+(due&&due.length?'Pendiente: '+due.map(function(x){return x.t}).join('; ')+'. ':'');if(extra)a.unshift(extra.replace(/\. $/,''))}
  if(!a.length&&!LEG.obs[sec])return '';
  return pre+a.join('; ')+(a.length?'.':'')+(LEG.obs[sec]?' '+LEG.obs[sec]:'');
@@ -764,10 +805,22 @@ function calcSync(){
   var w='',h='',c='';
   if(a){var g=function(i){var e=a.getElementById(i);return e?e.value:''};w=g('es-w')||g('lc-w');h=g('es-h')||g('lc-h');c=g('es-wc')}
   var key=[P.sex,m,w,h,c].join('|');
-  if(key!==CS.last){CS.last=key;if(h)setv(d,'met','t');setv(d,'peso',w);setv(d,'talla',h);setv(d,'cint',c);if(w&&h){var b=d.getElementById('calc');if(b)b.click()}}
+  if(key!==CS.last){CS.last=key;if(a){if(h)setv(d,'met','t');setv(d,'peso',w);setv(d,'talla',h);setv(d,'cint',c);if(w&&h){var b=d.getElementById('calc');if(b)b.click()}}}
  }catch(e){}
 }
 setInterval(calcSync,1500);
+var RQ={last:''};
+function reqSync(){
+ var fr=document.querySelector('#b-req iframe');if(!fr)return;
+ try{var d=fr.contentDocument;if(!d.getElementById('rq-w'))return;var w='',h='',src=null;
+  var fc=document.querySelector('#b-calc iframe'),fa=document.querySelector('#b-antro iframe'),fe=document.querySelector('#b-emb iframe');
+  if(curGroup()==='p'&&fe){var e=fe.contentDocument;w=(e.getElementById('em-w')||{}).value||(e.getElementById('em-wpre')||{}).value||'';h=(e.getElementById('em-h')||{}).value||''}
+  else if(curGroup()==='a'&&fc){var c=fc.contentDocument;w=(c.getElementById('peso')||{}).value||'';h=(c.getElementById('talla')||{}).value||''}
+  else if(fa){var a=fa.contentDocument;w=(a.getElementById('es-w')||a.getElementById('lc-w')||{}).value||'';h=(a.getElementById('es-h')||a.getElementById('lc-h')||{}).value||''}
+  var key=[w,h].join('|');if(key!==RQ.last&&(w||h)){RQ.last=key;if(w)setv(d,'rq-w',w);if(h)setv(d,'rq-h',h)}
+ }catch(e){}
+}
+setInterval(reqSync,1500);
 
 /* ---------- vista ampliada de antropometría ---------- */
 function openBig(){
